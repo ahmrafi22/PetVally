@@ -1,0 +1,31 @@
+nextjs: 
+npx create-next-app@latest -> keep all default 
+
+
+db:
+npm install prisma --save-dev
+npm install @prisma/client
+npx prisma init  
+npx prisma db push ( for pushing model )
+npx prisma generate -> generate and access db
+
+icons:
+npm install lucide-react
+
+
+authentication , passwordhashing  (i= install)
+npm i jose
+npm i bcrypt  , npm i --save-dev @types/bcrypt
+
+images stored on cloudinary:
+npm install cloudinary
+
+ui ShadCN: --legacy-peer-deps
+npx shadcn@latest add dialog
+npx shadcn@latest add button
+npx shadcn@latest add label
+npx shadcn@latest add switch
+npx shadcn@latest add select
+npx shadcn@latest add input
+npx shadcn@latest add textarea
+npx shadcn@latest add badge  

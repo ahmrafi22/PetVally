@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  name              String
+  email             String   @unique
+  password          String
+  age               Int?
+  image             String?
+  country           String?
+  city              String?
+  area              String?
+  dailyAvailability Int      @default(2)
+  hasOutdoorSpace   Boolean  @default(false)
+  hasChildren       Boolean  @default(false)
+  hasAllergies      Boolean  @default(false)
+  experienceLevel   Int      @default(2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  petOrders         PetOrder[] // History of all pet adoptions
+}
+
+model Caregiver {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  image         String? 
+  country       String? 
+  city          String? 
+  area          String? 
+  bio           String
+  verified      Boolean  @default(false)
+  hourlyRate    Decimal  @default(0) @db.Decimal(10, 2)
+  totalEarnings Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Pet {
+  // ===== Basic Information =====
+  id          String   @id @default(uuid())  // Unique pet identifier
+  name        String                       // Name of pet
+  breed       String                       // Breed or species
+  age         Int                          // Age in years
+  price       Decimal  @db.Decimal(10, 2)   // Adoption fee
+  images      String                      // image URL for pet gallery
+  isAvailable Boolean  @default(true)       // Whether pet is available for adoption after adoption it will be set to false then it would not be shown in store
+  bio         String                       // Short biography or personality summary of the pet
+  description String                       // Detailed description of the pet (e.g., history, behavior)
+
+  // ===== Compatibility Attributes =====
+  // will create an algorithm functon to match scores based on these and users preferences and attributes 
+  energyLevel   Int     @default(3)    // 1-5: Activity level (1=low, 5=high)
+  spaceRequired Int     @default(3)    // 1-5: Space needed (1=apartment, 5=large home)
+  maintenance   Int     @default(3)    // 1-5: Care difficulty (1=easy, 5=difficult)
+  childFriendly Boolean  @default(true)  // Whether pet is good with children
+  allergySafe   Boolean  @default(false) // Whether pet is hypoallergenic
+
+  // ===== Commerce Relationships =====
+  orders PetOrder[]  // Adoption records for this pet
+
+  // ===== Timestamps =====
+  createdAt DateTime @default(now())  // When pet was listed for adoption
+}
+
+model PetOrder {
+  id        String      @id @default(uuid())  // Unique adoption record identifier
+  user      User        @relation(fields: [userId], references: [id])  // Adopting user
+  userId    String                       // Reference to adopting user
+  pet       Pet         @relation(fields: [petId], references: [id])    // Adopted pet
+  petId     String                       // Reference to adopted pet
+  createdAt DateTime    @default(now())  // When adoption was initiated
+  
+  @@index([userId])  //optimize for user order queries
+}
+
