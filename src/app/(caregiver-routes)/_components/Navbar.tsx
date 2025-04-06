@@ -136,7 +136,7 @@ export default function CaregiverNavigation() {
               {/* Profile link with caregiver name */}
               <li>
                 <Link
-                  href={`/caregiver/careprofile/${caregiverId}`}
+                  href={`/careprofile/${caregiverId}`}
                   className="flex items-center p-2 rounded-md hover:bg-green-50 text-gray-700 hover:text-green-600"
                 >
                   <span className="inline-block">

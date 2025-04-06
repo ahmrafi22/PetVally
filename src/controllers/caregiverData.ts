@@ -1,3 +1,5 @@
+'use server'
+
 import { prisma } from "@/lib/prisma"
 import { uploadImage, deleteImage } from "@/lib/utils/cloudinary"
 import type { CaregiverProfile } from "@/types"

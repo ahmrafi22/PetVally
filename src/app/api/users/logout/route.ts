@@ -7,7 +7,7 @@ export async function POST() {
 
   // Create a response with redirect
   const response = NextResponse.redirect(
-    new URL("/", process.env.VERCEL_URL || "http://localhost:3000"),
+    new URL("/"),
     { status: 303 }, // 303 See Other
   )
 

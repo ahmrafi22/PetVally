@@ -1,0 +1,548 @@
+
+//_________________________________________________________________________________________
+//                                                                                         |
+//Change the db as needed no neeed to be like this, if needed create new mobel ...         |
+//_________________________________________________________________________________________|
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// ENUMS
+// =============================================
+
+enum OrderStatus {
+  PENDING    // Order is created but payment/processing not completed
+  COMPLETED  // Order has been successfully processed and fulfilled
+  CANCELLED  // Order was cancelled by user or system
+}
+
+enum AdoptionStatus {
+  PENDING   // Adoption request submitted but awaiting approval
+  APPROVED  // Adoption request has been approved by pet owner
+}
+
+// =============================================
+// USER MODELS
+// =============================================
+
+model User {
+  // ===== Identification Fields =====
+  id        String   @id @default(cuid())  // Unique identifier for user account
+  email     String @unique               // Login email address (must be unique)
+  password  String                       // Hashed password for authentication
+  name      String                       // Full name of the user
+  age       Int                          // Age of user for age-appropriate recommendations
+  image     String?                      // URL to user's profile picture (stored in Cloudinary)
+
+  // ===== Location Fields =====
+  country  String  // Full physical address for delivery/meetups
+  city      String  // City for location-based filtering
+  area      String  // Neighborhood/area for precise local matching
+
+  // ===== Pet Compatibility Preferences =====
+  dailyAvailability  Int @default(2)     // 1-5 scale: Daily time available for pet care (1=least, 5=most)
+  hasOutdoorSpace    Boolean @default(false) // Whether user has yard/outdoor space for pets
+  hasChildren        Boolean @default(false) // Presence of children under 12 in household
+  hasAllergies       Boolean @default(false) // Whether user has pet allergies
+  experienceLevel    Int @default(2)     // 1-5 scale: Pet care experience (1=beginner, 5=expert)
+
+  // ===== Commerce Relationships =====
+  cart        Cart?          // User's active shopping cart
+  orders      Order[]        // History of all product orders placed
+  petOrders   PetOrder[]     // History of all pet adoptions
+  ratings     ProductRating[] // Product reviews submitted by user
+
+  // ===== Community Relationships =====
+  donations     DonationPost[]  // Pets user has listed for donation
+  missingPosts  MissingPost[]   // Missing pet reports created by user
+  adoptionForms AdoptionForm[]  // Adoption applications submitted by user
+  upvotes       Upvote[]        // Posts user has upvoted
+  comments      Comment[]       // Comments user has posted
+
+  // ===== Service Relationships =====
+  jobPosts      JobPost[]       // Pet care jobs posted by user
+  appointments  Appointment[]   // Vet appointments booked by user
+
+  // ===== System Relationships =====
+  notifications Notification[]  // Notifications received by user
+
+  // ===== Timestamps =====
+  createdAt DateTime @default(now())  // When user account was created
+  updatedAt DateTime @updatedAt       // When user profile was last updated
+
+  // Purpose: Primary account type for pet owners and shoppers
+  // Relations: Central hub connecting to all user activities and purchases
+}
+
+model Caregiver {
+  // ===== Identification Fields =====
+  id     String   @id @default(cuid())  // Unique identifier for caregiver account
+  email   String @unique               // Login email address (must be unique)
+  password String                      // Hashed password for authentication
+  name    String                       // Full name of caregiver
+  image   String?                     // URL to caregiver's profile picture
+  country String?
+  city    String?
+  area    String?
+
+  // ===== Professional Information =====
+  bio           String   // Description of services, qualifications, experience
+  hourlyRate    Decimal @db.Decimal(10, 2)    // Base rate charged for services (per hour)
+  totalEarnings Decimal @db.Decimal(10, 2) @default(0)  // Lifetime earnings from completed jobs
+
+  // ===== Service Relationships =====
+  applications JobApplication[]  // All job applications submitted
+  selectedJobs JobPost[] @relation("SelectedJobs") // Jobs where caregiver was hired
+  reviews      Review[]         // Performance reviews received
+
+  // ===== Timestamps =====
+  createdAt DateTime @default(now())  // When caregiver account was created
+  updatedAt DateTime @updatedAt       // When caregiver profile was last updated
+
+  // Purpose: Service provider account focused exclusively on pet care jobs
+  // Relations: Connects to job applications and service history only
+  // Note: No access to commerce or community features
+}
+
+// =============================================
+// COMMERCE SYSTEM (User-Only)
+// =============================================
+
+model Product {
+  // ===== Product Information =====
+  id          String @id @default(uuid())  // Unique product identifier
+  name        String                       // Display name of product
+  description String                       // Detailed product description
+  price       Decimal @db.Decimal(10, 2)   // Current retail price
+  stock       Int @default(0)              // Available inventory quantity
+  image       String                       // URL to product image
+  category    String                       // Product type ("food","toy","medicine",etc)
+
+  // ===== Commerce Relationships =====
+  cartItems  CartItem[]      // Active cart references containing this product
+  orderItems OrderItem[]     // Historical order records of this product
+  ratings    ProductRating[] // User reviews for this product
+
+  // ===== Timestamps =====
+  createdAt DateTime @default(now())  // When product was added to inventory
+
+  // Purpose: Manage inventory of pet-related products
+  // Relations: Tracks product availability and purchase history
+}
+
+model Pet {
+  // ===== Basic Information =====
+  id          String @id @default(uuid())  // Unique pet identifier
+  name        String                       // Name of pet
+  breed       String                       // Breed or species
+  age         Int                          // Age in years
+  price       Decimal @db.Decimal(10, 2)   // Adoption fee
+  images      String                      // image URL for pet gallery
+  isAvailable Boolean @default(true)       // Whether pet is available for adoption after adoption it will be set to false then it would not be shown in store
+  bio         String                       // Short biography or personality summary of the pet
+  description String                       // Detailed description of the pet (e.g., history, behavior)
+
+  // ===== Compatibility Attributes =====
+  // will create an algorithm functon to match scores based on these and users preferences and attributes 
+  energyLevel   Int @default(3)    // 1-5: Activity level (1=low, 5=high)
+  spaceRequired Int @default(3)    // 1-5: Space needed (1=apartment, 5=large home)
+  maintenance   Int @default(3)    // 1-5: Care difficulty (1=easy, 5=difficult)
+  childFriendly Boolean @default(true)  // Whether pet is good with children
+  allergySafe   Boolean @default(false) // Whether pet is hypoallergenic
+
+  // ===== Commerce Relationships =====
+  orders PetOrder[]  // Adoption records for this pet
+
+  // ===== Timestamps =====
+  createdAt DateTime @default(now())  // When pet was listed for adoption
+
+  // Purpose: Manage adoptable pets with compatibility matching
+  // Relations: Connects to adoption orders only
+}
+
+// =============================================
+// CART SYSTEM (User-Only)
+// =============================================
+
+model Cart {
+  id        String @id @default(uuid())  // Unique cart identifier
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)  // Owner of cart
+  userId    String @unique               // Reference to owning user
+  items     CartItem[]                   // Products in cart
+  
+  createdAt DateTime @default(now())      // When cart was created
+  updatedAt DateTime @updatedAt          // When cart was last modified
+
+  // Purpose: Temporary storage for products before checkout
+  // Relations: Each user has exactly one active cart
+}
+
+model CartItem {
+  id        String @id @default(uuid())  // Unique cart item identifier
+  quantity  Int @default(1)              // Number of this product in cart (1-99)
+  product   Product @relation(fields: [productId], references: [id])  // Product reference
+  productId String                       // Reference to product
+  cart      Cart @relation(fields: [cartId], references: [id])        // Parent cart
+  cartId    String                       // Reference to parent cart
+
+  @@index([cartId, productId])  // Optimize for cart/product queries
+
+  // Purpose: Track individual product quantities in shopping cart
+  // Relations: Links products to their containing cart
+  // Validation: Quantity must be positive and <= available stock
+}
+
+// =============================================
+// ORDER SYSTEM (User-Only)
+// =============================================
+
+model Order {
+  id         String @id @default(uuid())  // Unique order identifier
+  totalPrice Decimal @db.Decimal(10, 2)   // Calculated sum of all order items
+  status     OrderStatus @default(PENDING) // Current order state
+  items      OrderItem[]                  // Products included in order
+  user       User @relation(fields: [userId], references: [id])  // Ordering user
+  userId     String                       // Reference to ordering user
+
+  createdAt DateTime @default(now())      // When order was placed
+  updatedAt DateTime @updatedAt           // When order was last updated
+  @@index([userId])                      //optimize for user order queries
+  // Purpose: Record completed product transactions
+  // Relations: Each order belongs to exactly one user
+}
+
+model OrderItem {
+  id        String @id @default(uuid())  // Unique order item identifier
+  quantity  Int @default(1)              // Quantity purchased
+  price     Decimal @db.Decimal(10, 2)    // Price at time of purchase 
+  product   Product @relation(fields: [productId], references: [id])  // Product reference
+  productId String                       // Reference to product
+  order     Order @relation(fields: [orderId], references: [id])      // Parent order
+  orderId   String                       // Reference to parent order
+
+  // Purpose: Preserve product details at time of purchase
+  // Relations: Links products to their containing order
+  // Note: Prices are frozen to handle future price changes
+}
+
+model PetOrder {
+  id     String @id @default(uuid())  // Unique adoption record identifier
+  user   User @relation(fields: [userId], references: [id])  // Adopting user
+  userId String                       // Reference to adopting user
+  pet    Pet @relation(fields: [petId], references: [id])    // Adopted pet
+  petId  String                       // Reference to adopted pet
+
+  createdAt DateTime @default(now())  // When adoption was initiated
+  @@index([userId])  //optimize for user order queries
+
+  // Purpose: Manage pet adoption transactions
+  // Relations: Connects users to pets they've adopted
+}
+
+// =============================================
+// RATING SYSTEM (User-Only)
+// =============================================
+
+model ProductRating {
+  id        String @id @default(uuid())  // Unique rating identifier
+  rating    Int                          // 1-5 star rating (required)
+  user      User @relation(fields: [userId], references: [id])  // Rating user
+  userId    String                       // Reference to rating user
+  product   Product @relation(fields: [productId], references: [id])  // Rated product
+  productId String                       // Reference to rated product
+
+  createdAt DateTime @default(now())      // When rating was submitted
+
+  @@unique([userId, productId])  // One rating per user per product
+
+  // Purpose: Collect user feedback on products
+  // Relations: Connects users to products they've rated
+  // Business Rules:
+  // - User must have purchased product before rating
+  // - Only products with 'pet-' category prefix can be rated
+}
+
+// =============================================
+// COMMUNITY FEATURES (User-Only)
+// =============================================
+
+model DonationPost {
+  id          String @id @default(uuid())  // Unique post identifier
+  title       String                       // Post title (e.g. "Labrador Puppy for Adoption")
+  description String                       // Detailed description of pet
+  images      String[]                     // Array of image URLs for pet
+  country     String                       // Full address for meetup
+  city        String                       // City for location filtering
+  area        String                       // Neighborhood for precise matching
+  isAvailable Boolean @default(true)       // Whether pet is still available
+  upvotesCount Int @default(0)             // Count of upvotes (cached for performance)
+
+  // ===== Relationships =====
+  user       User @relation(fields: [userId], references: [id])  // Posting user
+  userId     String                       // Reference to posting user
+  adoptionForms AdoptionForm[]            // Adoption applications received
+  upvotes    Upvote[]                     // Upvotes received
+  comments   Comment[]                    // Comments received
+
+  createdAt DateTime @default(now())      // When post was created
+
+  // Purpose: Facilitate pet rehoming through community
+  // Relations: Connects pet donors to potential adopters
+}
+
+model MissingPost {
+  id          String @id @default(uuid())  // Unique post identifier
+  title       String                       // Post title (e.g. "Lost Siamese Cat")
+  description String                       // Detailed description of missing pet
+  images      String[]                     // Array of image URLs for pet
+  country     String                       // Last seen address
+  city        String                       // City for location filtering
+  area        String                       // Neighborhood for precise matching
+  status      String @default("NOT_FOUND") // Current status ("FOUND"/"NOT_FOUND")
+  upvotesCount Int @default(0)             // Count of upvotes (cached)
+
+  // ===== Relationships =====
+  user       User @relation(fields: [userId], references: [id])  // Reporting user
+  userId     String                       // Reference to reporting user
+  upvotes    Upvote[]                     // Upvotes received
+  comments   Comment[]                    // Comments received
+
+  createdAt DateTime @default(now())      // When post was created
+
+  // Purpose: Track lost/found pets with community assistance
+  // Relations: Connects pet owners to community helpers
+}
+
+model Upvote {
+  id      String @id @default(uuid())  // Unique upvote identifier
+  user    User @relation(fields: [userId], references: [id])  // Voting user
+  userId  String                       // Reference to voting user
+  donationPost DonationPost? @relation(fields: [donationPostId], references: [id])  // Donation post reference
+  donationPostId String?               // Reference to donation post
+  missingPost  MissingPost? @relation(fields: [missingPostId], references: [id])    // Missing post reference
+  missingPostId  String?               // Reference to missing post
+
+  createdAt DateTime @default(now())   // When upvote was given
+
+  @@unique([userId, donationPostId])  // One vote per user per donation post
+  @@unique([userId, missingPostId])   // One vote per user per missing post
+
+  // Purpose: Track community engagement with posts
+  // Relations: Links users to posts they've supported
+  // Business Rules:
+  // - Users can only upvote posts from their city/area first
+  // - Each user gets one upvote per post
+}
+
+model Comment {
+  id      String @id @default(uuid())  // Unique comment identifier
+  content String                       // Comment text content
+  user    User @relation(fields: [userId], references: [id])  // Commenting user
+  userId  String                       // Reference to commenting user
+  donationPost DonationPost? @relation(fields: [donationPostId], references: [id])  // Donation post reference
+  donationPostId String?               // Reference to donation post
+  missingPost  MissingPost? @relation(fields: [missingPostId], references: [id])    // Missing post reference
+  missingPostId  String?               // Reference to missing post
+
+  createdAt DateTime @default(now())   // When comment was posted
+
+  // Purpose: Enable community discussions on posts
+  // Relations: Connects users to posts they've commented on
+  // Business Rules:
+  // - Comments show user's name and profile picture
+  // - No edit/delete after 1 hour
+}
+
+model AdoptionForm {
+  id              String @id @default(uuid())  // Unique form identifier
+  description     String                       // Why applicant wants to adopt
+  meetingSchedule DateTime                     // Proposed meeting date/time
+  status          AdoptionStatus @default(PENDING) // Current application status
+
+  // ===== Relationships =====
+  user           User @relation(fields: [userId], references: [id])  // Applicant
+  userId         String                       // Reference to applicant
+  donationPost   DonationPost @relation(fields: [donationPostId], references: [id])  // Target pet post
+  donationPostId String                       // Reference to donation post
+
+  createdAt DateTime @default(now())          // When application was submitted
+
+  // Purpose: Formalize pet adoption process
+  // Relations: Connects applicants to donation posts
+  // Business Rules:
+  // - Only users with complete profiles can apply
+  // - Donor can only accept one application per pet
+}
+
+// =============================================
+// PET SERVICES
+// =============================================
+
+model JobPost {
+  id              String @id @default(uuid())  // Unique job identifier
+  title           String                       // Job title (e.g. "Dog Walker Needed")
+  description     String                       // Detailed job description
+  tags            String[]                     // Service tags (e.g. ["walking","daily"])
+  country         String                       // Job country
+  city            String                       // City for location filtering
+  area            String                       // Neighborhood for precise matching
+  priceRangeLow   Decimal @db.Decimal(10, 2)   // Minimum budget for job
+  priceRangeHigh  Decimal @db.Decimal(10, 2)   // Maximum budget for job
+  startDate       DateTime                     // When service should begin
+  endDate         DateTime                     // When service should end
+  status          String @default("OPEN")      // Current status ("OPEN"/"CLOSED")
+
+  // ===== Relationships =====
+  user           User @relation(fields: [userId], references: [id])  // Job poster
+  userId         String                       // Reference to job poster
+  applications   JobApplication[]             // Applications received
+  selectedCaregiver Caregiver? @relation("SelectedJobs", fields: [selectedCaregiverId], references: [id])  // Hired caregiver
+  selectedCaregiverId String?                 // Reference to hired caregiver
+
+  createdAt DateTime @default(now())          // When job was posted
+  @@index([userId])
+
+  // Purpose: Connect pet owners with service providers
+  // Relations: Central hub for pet care services
+  // Business Rules:
+  // - Only users with pets can post jobs
+  // - Jobs auto-close after endDate
+}
+
+model JobApplication {
+  id              String @id @default(uuid())  // Unique application identifier
+  proposal        String                       // Why caregiver is suitable
+  requestedAmount Decimal @db.Decimal(10, 2)                        // Caregiver's proposed rate
+  status          String @default("PENDING")   // Current status ("PENDING"/"ACCEPTED"/"REJECTED")
+
+  // ===== Relationships =====
+  caregiver      Caregiver @relation(fields: [caregiverId], references: [id])  // Applicant
+  caregiverId    String                       // Reference to applicant
+  jobPost        JobPost @relation(fields: [jobPostId], references: [id])      // Target job
+  jobPostId      String                       // Reference to target job
+
+  createdAt DateTime @default(now())          // When application was submitted
+
+  // Purpose: Formalize service applications
+  // Relations: Connects caregivers to job posts
+  // Business Rules:
+  // - Caregivers can only apply to jobs 
+  
+}
+// need to chnage this model users will directly rate the caregivers after a job is done , not rating the job 
+model Review {
+  id      String @id @default(uuid())  // Unique review identifier
+  rating  Int                          // 1-5 star rating (required)
+  comment String?                      // Optional detailed feedback
+
+  // ===== Relationships =====
+
+  caregiver Caregiver @relation(fields: [caregiverId], references: [id])  // Reviewed caregiver
+  caregiverId String                     // Reference to reviewed caregiver
+
+  createdAt DateTime @default(now())    // When review was submitted
+  @@unique([caregiverId]) //one review per caregiver
+
+  // Purpose: Provide feedback on completed services
+  // Relations: Links jobs to caregiver performance
+  // Business Rules:
+  // - Only job poster can leave review
+  // - Reviewable only after job completion
+}
+
+// =============================================
+// VETERINARY SERVICES (User-Only)
+// =============================================
+
+model VetDoctor {
+  id        String @id @default(uuid())  // Unique vet identifier
+  name      String                       // Vet's full name
+  specialty String                       // Medical specialty (e.g. "Surgery")
+  country   String                       // Clinic address
+  city      String                       // City for location filtering
+  area      String                       // Neighborhood for precise matching
+  contact   String                       // Phone/email for appointments
+  image     String                       // Profile picture URL
+
+  // ===== Relationships =====
+  appointments Appointment[]             // Scheduled appointments
+
+  createdAt DateTime @default(now())    // When vet was added to directory
+
+  // Purpose: Manage veterinary professional directory
+  // Relations: Connects vets to appointments
+  // Business Rules:
+  // - Only admins can add/edit vets
+  // - Vets sorted by proximity to user
+}
+
+model Appointment {
+  id   String @id @default(uuid())  // Unique appointment identifier
+  date DateTime                     // Appointment date
+  time String                       // Time slot (e.g. "14:30")
+
+  // ===== Relationships =====
+  user User @relation(fields: [userId], references: [id])  // Booking user
+  userId String                       // Reference to booking user
+  vet   VetDoctor @relation(fields: [vetId], references: [id])  // Selected vet
+  vetId String                       // Reference to selected vet
+
+  createdAt DateTime @default(now()) // When appointment was booked
+  @@index([userId]) //optimize 
+
+  // Purpose: Schedule veterinary visits
+  // Relations: Links users to vet bookings
+  // Business Rules:
+  // - Appointments can be cancelled up to 24h before
+  // - Users get reminders 1 day before
+}
+
+// =============================================
+// NOTIFICATION SYSTEM (User-Only)
+// =============================================
+
+model Notification {
+  id      String @id @default(uuid())  // Unique notification identifier
+  type    String                       // Notification type ("NEW_PET","MISSING_PET",etc)
+  message String                       // Notification content text
+  read    Boolean @default(false)      // Whether notification has been viewed
+
+  // ===== Relationships =====
+  user    User @relation(fields: [userId], references: [id])  // Recipient user
+  userId  String                       // Reference to recipient user
+
+  createdAt DateTime @default(now())   // When notification was generated
+  @@index([userId]) //optimize for notification
+  @@index([type]) 
+
+  // Purpose: Alert users about system events
+  // Relations: Delivers updates to users
+  // Business Rules:
+  // - Location-based for community posts
+  // - Mark as read when viewed
+}
+
+// =============================================
+// ADMIN SYSTEM
+// =============================================
+
+model Admin {
+  id       String @id @default(uuid())  // Unique admin identifier
+  username String @unique               // Login username
+  password String                       // Hashed password
+
+  createdAt DateTime @default(now())    // When admin account was created
+
+  // Purpose: Platform administration access
+  // Relations: Standalone system accesswwww
+  // - Full access to all data tables
+}
+
