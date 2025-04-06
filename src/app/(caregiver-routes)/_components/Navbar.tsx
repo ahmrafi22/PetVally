@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Home, Briefcase, Calendar, User, LogOut, Menu, X, ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function CaregiverNavigation() {
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [caregiverName, setCaregiverName] = useState<string>("")

@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server"
 import { clearUserCookie } from "@/lib/auth"
 
-export async function POST() {
+export async function POST(request: Request) {
   // Clear the user cookie
   clearUserCookie()
 
   // Create a response with redirect
-  const response = NextResponse.redirect(
-    new URL("/"),
-    { status: 303 }, // 303 See Other
-  )
+  const url = new URL("/", request.url) 
+
+  const response = NextResponse.redirect(url, { status: 303 })
 
   // Explicitly clear the cookie in the response as well
   response.cookies.set({

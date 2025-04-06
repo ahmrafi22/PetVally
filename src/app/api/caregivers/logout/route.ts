@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server"
 import { clearCaregiverCookie } from "@/lib/auth"
 
-export async function POST() {
+export async function POST(request: Request) {
   // Clear the caregiver cookie
   clearCaregiverCookie()
 
   // Create a response object
-  const response = NextResponse.json(
-    { message: "Logged out successfully" },
-    { status: 200 }
-  )
+  const url = new URL("/", request.url) 
+
+  const response = NextResponse.redirect(url, { status: 303 })
 
   // Explicitly clear the cookie in the response as well
   response.cookies.set({
