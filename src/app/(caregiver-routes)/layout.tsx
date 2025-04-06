@@ -2,7 +2,7 @@ import type React from "react"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { verifyJwtToken } from "@/lib/auth"
-import CaregiverNavigation from "./_caregiverComponents/Navbar"
+import CaregiverNavigation from "./_components/Navbar"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0

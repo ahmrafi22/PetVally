@@ -1,5 +1,5 @@
-import { prisma } from "../prisma"
-import { uploadImage, deleteImage } from "../utils/cloudinary"
+import { prisma } from "@/lib/prisma"
+import { uploadImage, deleteImage } from "@/lib/utils/cloudinary"
 import type { UserProfile, UserPreferences } from "@/types"
 
 // Get user by ID

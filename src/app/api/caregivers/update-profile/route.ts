@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { updateCaregiverProfile } from "@/lib/controllers/caregiverData"
+import { updateCaregiverProfile } from "@/controllers/caregiverData"
 import { verifyJwtToken } from "@/lib/auth"
 
 export async function PUT(request: NextRequest) {

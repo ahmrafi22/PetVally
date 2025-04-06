@@ -1,12 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getPetById } from "@/lib/controllers/petshop"
+import { getPetById } from "@/controllers/petshop"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Get pet by ID
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Get the authorization header
     const authHeader = request.headers.get("Authorization")
+
+    const awaitedParams = await params
 
     // Check if the authorization header exists and is in the correct format
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -24,7 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Get the pet ID from the URL params
-    const id = params.id
+    const id = awaitedParams.id
 
     // Get the pet by ID
     const pet = await getPetById(id)

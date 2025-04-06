@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createPetOrder } from "@/lib/controllers/petshop"
+import { createPetOrder } from "@/controllers/petshop"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Create a pet order

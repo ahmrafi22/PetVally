@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Camera, Edit, BadgeCheck, BadgeX } from "lucide-react"
-import CaregiverProfileDialog from "../../_caregiverComponents/CaregiverProfileDialog"
-import CaregiverImageDialog from "../../_caregiverComponents/CaregiverImageDialog"
+import CaregiverProfileDialog from "../../_components/CaregiverProfileDialog"
+import CaregiverImageDialog from "../../_components/CaregiverImageDialog"
 import type { Caregiver } from "@/types"
 
 // Client component to fetch caregiver data from API

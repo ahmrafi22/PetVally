@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { updateUserPreferences } from "@/lib/controllers/userData"
+import { updateUserPreferences } from "@/controllers/userData"
 import { verifyJwtToken } from "@/lib/auth"
 
 export async function PUT(request: NextRequest) {

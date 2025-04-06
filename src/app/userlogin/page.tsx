@@ -101,7 +101,7 @@ export default function UserLogin() {
 
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/userregistration" className="font-medium text-blue-600 hover:text-blue-500">
               Register here
             </Link>

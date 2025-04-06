@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getCaregiverById } from "@/lib/controllers/caregiverData"
+import { getCaregiverById } from "@/controllers/caregiverData"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Controller function to handle caregiver data requests

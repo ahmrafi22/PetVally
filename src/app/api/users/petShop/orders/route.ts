@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getAvailablePets } from "@/lib/controllers/petshop"
+import { getAvailablePets } from "@/controllers/petshop"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Get all available pets

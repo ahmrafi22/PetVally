@@ -1,4 +1,4 @@
-import { prisma } from "../prisma"
+import { prisma } from "@/lib/prisma"
 import type { User, Pet } from "@/types"
 
 // Get all available pets

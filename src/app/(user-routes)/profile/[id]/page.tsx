@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Camera, Edit, Settings } from "lucide-react";
-import ProfileUpdateDialog from "../../_userComponents/ProfileUpdateDialog";
-import PreferencesUpdateDialog from "../../_userComponents/PreferencesUpdateDialog";
-import ImageUploadDialog from "../../_userComponents/ImageUploadDialog";
+import ProfileUpdateDialog from "../../_components/ProfileUpdateDialog";
+import PreferencesUpdateDialog from "../../_components/PreferencesUpdateDialog";
+import ImageUploadDialog from "../../_components/image-upload-dialog";
 import type { User } from "@/types";
 
 // Client component to fetch user data from API

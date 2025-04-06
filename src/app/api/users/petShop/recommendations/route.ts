@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getRecommendedPets } from "@/lib/controllers/petshop"
+import { getRecommendedPets } from "@/controllers/petshop"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Get recommended pets for the user
