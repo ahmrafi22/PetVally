@@ -40,6 +40,21 @@ async function main() {
       childFriendly: true,
       allergySafe: false,
     },
+    {
+      name: "Rocky",
+      breed: "German Shepherd",
+      age: 4,
+      price: 400.0,
+      images: "/placeholder.svg?height=300&width=300",
+      bio: "Loyal and intelligent German Shepherd with excellent training.",
+      description:
+        "Rocky is a well-trained German Shepherd with a calm and confident demeanor. He's extremely loyal and protective of his family. Rocky has completed advanced obedience training and knows many commands. He's great with children but needs an experienced owner who understands the breed.",
+      energyLevel: 4,
+      spaceRequired: 5,
+      maintenance: 4,
+      childFriendly: true,
+      allergySafe: false,
+    },
     // Cats
     {
       name: "Luna",
@@ -71,7 +86,22 @@ async function main() {
       childFriendly: true,
       allergySafe: false,
     },
-    // Bird
+    {
+      name: "Milo",
+      breed: "Bengal",
+      age: 1,
+      price: 325.0,
+      images: "/placeholder.svg?height=300&width=300",
+      bio: "Playful Bengal cat with stunning spotted coat.",
+      description:
+        "Milo is a young Bengal cat with a beautiful spotted coat that resembles a wild leopard. He's extremely playful and athletic, enjoying climbing and interactive toys. Milo is intelligent and can be trained to do tricks. He needs an active household that can provide plenty of stimulation.",
+      energyLevel: 5,
+      spaceRequired: 3,
+      maintenance: 3,
+      childFriendly: true,
+      allergySafe: false,
+    },
+    // Birds
     {
       name: "Charlie",
       breed: "Cockatiel",
@@ -86,6 +116,52 @@ async function main() {
       maintenance: 3,
       childFriendly: true,
       allergySafe: true,
+    },
+    {
+      name: "Kiwi",
+      breed: "Budgerigar",
+      age: 2,
+      price: 75.0,
+      images: "/placeholder.svg?height=300&width=300",
+      bio: "Colorful budgie with a friendly personality.",
+      description:
+        "Kiwi is a vibrant green and yellow budgie who loves to chatter and play. He's very social and enjoys being around people. Kiwi can learn to mimic words and sounds with patient training. He's a low-maintenance pet perfect for first-time bird owners.",
+      energyLevel: 4,
+      spaceRequired: 1,
+      maintenance: 2,
+      childFriendly: true,
+      allergySafe: true,
+    },
+    // Rabbits
+    {
+      name: "Thumper",
+      breed: "Holland Lop",
+      age: 1,
+      price: 120.0,
+      images: "/placeholder.svg?height=300&width=300",
+      bio: "Adorable Holland Lop rabbit with floppy ears.",
+      description:
+        "Thumper is a sweet Holland Lop rabbit with characteristic floppy ears. He's gentle and enjoys being petted. Thumper is litter-trained and has a playful personality. He makes a wonderful indoor pet for families looking for a quiet, cuddly companion.",
+      energyLevel: 3,
+      spaceRequired: 2,
+      maintenance: 3,
+      childFriendly: true,
+      allergySafe: false,
+    },
+    {
+      name: "Cinnamon",
+      breed: "Lionhead",
+      age: 2,
+      price: 135.0,
+      images: "/placeholder.svg?height=300&width=300",
+      bio: "Fluffy Lionhead rabbit with a mane of fur.",
+      description:
+        "Cinnamon is a beautiful Lionhead rabbit with a distinctive mane of fur around her head. She has a gentle temperament and enjoys exploring her surroundings. Cinnamon is litter-trained and enjoys fresh vegetables and hay. She's a delightful pet for someone who can appreciate her unique appearance and personality.",
+      energyLevel: 2,
+      spaceRequired: 2,
+      maintenance: 4,
+      childFriendly: true,
+      allergySafe: false,
     },
   ]
 

@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-// import { toast } from "@/components/ui/use-toast"
+import { toast } from 'sonner'
 import type { Pet, PaymentFormData } from "@/types"
 
 export default function BuyPet() {
@@ -61,11 +61,16 @@ export default function BuyPet() {
         console.log("Pet data for purchase:", data)
 
         if (!data.pet.isAvailable) {
-        //   toast({
-        //     title: "Pet Not Available",
-        //     description: "This pet is no longer available for adoption.",
-        //     variant: "destructive",
-        //   })
+          toast("Pet Not Available", {
+            description: "This pet is no longer available for adoption.",
+            icon: "🐾",
+            style: {
+              background: "#1e1b4b",
+              color: "#facc15",       
+              border: "1px solid #facc15",
+            },
+          })
+          
           router.push("/petshop")
           return
         }
@@ -121,22 +126,31 @@ export default function BuyPet() {
       const data = await response.json()
       console.log("Order response:", data)
 
-    //   toast({
-    //     title: "Adoption Successful!",
-    //     description: `Congratulations! ${pet.name} will be delivered to your location very soon.`,
-    //   })
+      toast("Adoption Successful!", {
+        description: `Congratulations! ${pet.name} will be delivered to your location very soon.`,
+        icon: "🎉",
+        style: {
+          background: "#1e1b4b",
+          color: "#34d399",       
+          border: "1px solid #34d399",
+        },
+      })
 
       // Redirect to pet shop after successful adoption
       setTimeout(() => {
-        router.push("/user/petshop")
+        router.push("/petshop")
       }, 2000)
     } catch (err: any) {
       console.error("Error completing adoption:", err)
-    //   toast({
-    //     title: "Error",
-    //     description: err.message || "An error occurred while completing the adoption.",
-    //     variant: "destructive",
-    //   })
+      toast("Error", {
+        description: err.message || "An error occurred while completing the adoption.",
+        icon: "❌",
+        style: {
+          background: "#1e1b4b", 
+          color: "#f87171",       
+          border: "1px solid #f87171",
+        },
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -171,7 +185,7 @@ export default function BuyPet() {
         <h3 className="text-lg leading-6 font-medium text-red-600">Pet not found</h3>
         <p className="mt-1 text-sm text-gray-500">The requested pet could not be found.</p>
         <button
-          onClick={() => router.push("/user/petshop")}
+          onClick={() => router.push("/petshop")}
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           Return to Pet Shop

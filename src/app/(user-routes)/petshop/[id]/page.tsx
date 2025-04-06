@@ -38,7 +38,7 @@ export default function PetDetail() {
         }
 
         const data = await response.json()
-        console.log("Pet data:", data)
+        // console.log("Pet data:", data)
         setPet(data.pet)
       } catch (err: any) {
         console.error("Error fetching pet details:", err)

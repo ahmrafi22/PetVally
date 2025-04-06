@@ -9,6 +9,17 @@ npx prisma init
 npx prisma db push ( for pushing model )
 npx prisma generate -> generate and access db
 
+for seeding data 
+npm i -D ts-node typescript @types/node -- dependency
+npx prisma db seed
+
+  "scripts": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
+
 icons:
 npm install lucide-react
 
@@ -28,4 +39,3 @@ npx shadcn@latest add switch
 npx shadcn@latest add select
 npx shadcn@latest add input
 npx shadcn@latest add textarea
-npx shadcn@latest add badge  

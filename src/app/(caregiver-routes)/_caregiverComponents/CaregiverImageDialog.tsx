@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-// import { toast } from "@/components/ui/use-toast"
 import { Camera, Upload } from "lucide-react"
 import type { Caregiver } from "@/types"
 
@@ -33,27 +32,15 @@ export default function CaregiverImageDialog({ isOpen, onClose, caregiver, onUpd
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Check file size (max 5MB)
+
     if (file.size > 5 * 1024 * 1024) {
-    //   toast({
-    //     title: "File too large",
-    //     description: "Please select an image smaller than 5MB.",
-    //     variant: "destructive",
-    //   })
       return
     }
 
-    // Check file type
     if (!file.type.startsWith("image/")) {
-    //   toast({
-    //     title: "Invalid file type",
-    //     description: "Please select an image file.",
-    //     variant: "destructive",
-    //   })
       return
     }
 
-    // Create preview
     const reader = new FileReader()
     reader.onload = () => {
       setPreviewImage(reader.result as string)
@@ -94,22 +81,12 @@ export default function CaregiverImageDialog({ isOpen, onClose, caregiver, onUpd
 
       const data = await response.json()
 
-      // Call the onUpdate callback with the updated caregiver data
-      onUpdate(data.caregiver)
 
-    //   toast({
-    //     title: "Profile Image Updated",
-    //     description: "Your profile image has been updated successfully.",
-    //   })
+      onUpdate(data.caregiver)
 
       onClose()
     } catch (error: any) {
       console.error("Error updating profile image:", error)
-    //   toast({
-    //     title: "Error",
-    //     description: error.message || "An error occurred while updating your profile image.",
-    //     variant: "destructive",
-    //   })
     } finally {
       setIsLoading(false)
     }

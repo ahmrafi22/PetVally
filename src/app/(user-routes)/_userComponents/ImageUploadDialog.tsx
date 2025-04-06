@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-// import { toast } from "@/components/ui/use-toast"
 import { Camera, Upload } from "lucide-react"
 import type { User } from "@/types"
 
@@ -33,31 +32,21 @@ export default function ImageUploadDialog({ isOpen, onClose, user, onUpdate }: I
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Check file size (max 5MB)
+
     if (file.size > 5 * 1024 * 1024) {
-      // toast({
-      //   title: "File too large",
-      //   description: "Please select an image smaller than 5MB.",
-      //   variant: "destructive",
-      // })
       console.log("file too long");
       
       return
     }
 
-    // Check file type
+
     if (!file.type.startsWith("image/")) {
-      // toast({
-      //   title: "Invalid file type",
-      //   description: "Please select an image file.",
-      //   variant: "destructive",
-      // })
       console.log("inavlid file format");
       
       return
     }
 
-    // Create preview
+
     const reader = new FileReader()
     reader.onload = () => {
       setPreviewImage(reader.result as string)
@@ -101,19 +90,11 @@ export default function ImageUploadDialog({ isOpen, onClose, user, onUpdate }: I
       // Call the onUpdate callback with the updated user data
       onUpdate(data.user)
 
-      // toast({
-      //   title: "Profile Image Updated",
-      //   description: "Your profile image has been updated successfully.",
-      // })
 
       onClose()
     } catch (error: any) {
       console.error("Error updating profile image:", error)
-      // toast({
-      //   title: "Error",
-      //   description: error.message || "An error occurred while updating your profile image.",
-      //   variant: "destructive",
-      // })
+
     } finally {
       setIsLoading(false)
     }

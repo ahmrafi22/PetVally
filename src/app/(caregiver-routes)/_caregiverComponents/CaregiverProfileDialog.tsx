@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-// import { toast } from "@/components/ui/use-toast"
+
 import type { Caregiver } from "@/types"
 
 type CaregiverProfileDialogProps = {
@@ -92,22 +92,12 @@ export default function CaregiverProfileDialog({ isOpen, onClose, caregiver, onU
 
       const data = await response.json()
 
-      // Call the onUpdate callback with the updated caregiver data
       onUpdate(data.caregiver)
 
-    //   toast({
-    //     title: "Profile Updated",
-    //     description: "Your profile has been updated successfully.",
-    //   })
 
       onClose()
     } catch (error: any) {
       console.error("Error updating profile:", error)
-    //   toast({
-    //     title: "Error",
-    //     description: error.message || "An error occurred while updating your profile.",
-    //     variant: "destructive",
-    //   })
     } finally {
       setIsLoading(false)
     }

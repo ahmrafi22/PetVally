@@ -6,9 +6,7 @@ import { Inter } from "next/font/google"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "User and Caregiver Portal",
-  description: "A portal for users and caregivers",
-    generator: 'v0.dev'
+  title: "PetVally"
 }
 
 export default function RootLayout({
@@ -18,7 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Toaster richColors={true}/>
+        {children}</body>
     </html>
   )
 }
@@ -26,3 +26,4 @@ export default function RootLayout({
 
 
 import './globals.css'
+import { Toaster } from "sonner"

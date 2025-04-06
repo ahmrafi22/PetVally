@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
-  Home,
   ShoppingBag,
   MessageSquare,
   User,
@@ -87,10 +86,9 @@ export default function UserNavigation() {
 
   // Navigation items
   const navItems = [
-    { name: "Dashboard", icon: <Home size={20} />, href: `/user/profile/${userId}` },
     { name: "Pet Shop", icon: <PawPrint size={20} />, href: "/petshop" },
-    { name: "Store", icon: <ShoppingBag size={20} />, href: "/user/store" },
-    { name: "Forum", icon: <MessageSquare size={20} />, href: "/user/forum" },
+    { name: "Store", icon: <ShoppingBag size={20} />, href: "/store" },
+    { name: "Forum", icon: <MessageSquare size={20} />, href: "/forum" },
   ]
 
   return (

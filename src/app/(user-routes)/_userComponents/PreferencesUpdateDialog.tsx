@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { toast } from "@/components/ui/use-toast"
 import type { User } from "@/types"
 
 type PreferencesUpdateDialogProps = {
@@ -92,22 +91,14 @@ export default function PreferencesUpdateDialog({ isOpen, onClose, user, onUpdat
 
       const data = await response.json()
 
-      // Call the onUpdate callback with the updated user data
+
       onUpdate(data.user)
 
-      // toast({
-      //   title: "Preferences Updated",
-      //   description: "Your preferences have been updated successfully.",
-      // })
 
       onClose()
     } catch (error: any) {
       console.error("Error updating preferences:", error)
-      // toast({
-      //   title: "Error",
-      //   description: error.message || "An error occurred while updating your preferences.",
-      //   variant: "destructive",
-      // })
+
     } finally {
       setIsLoading(false)
     }

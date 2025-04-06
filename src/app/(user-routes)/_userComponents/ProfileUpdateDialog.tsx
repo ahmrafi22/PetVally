@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-// import { toast } from "@/components/ui/use-toast"
 import type { User } from "@/types"
 
 type ProfileUpdateDialogProps = {
@@ -88,22 +87,14 @@ export default function ProfileUpdateDialog({ isOpen, onClose, user, onUpdate }:
 
       const data = await response.json()
 
-      // Call the onUpdate callback with the updated user data
+
       onUpdate(data.user)
 
-      // toast({
-      //   title: "Profile Updated",
-      //   description: "Your profile has been updated successfully.",
-      // })
+
 
       onClose()
     } catch (error: any) {
       console.error("Error updating profile:", error)
-      // toast({
-      //   title: "Error",
-      //   description: error.message || "An error occurred while updating your profile.",
-      //   variant: "destructive",
-      // })
     } finally {
       setIsLoading(false)
     }
