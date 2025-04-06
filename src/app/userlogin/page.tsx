@@ -40,7 +40,7 @@ export default function UserLogin() {
 
       // Redirect to user profile with a slight delay to allow cookies to be set
       setTimeout(() => {
-        router.push(`/profile/${data.user.id}`)
+        router.push("/petshop")
       }, 300)
     } catch (err: any) {
       setError(err.message || "Something went wrong")
