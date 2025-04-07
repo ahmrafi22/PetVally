@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client"
+import { hash } from "bcrypt"
 
 const prisma = new PrismaClient()
 
@@ -6,6 +7,41 @@ async function main() {
   // Clear existing pets to avoid duplicates during development
   await prisma.petOrder.deleteMany({})
   await prisma.pet.deleteMany({})
+
+  // Create admin users with hashed passwords
+  const admin1Password = await hash("admin123", 10)
+  const admin2Password = await hash("admin456", 10)
+
+  // Check if admins already exist
+  const existingAdmin1 = await prisma.admin.findUnique({
+    where: { username: "admin1" },
+  })
+
+  const existingAdmin2 = await prisma.admin.findUnique({
+    where: { username: "admin2" },
+  })
+
+  // Create admin1 if it doesn't exist
+  if (!existingAdmin1) {
+    await prisma.admin.create({
+      data: {
+        username: "admin1",
+        password: admin1Password,
+      },
+    })
+    console.log("Admin1 created successfully")
+  }
+
+  // Create admin2 if it doesn't exist
+  if (!existingAdmin2) {
+    await prisma.admin.create({
+      data: {
+        username: "admin2",
+        password: admin2Password,
+      },
+    })
+    console.log("Admin2 created successfully")
+  }
 
   // Create pets
   const pets = [

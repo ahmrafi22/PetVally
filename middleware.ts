@@ -11,6 +11,7 @@ export async function middleware(request: NextRequest) {
     path === "/userregistration" ||
     path === "/caregiverlogin" ||
     path === "/caregiverregistration" ||
+    path === "/admin" ||
     path.startsWith("/api/")
 
   if (isPublicPath) {
@@ -22,6 +23,27 @@ export async function middleware(request: NextRequest) {
   response.headers.set("Cache-Control", "no-store, max-age=0, must-revalidate")
   response.headers.set("Pragma", "no-cache")
   response.headers.set("Expires", "0")
+
+  // Check for admin routes
+  if (path.startsWith("/admin/")) {
+    const adminToken = request.cookies.get("admin-token")?.value
+
+    if (!adminToken) {
+      return NextResponse.redirect(new URL("/admin", request.url))
+    }
+
+    try {
+      const payload = await verifyJwtToken(adminToken)
+      if (!payload || payload.role !== "admin") {
+        return NextResponse.redirect(new URL("/admin", request.url))
+      }
+
+      // Add the cache control headers to the response
+      return response
+    } catch (error) {
+      return NextResponse.redirect(new URL("/admin", request.url))
+    }
+  }
 
   // Check for user routes
   if (path.startsWith("/user/") || path.startsWith("/profile/")) {

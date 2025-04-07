@@ -1,7 +1,9 @@
 import type React from "react"
-import "./globals.css"
+import './globals.css'
+import { Toaster } from "sonner"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -17,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+
         <Toaster richColors={true}/>
         {children}</body>
     </html>
@@ -25,5 +28,4 @@ export default function RootLayout({
 
 
 
-import './globals.css'
-import { Toaster } from "sonner"
+

@@ -88,3 +88,15 @@ model PetOrder {
   @@index([userId])  //optimize for user order queries
 }
 
+
+model Admin {
+  id       String @id @default(uuid())  // Unique admin identifier
+  username String @unique               // Login username
+  password String                       // Hashed password
+
+  createdAt DateTime @default(now())    // When admin account was created
+
+  // Purpose: Platform administration access
+  // Relations: Standalone system access
+  // - Full access to all data tables
+}
