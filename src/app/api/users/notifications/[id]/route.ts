@@ -3,7 +3,7 @@ import { markNotificationAsRead } from "@/controllers/notifications"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Mark a notification as read
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Get the authorization header
     const authHeader = request.headers.get("Authorization")
@@ -23,8 +23,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 })
     }
 
+    const awaitedParams = await params
+
     // Get the notification ID from the URL params
-    const id = params.id
+    const id = awaitedParams.id
 
     // Mark the notification as read
     await markNotificationAsRead(id)

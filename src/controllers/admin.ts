@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 import { compare } from "bcrypt"
 import { signJwtToken } from "@/lib/auth"
 import { uploadImage, deleteImage } from "@/lib/utils/cloudinary"
+// Import the notification service at the top to avoid circular dependencies
+import { createNotificationForAllUsers } from "@/controllers/notifications"
 
 // Verify admin credentials
 export async function verifyAdminCredentials(username: string, password: string) {
@@ -167,8 +169,6 @@ export async function createPet(data: any) {
 
     // Create notifications for all users
     try {
-      // Import the function here to avoid circular dependencies
-      const { createNotificationForAllUsers } = require("./notifications")
       await createNotificationForAllUsers(
         "NEW_PET",
         `A new pet named ${pet.name} (${pet.breed}) is now available for adoption!`,

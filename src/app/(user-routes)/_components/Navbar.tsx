@@ -17,17 +17,18 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { useIsMobile } from "@/hooks/use-mobile"; // Adjust path as needed
 
 gsap.registerPlugin(useGSAP);
 
 export default function UserNavigation() {
   const [expanded, setExpanded] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userName, setUserName] = useState<string>("");
   const [userPic, setUserPic] = useState<string>("");
   const [notificationCount, setNotificationCount] = useState(0);
   const router = useRouter();
+  const isMobile = useIsMobile();
   const userId =
     typeof window !== "undefined" ? localStorage.getItem("userId") : null;
 
@@ -35,24 +36,12 @@ export default function UserNavigation() {
   const sidebarRef = useRef(null);
   const textElementsRef = useRef<HTMLSpanElement[]>([]);
 
-  // Check if mobile on mount and when window resizes
+  // Set initial expanded state based on screen size
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
-        setExpanded(false);
-      }
-    };
-
-    // Check on mount
-    checkIfMobile();
-
-    // Add event listener for resize
-    window.addEventListener("resize", checkIfMobile);
-
-    // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
+    if (isMobile) {
+      setExpanded(false);
+    }
+  }, [isMobile]);
 
   // Fetch user data and notification count on mount
   useEffect(() => {
@@ -209,7 +198,7 @@ export default function UserNavigation() {
         });
       }
     }
-  }, [isMobile]);
+  }, [isMobile, mobileOpen, expanded]);
 
   // Add reference to text elements for animation
   const addToRefs = (el: any) => {
