@@ -52,7 +52,6 @@ export default function UserRegistration() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-100 to-purple-100 px-4 sm:px-6 lg:px-5">
-
       <header className="w-full pt-6 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <PetVallyLogo />
@@ -60,13 +59,12 @@ export default function UserRegistration() {
       </header>
       <div className="flex-grow flex items-center justify-center">
         <div className="w-full lg:h-[70vh] max-w-7xl mx-auto flex flex-col md:flex-row bg-white/25 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 overflow-hidden">
-          {/* Lottie Animation - Hidden on small screens */}
           <div className="hidden md:flex md:w-1/2 items-center justify-center p-0 bg-pink-50/30">
             <DotLottieReact
               src="https://lottie.host/4bbb263f-f277-44d3-821d-7ec663a984c1/QtmrC0fs8o.lottie"
               loop
               autoplay
-               className="w-full h-64 lg:h-80"
+              className="w-full h-64 lg:h-80"
             />
           </div>
 

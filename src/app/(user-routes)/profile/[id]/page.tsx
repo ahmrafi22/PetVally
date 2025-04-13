@@ -270,12 +270,12 @@ export default function UserProfile() {
                   <div
                     key={order.id}
                     onClick={() =>
-                      (window.location.href = `/petshop/${order.pet.id}`)
+                      (window.location.href = `/petshop/${order.pet?.id}`)
                     }
                     className="bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200"
                   >
                     <div className="aspect-square rounded-md overflow-hidden mb-3">
-                      {order.pet.images ? (
+                      {order?.pet?.images ? (
                         <img
                           src={order.pet.images}
                           alt={order.pet.name}
@@ -288,13 +288,13 @@ export default function UserProfile() {
                       )}
                     </div>
                     <h3 className="font-medium text-gray-900">
-                      {order.pet.name}
+                      {order?.pet?.name}
                     </h3>
                     <div className="mt-1 text-sm text-gray-500">
-                      <p>Breed: {order.pet.breed}</p>
+                      <p>Breed: {order?.pet?.breed}</p>
                       <p>
-                        Age: {order.pet.age}{" "}
-                        {order.pet.age === 1 ? "year" : "years"}
+                        Age: {order.pet?.age}{" "}
+                        {order.pet?.age === 1 ? "year" : "years"}
                       </p>
                     </div>
                   </div>

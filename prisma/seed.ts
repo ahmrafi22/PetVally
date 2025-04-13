@@ -60,6 +60,9 @@ async function main() {
       maintenance: 3,
       childFriendly: true,
       allergySafe: false,
+      neutered: true,
+      vaccinated: true,
+      tags: ["dog", "friendly", "energetic", "trained", "family-friendly"],
     },
     {
       name: "Bella",
@@ -75,6 +78,9 @@ async function main() {
       maintenance: 3,
       childFriendly: true,
       allergySafe: false,
+      neutered: false,
+      vaccinated: true,
+      tags: ["dog", "curious", "playful", "affectionate", "vocal"],
     },
     {
       name: "Rocky",
@@ -90,6 +96,9 @@ async function main() {
       maintenance: 4,
       childFriendly: true,
       allergySafe: false,
+      neutered: true,
+      vaccinated: true,
+      tags: ["dog", "loyal", "intelligent", "protective", "trained"],
     },
     // Cats
     {
@@ -106,6 +115,9 @@ async function main() {
       maintenance: 2,
       childFriendly: true,
       allergySafe: false,
+      neutered: true,
+      vaccinated: true,
+      tags: ["cat", "elegant", "vocal", "attention-seeking", "independent"],
     },
     {
       name: "Oliver",
@@ -121,6 +133,9 @@ async function main() {
       maintenance: 4,
       childFriendly: true,
       allergySafe: false,
+      neutered: true,
+      vaccinated: false,
+      tags: ["cat", "gentle", "large", "patient", "family-friendly"],
     },
     {
       name: "Milo",
@@ -136,6 +151,9 @@ async function main() {
       maintenance: 3,
       childFriendly: true,
       allergySafe: false,
+      neutered: false,
+      vaccinated: true,
+      tags: ["cat", "playful", "athletic", "intelligent", "active"],
     },
     // Birds
     {
@@ -152,6 +170,9 @@ async function main() {
       maintenance: 3,
       childFriendly: true,
       allergySafe: true,
+      neutered: false, 
+      vaccinated: true,
+      tags: ["bird", "musical", "cheerful", "hand-raised", "interactive"],
     },
     {
       name: "Kiwi",
@@ -167,6 +188,9 @@ async function main() {
       maintenance: 2,
       childFriendly: true,
       allergySafe: true,
+      neutered: false, // Not applicable for birds, but keeping for consistency
+      vaccinated: false,
+      tags: ["bird", "colorful", "social", "talkative", "beginner-friendly"],
     },
     // Rabbits
     {
@@ -183,6 +207,9 @@ async function main() {
       maintenance: 3,
       childFriendly: true,
       allergySafe: false,
+      neutered: true,
+      vaccinated: true,
+      tags: ["rabbit", "gentle", "litter-trained", "playful", "quiet"],
     },
     {
       name: "Cinnamon",
@@ -198,6 +225,9 @@ async function main() {
       maintenance: 4,
       childFriendly: true,
       allergySafe: false,
+      neutered: false,
+      vaccinated: true,
+      tags: ["rabbit", "fluffy", "gentle", "litter-trained", "unique"],
     },
   ]
 
@@ -218,4 +248,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
-

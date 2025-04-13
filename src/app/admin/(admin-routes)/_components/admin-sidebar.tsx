@@ -73,7 +73,7 @@ export default function AdminSidebar() {
       >
         <div className="flex flex-col h-full">
           {/* Sidebar header */}
-          <div className="flex items-center justify-center p-6 bg-purple-600 text-white">
+          <div className="flex items-center justify-center p-5.5 bg-purple-600 text-white">
             <h2 className="text-xl font-bold">Admin Portal</h2>
           </div>
 

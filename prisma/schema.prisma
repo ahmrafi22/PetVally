@@ -30,7 +30,9 @@ model User {
   experienceLevel   Int      @default(2)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  petOrders         PetOrder[] // History of all pet adoptions
+  petOrders         PetOrder[] 
+   // ===== System Relationships =====
+ notifications     Notification[]  // Notifications received by user
 }
 
 model Caregiver {
@@ -69,6 +71,13 @@ model Pet {
   maintenance   Int     @default(3)    // 1-5: Care difficulty (1=easy, 5=difficult)
   childFriendly Boolean  @default(true)  // Whether pet is good with children
   allergySafe   Boolean  @default(false) // Whether pet is hypoallergenic
+  
+ // ===== Health Attributes =====
+ neutered     Boolean  @default(false) // Whether pet is neutered/spayed
+ vaccinated   Boolean  @default(false) // Whether pet is up-to-date on vaccines
+ 
+ // ===== Tags =====
+ tags         String[] // Array of tags describing the pet (e.g., "playful", "quiet", "cat", "dog")
 
   // ===== Commerce Relationships =====
   orders PetOrder[]  // Adoption records for this pet
@@ -85,18 +94,31 @@ model PetOrder {
   petId     String                       // Reference to adopted pet
   createdAt DateTime    @default(now())  // When adoption was initiated
   
-  @@index([userId])  //optimize for user order queries
+  @@index([userId])  
 }
 
 
 model Admin {
-  id       String @id @default(uuid())  // Unique admin identifier
-  username String @unique               // Login username
-  password String                       // Hashed password
+  id       String @id @default(uuid())  
+  username String @unique               
+  password String                       
 
-  createdAt DateTime @default(now())    // When admin account was created
+  createdAt DateTime @default(now())    
 
-  // Purpose: Platform administration access
-  // Relations: Standalone system access
-  // - Full access to all data tables
+}
+
+model Notification {
+  id      String @id @default(uuid())  // Unique notification identifier
+  type    String                       // Notification type ("NEW_PET","MISSING_PET",etc there will more in future)
+  message String                       // Notification content text
+  read    Boolean @default(false)      // Whether notification has been viewed
+
+  // ===== Relationships =====
+  user    User @relation(fields: [userId], references: [id])  // Recipient user
+  userId  String                       // Reference to recipient user
+
+  createdAt DateTime @default(now())   
+  @@index([userId]) 
+  @@index([type]) 
+
 }

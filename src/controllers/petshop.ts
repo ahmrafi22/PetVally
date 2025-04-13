@@ -167,7 +167,8 @@ export async function getRecommendedPets(userId: string) {
   }
 }
 
-// Calculate compatibility score between user and pet
+// Update the calculateCompatibilityScore function to include neutered and vaccinated status:
+
 function calculateCompatibilityScore(
   user: Pick<User, "dailyAvailability" | "hasOutdoorSpace" | "hasChildren" | "hasAllergies" | "experienceLevel">,
   pet: Pet,
@@ -175,18 +176,18 @@ function calculateCompatibilityScore(
   let score = 0
   const maxScore = 100
 
-  // 1. Daily Availability vs Energy Level and Maintenance (30 points)
+  // 1. Daily Availability vs Energy Level and Maintenance (25 points)
   // Higher energy pets need more time commitment
-  const availabilityScore = 30 - Math.abs(user.dailyAvailability * 3 - (pet.energyLevel + pet.maintenance)) * 3
+  const availabilityScore = 25 - Math.abs(user.dailyAvailability * 3 - (pet.energyLevel + pet.maintenance)) * 2.5
   score += Math.max(0, availabilityScore)
 
-  // 2. Outdoor Space vs Space Required (20 points)
+  // 2. Outdoor Space vs Space Required (15 points)
   if (user.hasOutdoorSpace) {
     // If user has outdoor space, they can accommodate pets needing more space
-    score += 20
+    score += 15
   } else {
     // If no outdoor space, penalize pets that need more space
-    score += 20 - pet.spaceRequired * 4
+    score += 15 - pet.spaceRequired * 3
   }
 
   // 3. Children Compatibility (15 points)
@@ -213,11 +214,15 @@ function calculateCompatibilityScore(
     score += 10
   }
 
-  // 5. Experience Level vs Maintenance (20 points)
-  const experienceScore = 20 - Math.abs(user.experienceLevel - pet.maintenance) * 4
+  // 5. Experience Level vs Maintenance (15 points)
+  const experienceScore = 15 - Math.abs(user.experienceLevel - pet.maintenance) * 3
   score += Math.max(0, experienceScore)
+
+  // 6. Health Considerations (15 points)
+  // Neutered and vaccinated pets are generally preferred
+  if (pet.neutered) score += 7.5
+  if (pet.vaccinated) score += 7.5
 
   // Ensure score is between 0 and 100
   return Math.max(0, Math.min(maxScore, score))
 }
-

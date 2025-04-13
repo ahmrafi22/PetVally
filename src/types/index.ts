@@ -16,11 +16,7 @@ export type User = {
   experienceLevel: number
   createdAt: string
   updatedAt: string
-  petOrders?: Array<{
-    id: string
-    pet: Pet
-    createdAt: string
-  }> 
+  petOrders?: PetOrder[] 
 }
 
 export type UserProfile = Pick<User, "id" | "name" | "age" | "country" | "city" | "area">
@@ -73,6 +69,9 @@ export type Pet = {
   maintenance: number
   childFriendly: boolean
   allergySafe: boolean
+  neutered: boolean
+  vaccinated: boolean
+  tags: string[]
   createdAt: string
   orders?: PetOrder[]
 }
@@ -95,4 +94,3 @@ export type PaymentFormData = {
   country: string
   zipCode: string
 }
-

@@ -31,6 +31,11 @@ export async function getUserById(id: string) {
             createdAt: "desc",
           },
         },
+        notifications: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     })
 
@@ -218,4 +223,3 @@ export async function updateUserProfileImage(id: string, imageBase64: string) {
     throw error
   }
 }
-

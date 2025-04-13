@@ -101,18 +101,36 @@ export async function getAllUsers() {
 }
 
 // Get all pets
-export async function getAllPets() {
+export async function getAllPets(onlyAvailable = false) {
   try {
+    const whereClause = onlyAvailable
+      ? {
+          isAvailable: true,
+          orders: {
+            none: {}, 
+          },
+        }
+      : {}
+
     const pets = await prisma.pet.findMany({
+      where: whereClause,
       orderBy: {
         createdAt: "desc",
       },
+      include: {
+        orders: {
+          select: {
+            id: true,
+          },
+        },
+      },
     })
 
-    // Convert Decimal to number for JSON serialization
+    // Convert Decimal to number for JSON serialization and remove orders from response
     return pets.map((pet) => ({
       ...pet,
       price: Number(pet.price),
+      orders: undefined,
     }))
   } catch (error) {
     console.error("Error getting all pets:", error)
@@ -141,8 +159,24 @@ export async function createPet(data: any) {
         maintenance: data.maintenance,
         childFriendly: data.childFriendly,
         allergySafe: data.allergySafe,
+        neutered: data.neutered,
+        vaccinated: data.vaccinated,
+        tags: data.tags || [],
       },
     })
+
+    // Create notifications for all users
+    try {
+      // Import the function here to avoid circular dependencies
+      const { createNotificationForAllUsers } = require("./notifications")
+      await createNotificationForAllUsers(
+        "NEW_PET",
+        `A new pet named ${pet.name} (${pet.breed}) is now available for adoption!`,
+      )
+    } catch (notificationError) {
+      console.error("Error creating notifications:", notificationError)
+      // Don't throw the error, as we still want to return the pet
+    }
 
     // Convert Decimal to number for JSON serialization
     return {
@@ -192,4 +226,3 @@ export async function deletePet(id: string) {
     throw error
   }
 }
-

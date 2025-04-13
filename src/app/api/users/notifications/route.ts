@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getAllPets, createPet } from "@/controllers/admin"
+import { getUserNotifications, markAllNotificationsAsRead } from "@/controllers/notifications"
 import { verifyJwtToken } from "@/lib/auth"
 
-// Get all pets
+// Get notifications for the authenticated user
 export async function GET(request: NextRequest) {
   try {
     // Get the authorization header
@@ -19,33 +19,32 @@ export async function GET(request: NextRequest) {
     // Verify the token
     const payload = await verifyJwtToken(token)
 
-    if (!payload || payload.role !== "admin") {
+    if (!payload || payload.role !== "user") {
       return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 })
     }
 
-    // Check if we should only return available pets
-    const { searchParams } = new URL(request.url)
-    const onlyAvailable = searchParams.get("onlyAvailable") === "true"
+    // Get the user ID from the payload
+    const userId = payload.id as string
 
-    // Get all pets
-    const pets = await getAllPets(onlyAvailable)
+    // Get the notifications
+    const notifications = await getUserNotifications(userId)
 
-    // Return the pets
+    // Return the notifications
     return NextResponse.json(
       {
-        message: "Pets retrieved successfully",
-        pets,
+        message: "Notifications retrieved successfully",
+        notifications,
       },
       { status: 200 },
     )
   } catch (error) {
-    console.error("Error retrieving pets:", error)
+    console.error("Error retrieving notifications:", error)
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 })
   }
 }
 
-// Create a new pet
-export async function POST(request: NextRequest) {
+// Mark all notifications as read
+export async function PUT(request: NextRequest) {
   try {
     // Get the authorization header
     const authHeader = request.headers.get("Authorization")
@@ -61,46 +60,25 @@ export async function POST(request: NextRequest) {
     // Verify the token
     const payload = await verifyJwtToken(token)
 
-    if (!payload || payload.role !== "admin") {
+    if (!payload || payload.role !== "user") {
       return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 })
     }
 
-    // Get the request body
-    const body = await request.json()
+    // Get the user ID from the payload
+    const userId = payload.id as string
 
-    // Validate required fields
-    const requiredFields = [
-      "name",
-      "breed",
-      "age",
-      "price",
-      "bio",
-      "description",
-      "energyLevel",
-      "spaceRequired",
-      "maintenance",
-      "imageBase64",
-    ]
+    // Mark all notifications as read
+    await markAllNotificationsAsRead(userId)
 
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        return NextResponse.json({ message: `Missing required field: ${field}` }, { status: 400 })
-      }
-    }
-
-    // Create the pet
-    const pet = await createPet(body)
-
-    // Return the pet
+    // Return success
     return NextResponse.json(
       {
-        message: "Pet created successfully",
-        pet,
+        message: "All notifications marked as read",
       },
-      { status: 201 },
+      { status: 200 },
     )
   } catch (error) {
-    console.error("Error creating pet:", error)
+    console.error("Error marking notifications as read:", error)
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 })
   }
 }

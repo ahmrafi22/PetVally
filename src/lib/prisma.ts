@@ -13,16 +13,16 @@ export default prisma
 
 
 //Keep NeonDB alive by pinging 
-async function keepNeonAlive() {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    console.log("NeonDB is alive");
-  } catch (error) {
-    console.error("NeonDB connection failed ", error);
-  }
-}
+// async function keepNeonAlive() {
+//   try {
+//     await prisma.$queryRaw`SELECT 1`;
+//     console.log("NeonDB is alive");
+//   } catch (error) {
+//     console.error("NeonDB connection failed ", error);
+//   }
+// }
 
 // Keep the connection alive in development
-if (process.env.NODE_ENV !== "production") {
-  setInterval(keepNeonAlive, 240000); // Ping every 4 minutes
-}
+// if (process.env.NODE_ENV !== "production") {
+//   setInterval(keepNeonAlive, 240000); // Ping every 4 minutes
+// }
