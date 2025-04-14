@@ -67,14 +67,14 @@ export default function UserLogin() {
   // Show loading indicator while checking authentication status
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tl from-red-200 to-blue-200">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-100 to-purple-100 px-4 sm:px-6 lg:px-5">
+    <div className="min-h-screen flex flex-col bg-gradient-to-tl from-red-200 to-blue-200 px-4 sm:px-6 lg:px-5">
       {/* Logo/Header at the top */}
       <header className="w-full pt-6 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">

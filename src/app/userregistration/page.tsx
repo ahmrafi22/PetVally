@@ -51,7 +51,7 @@ export default function UserRegistration() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-100 to-purple-100 px-4 sm:px-6 lg:px-5">
+    <div className="min-h-screen flex flex-col bg-gradient-to-tr from-red-200 to-blue-200 px-4 sm:px-6 lg:px-5">
       <header className="w-full pt-6 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <PetVallyLogo />
