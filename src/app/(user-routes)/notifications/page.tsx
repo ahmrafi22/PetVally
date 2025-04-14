@@ -2,18 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Bell, CheckCircle, Calendar, Info, AlertTriangle } from "lucide-react"
+import { Bell,  Calendar, Info, Cat } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
-
-type Notification = {
-  id: string
-  type: string
-  message: string
-  read: boolean
-  createdAt: string
-}
+import type { Notification } from "@/types"
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -25,10 +18,6 @@ export default function NotificationsPage() {
     async function fetchNotifications() {
       try {
         const token = localStorage.getItem("userToken")
-        if (!token) {
-          router.push("/userlogin")
-          return
-        }
 
         const response = await fetch("/api/users/notifications", {
           headers: {
@@ -66,13 +55,9 @@ export default function NotificationsPage() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "NEW_PET":
-        return <Bell className="h-5 w-5 text-blue-500" />
-      case "ADOPTION_CONFIRMED":
-        return <CheckCircle className="h-5 w-5 text-green-500" />
+        return <Cat className="h-5 w-5 text-blue-500" />
       case "APPOINTMENT":
         return <Calendar className="h-5 w-5 text-purple-500" />
-      case "WARNING":
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />
       default:
         return <Info className="h-5 w-5 text-gray-500" />
     }

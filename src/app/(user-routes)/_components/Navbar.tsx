@@ -14,23 +14,30 @@ import {
   ChevronRight,
   PawPrint,
   Bell,
+  ShoppingCart,
 } from "lucide-react";
-import gsap from "gsap";
+import gsap from "gsap"
 import { useGSAP } from "@gsap/react";
-import { useIsMobile } from "@/hooks/use-mobile"; // Adjust path as needed
+import { useIsMobile } from "@/hooks/use-mobile"; 
+import Image from "next/image";
 
 gsap.registerPlugin(useGSAP);
 
 export default function UserNavigation() {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userName, setUserName] = useState<string>("");
   const [userPic, setUserPic] = useState<string>("");
   const [notificationCount, setNotificationCount] = useState(0);
   const router = useRouter();
   const isMobile = useIsMobile();
-  const userId =
-    typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const id = localStorage.getItem("userId");
+
+    setUserId(id);
+  }, []);
 
   // Refs for GSAP animations
   const sidebarRef = useRef(null);
@@ -152,7 +159,7 @@ export default function UserNavigation() {
         gsap.fromTo(
           textElementsRef.current,
           { opacity: 0, x: -12 },
-          { opacity: 1, x: 0, stagger: 0.02, delay: 0.02, duration: 0.2 }
+          { opacity: 1, x: 0, stagger: 0.02, duration: 0.2 }
         );
       } else {
         gsap.to(textElementsRef.current, {
@@ -177,7 +184,7 @@ export default function UserNavigation() {
         gsap.fromTo(
           textElementsRef.current,
           { opacity: 0, x: -12 },
-          { opacity: 1, x: 0, stagger: 0.02, delay: 0.05, duration: 0.2 }
+          { opacity: 1, x: 0, stagger: 0.02, duration: 0.2 }
         );
       }
     }
@@ -226,6 +233,7 @@ export default function UserNavigation() {
   const navItems = [
     { name: "Pet Shop", icon: <PawPrint size={25} />, href: "/petshop" },
     { name: "Store", icon: <ShoppingBag size={25} />, href: "/store" },
+    { name: "Cart", icon: <ShoppingCart size={25} />, href: "/cart" },
     { name: "Forum", icon: <MessageSquare size={25} />, href: "/user/forum" },
     {
       name: "Notifications",
@@ -237,10 +245,10 @@ export default function UserNavigation() {
 
   return (
     <>
-      {/* Mobile menu button - only shown when sidebar is closed */}
+      {/* Mobile menu button  */}
       {(!mobileOpen || !isMobile) && (
         <button
-          className="md:hidden fixed top-4 left-4 z-30 bg-blue-600 text-white p-2 rounded-md"
+          className="md:hidden fixed top-4 left-4 z-30 text-black p-2 rounded-md"
           onClick={toggleSidebar}
           aria-label="Toggle menu"
         >
@@ -270,9 +278,6 @@ export default function UserNavigation() {
           {/* Sidebar header */}
           <div className="flex items-center justify-between p-4.5 border-b">
             <div className="flex items-center gap-2">
-              <div className="grid size-8 place-content-center rounded-md bg-pink-600 text-white">
-                <PawPrint size={20} />
-              </div>
               {(expanded || mobileOpen) && (
                 <h2 ref={addToRefs} className="text-xl font-bold text-pink-600">
                   User Portal
@@ -282,7 +287,7 @@ export default function UserNavigation() {
             {!isMobile && (
               <button
                 onClick={toggleSidebar}
-                className="p-2 rounded-md hover:bg-gray-100"
+                className="p-2 rounded-md  hover:bg-gray-100"
                 aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
               >
                 {expanded ? (
@@ -326,9 +331,11 @@ export default function UserNavigation() {
                 >
                   <span className="inline-block">
                     {userPic ? (
-                      <img
+                      <Image
                         src={userPic}
                         alt="Profile"
+                        width={28}
+                        height={28}
                         className="w-7 h-7 rounded-full object-cover"
                       />
                     ) : (
@@ -364,7 +371,7 @@ export default function UserNavigation() {
         </div>
       </div>
 
-      {/* Main content padding adjustment */}
+      {/* Main content */}
       <div
         className={`transition-all duration-200 ${
           !isMobile && expanded ? "md:ml-64" : "md:ml-20"

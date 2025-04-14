@@ -30,9 +30,15 @@ model User {
   experienceLevel   Int      @default(2)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  petOrders         PetOrder[] 
-   // ===== System Relationships =====
- notifications     Notification[]  // Notifications received by user
+  petOrders         PetOrder[] // History of all pet adoptions
+
+  // ===== System Relationships =====
+  notifications     Notification[]  // Notifications received by user
+  
+  // ===== Commerce Relationships =====
+  cart        Cart?          // User's active shopping cart
+  orders      Order[]        // History of all product orders placed
+  ratings     ProductRating[] // Product reviews submitted by user
 }
 
 model Caregiver {
@@ -50,6 +56,18 @@ model Caregiver {
   totalEarnings Decimal  @default(0) @db.Decimal(10, 2)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Admin {
+  id       String @id @default(uuid())  // Unique admin identifier
+  username String @unique               // Login username
+  password String                       // Hashed password
+
+  createdAt DateTime @default(now())    // When admin account was created
+
+  // Purpose: Platform administration access
+  // Relations: Standalone system access
+  // - Full access to all data tables
 }
 
 model Pet {
@@ -71,13 +89,13 @@ model Pet {
   maintenance   Int     @default(3)    // 1-5: Care difficulty (1=easy, 5=difficult)
   childFriendly Boolean  @default(true)  // Whether pet is good with children
   allergySafe   Boolean  @default(false) // Whether pet is hypoallergenic
-  
- // ===== Health Attributes =====
- neutered     Boolean  @default(false) // Whether pet is neutered/spayed
- vaccinated   Boolean  @default(false) // Whether pet is up-to-date on vaccines
- 
- // ===== Tags =====
- tags         String[] // Array of tags describing the pet (e.g., "playful", "quiet", "cat", "dog")
+
+  // ===== Health Attributes =====
+  neutered     Boolean  @default(false) // Whether pet is neutered/spayed
+  vaccinated   Boolean  @default(false) // Whether pet is up-to-date on vaccines
+
+  // ===== Tags =====
+  tags         String[] // Array of tags describing the pet (e.g., "playful", "quiet", "cat", "dog")
 
   // ===== Commerce Relationships =====
   orders PetOrder[]  // Adoption records for this pet
@@ -93,18 +111,8 @@ model PetOrder {
   pet       Pet         @relation(fields: [petId], references: [id])    // Adopted pet
   petId     String                       // Reference to adopted pet
   createdAt DateTime    @default(now())  // When adoption was initiated
-  
-  @@index([userId])  
-}
 
-
-model Admin {
-  id       String @id @default(uuid())  
-  username String @unique               
-  password String                       
-
-  createdAt DateTime @default(now())    
-
+  @@index([userId])  //optimize for user order queries
 }
 
 model Notification {
@@ -117,8 +125,126 @@ model Notification {
   user    User @relation(fields: [userId], references: [id])  // Recipient user
   userId  String                       // Reference to recipient user
 
-  createdAt DateTime @default(now())   
-  @@index([userId]) 
+  createdAt DateTime @default(now())   // When notification was generated
+  @@index([userId]) //optimize for notification
   @@index([type]) 
 
+  // Purpose: Alert users about system events
+  // Relations: Delivers updates to users
+  // Business Rules:
+  // - Location-based for community posts
+  // - Mark as read when viewed
+}
+
+model Product {
+  // ===== Product Information =====
+  id          String @id @default(uuid())  // Unique product identifier
+  name        String                       // Display name of product
+  description String                       // Detailed product description
+  price       Decimal @db.Decimal(10, 2)   // Current retail price
+  stock       Int @default(0)              // Available inventory quantity
+  image       String                       // URL to product image
+  category    String                       // Product type ("food","toy","medicine",etc)
+
+  // ===== Commerce Relationships =====
+  cartItems  CartItem[]      // Active cart references containing this product
+  orderItems OrderItem[]     // Historical order records of this product
+  ratings    ProductRating[] // User reviews for this product
+
+  // ===== Timestamps =====
+  createdAt DateTime @default(now())  // When product was added to inventory
+
+  // Purpose: Manage inventory of pet-related products
+  // Relations: Tracks product availability and purchase history
+}
+
+model Cart {
+  id        String @id @default(uuid())  // Unique cart identifier
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)  // Owner of cart
+  userId    String @unique               // Reference to owning user
+  items     CartItem[]                   // Products in cart
+  
+  createdAt DateTime @default(now())      // When cart was created
+  updatedAt DateTime @updatedAt          // When cart was last modified
+
+  // Purpose: Temporary storage for products before checkout
+  // Relations: Each user has exactly one active cart
+}
+
+model CartItem {
+  id        String @id @default(uuid())  // Unique cart item identifier
+  cart      Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)  // Parent cart
+  cartId    String                       // Reference to parent cart
+  product   Product @relation(fields: [productId], references: [id])  // Product in cart
+  productId String                       // Reference to product
+  quantity  Int                          // Number of this product in cart
+  
+  @@index([cartId])  // Optimize for cart queries
+  @@index([productId])  // Optimize for product queries
+  @@unique([cartId, productId])  // Prevent duplicate products in cart
+
+  // Purpose: Track individual products in a cart
+  // Relations: Links products to carts
+}
+
+model Order {
+  id         String @id @default(uuid())  // Unique order identifier
+  totalPrice Decimal @db.Decimal(10, 2)   // Calculated sum of all order items
+  status     OrderStatus @default(PENDING) // Current order state
+  items      OrderItem[]                  // Products included in order
+  user       User @relation(fields: [userId], references: [id])  // Ordering user
+  userId     String                       // Reference to ordering user
+  
+  // Shipping information
+  shippingName    String?
+  shippingAddress String?
+  shippingCity    String?
+  shippingState   String?
+  shippingZip     String?
+  shippingCountry String?
+
+  createdAt DateTime @default(now())      // When order was placed
+  updatedAt DateTime @updatedAt           // When order was last updated
+  @@index([userId])                      //optimize for user order queries
+  // Purpose: Record completed product transactions
+  // Relations: Each order belongs to exactly one user
+}
+
+model OrderItem {
+  id        String @id @default(uuid())  // Unique order item identifier
+  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)  // Parent order
+  orderId   String                       // Reference to parent order
+  product   Product @relation(fields: [productId], references: [id])  // Product ordered
+  productId String                       // Reference to product
+  quantity  Int                          // Number of this product ordered
+  price     Decimal @db.Decimal(10, 2)   // Price at time of purchase (may differ from current price)
+  
+  @@index([orderId])  // Optimize for order queries
+  @@index([productId])  // Optimize for product queries
+
+  // Purpose: Track individual products in an order
+  // Relations: Links products to orders
+}
+
+model ProductRating {
+  id        String @id @default(uuid())  // Unique rating identifier
+  rating    Int                          // 1-5 star rating (required)
+  comment   String?                      // Optional review text
+  user      User @relation(fields: [userId], references: [id])  // Rating user
+  userId    String                       // Reference to rating user
+  product   Product @relation(fields: [productId], references: [id])  // Rated product
+  productId String                       // Reference to rated product
+
+  createdAt DateTime @default(now())      // When rating was submitted
+
+  @@unique([userId, productId])  // One rating per user per product
+
+  // Purpose: Collect user feedback on products
+  // Relations: Connects users to products they've rated
+}
+
+enum OrderStatus {
+  PENDING    // Order is created but payment/processing not completed
+  COMPLETED  // Order has been successfully processed and fulfilled
+  CANCELLED  // Order was cancelled by user or system
 }

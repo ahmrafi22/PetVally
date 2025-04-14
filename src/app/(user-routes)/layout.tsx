@@ -30,7 +30,7 @@ export default async function UserLayout({
 
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <header className="w-full bg-white shadow-sm z-10">
+        <header className="w-full bg-gray-100 shadow-sm z-10">
           <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-center">
             <PetVallyLogo />
           </div>

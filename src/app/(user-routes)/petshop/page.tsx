@@ -132,7 +132,7 @@ export default function PetShop() {
                 {Math.round(scoredPet.compatibilityScore)}%
               </div>
             )}
-            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-pink-100 to-transparent opacity-70"></div>
+            {/* <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-pink-100 to-transparent opacity-70"></div> */}
           </div>
           <div className="p-4">
             <div className="flex justify-between items-start">
@@ -147,8 +147,8 @@ export default function PetShop() {
             {/* Tags */}
             {pet.tags && pet.tags.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
-                {pet.tags.slice(0, 3).map((tag) => (
-                  <span key={tag} className="inline-block px-2 py-1 text-xs bg-pink-100 text-pink-800 rounded-full border border-pink-200">
+                {pet.tags.slice(0, 3).map((tag,index) => (
+                  <span key={index} className="inline-block px-2 py-1 text-xs bg-pink-100 text-pink-800 rounded-full border border-pink-200">
                     {tag}
                   </span>
                 ))}
@@ -270,7 +270,7 @@ export default function PetShop() {
               <Button 
                 variant="outline" 
                 onClick={() => setSearchTerm("")}
-                className="rounded-full border-2 border-pink-300 text-pink-600 hover:bg-pink-50"
+                className="rounded-full border-2 cursor-pointer hover:bg-pink-50"
               >
                 Clear Search
               </Button>
