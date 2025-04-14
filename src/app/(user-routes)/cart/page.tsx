@@ -1,157 +1,68 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Separator } from "@/components/ui/separator"
-import { toast } from "sonner"
-import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react"
-import Link from "next/link"
-
-type CartItem = {
-  id: string
-  quantity: number
-  product: {
-    id: string
-    name: string
-    price: number
-    image: string
-    stock: number
-  }
-  totalPrice: number
-}
-
-type Cart = {
-  id: string
-  userId: string
-  items: CartItem[]
-  totalPrice: number
-}
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import { useCartStore } from "@/stores/cart-store";
 
 export default function CartPage() {
-  const router = useRouter()
-  const [cart, setCart] = useState<Cart | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [updatingItems, setUpdatingItems] = useState<Record<string, boolean>>({})
+  const router = useRouter();
+  const {
+    cart,
+    loading,
+    error,
+    fetchCart,
+    updateItemQuantity,
+    removeItem,
+  } = useCartStore();
+  
+  // Track which items are being updated
+  const [updatingItems, setUpdatingItems] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetchCart()
-  })
+    fetchCart();
+  }, [fetchCart]);
 
-  const fetchCart = async () => {
+  const handleUpdateQuantity = async (cartItemId: string, newQuantity: number) => {
     try {
-      const token = localStorage.getItem("userToken")
-      if (!token) {
-        router.push("/userlogin")
-        return
-      }
-
-      const response = await fetch("/api/users/cart", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch cart")
-      }
-
-      const data = await response.json()
-      setCart(data.cart)
-    } catch (err: any) {
-      console.error("Error fetching cart:", err)
-      setError(err.message || "An error occurred while fetching your cart")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const updateItemQuantity = async (cartItemId: string, quantity: number) => {
-    try {
-      setUpdatingItems((prev) => ({ ...prev, [cartItemId]: true }))
-
-      const token = localStorage.getItem("userToken")
-      if (!token) {
-        router.push("/userlogin")
-        return
-      }
-
-      const response = await fetch("/api/users/cart/item", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          cartItemId,
-          quantity,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to update item quantity")
-      }
-
-      // Refresh cart data
-      fetchCart()
-
-      if (quantity === 0) {
-        toast.success("Item removed from cart")
+      setUpdatingItems(prev => ({ ...prev, [cartItemId]: true }));
+      await updateItemQuantity(cartItemId, newQuantity);
+      if (newQuantity === 0) {
+        toast.success("Item removed from cart");
       }
     } catch (error: any) {
-      console.error("Error updating item quantity:", error)
-      toast.error(error.message || "Failed to update item quantity")
+      toast.error(error.message || "Failed to update quantity");
     } finally {
-      setUpdatingItems((prev) => ({ ...prev, [cartItemId]: false }))
+      setUpdatingItems(prev => ({ ...prev, [cartItemId]: false }));
     }
-  }
+  };
 
-  const removeItem = async (cartItemId: string) => {
+  const handleRemoveItem = async (cartItemId: string) => {
     try {
-      setUpdatingItems((prev) => ({ ...prev, [cartItemId]: true }))
-
-      const token = localStorage.getItem("userToken")
-      if (!token) {
-        router.push("/userlogin")
-        return
-      }
-
-      const response = await fetch(`/api/users/cart/item?id=${cartItemId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to remove item from cart")
-      }
-
-      // Refresh cart data
-      fetchCart()
-      toast.success("Item removed from cart")
+      setUpdatingItems(prev => ({ ...prev, [cartItemId]: true }));
+      await removeItem(cartItemId);
+      toast.success("Item removed from cart");
     } catch (error: any) {
-      console.error("Error removing item from cart:", error)
-      toast.error(error.message || "Failed to remove item from cart")
+      toast.error(error.message || "Failed to remove item");
     } finally {
-      setUpdatingItems((prev) => ({ ...prev, [cartItemId]: false }))
+      setUpdatingItems(prev => ({ ...prev, [cartItemId]: false }));
     }
-  }
+  };
 
   const proceedToCheckout = () => {
     if (!cart || cart.items.length === 0) {
-      toast.error("Your cart is empty")
-      return
+      toast.error("Your cart is empty");
+      return;
     }
+    router.push("/cart/checkout");
+  };
 
-    router.push("/cart/checkout")
-  }
-
-  if (loading) {
+  if (loading && !cart) {
     return (
       <div className="bg-white shadow-md rounded-lg p-6">
         <Skeleton className="h-8 w-64 mb-6" />
@@ -172,7 +83,7 @@ export default function CartPage() {
         </div>
         <Skeleton className="h-32 w-full" />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -184,11 +95,11 @@ export default function CartPage() {
         </div>
         <Button onClick={() => router.push("/store")}>Return to Store</Button>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
+    <div className="p-6">
       <h1 className="text-2xl font-bold mb-6 flex items-center">
         <ShoppingCart className="mr-2 h-6 w-6" />
         Shopping Cart
@@ -216,7 +127,7 @@ export default function CartPage() {
                     <img
                       src={item.product.image || "/placeholder.svg?height=96&width=96"}
                       alt={item.product.name}
-                      className="h-full w-full object-cover"
+                      className="h-full rounded-sm w-full object-cover"
                     />
                   </div>
                   <div className="flex-1">
@@ -229,7 +140,7 @@ export default function CartPage() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8 rounded-r-none"
-                          onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                           disabled={updatingItems[item.id] || item.quantity <= 1}
                         >
                           <Minus className="h-4 w-4" />
@@ -241,7 +152,7 @@ export default function CartPage() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8 rounded-l-none"
-                          onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                           disabled={updatingItems[item.id] || item.quantity >= item.product.stock}
                         >
                           <Plus className="h-4 w-4" />
@@ -249,12 +160,12 @@ export default function CartPage() {
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <span className="font-semibold">${item.totalPrice.toFixed(2)}</span>
+                        <span className="font-semibold">${(item.product.price * item.quantity).toFixed(2)}</span>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => handleRemoveItem(item.id)}
                           disabled={updatingItems[item.id]}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -295,7 +206,7 @@ export default function CartPage() {
               </Button>
 
               <div className="mt-4">
-                <Link href="/user/store">
+                <Link href="/store">
                   <Button variant="outline" className="w-full">
                     Continue Shopping
                   </Button>
@@ -306,5 +217,5 @@ export default function CartPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

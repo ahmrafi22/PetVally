@@ -1,8 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getAllProducts, getProductsByCategory, getFeaturedProducts } from "@/controllers/storedata"
+import { deleteProduct } from "@/controllers/admin"
 import { verifyJwtToken } from "@/lib/auth"
 
-export async function GET(request: NextRequest) {
+// Delete a product
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Get the authorization header
     const authHeader = request.headers.get("Authorization")
@@ -18,38 +19,27 @@ export async function GET(request: NextRequest) {
     // Verify the token
     const payload = await verifyJwtToken(token)
 
-    if (!payload || payload.role !== "user") {
+    if (!payload || payload.role !== "admin") {
       return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 })
     }
 
-    // Get query parameters
-    const { searchParams } = new URL(request.url)
-    const category = searchParams.get("category")
-    const featured = searchParams.get("featured")
+    // Get the product ID from the URL params
 
-    let products
+    const awaitedParams = await params
+    const id = awaitedParams.id
 
-    if (featured === "true") {
-      // Get featured products
-      products = await getFeaturedProducts(10) 
-    } else if (category) {
-      // Get products by category
-      products = await getProductsByCategory(category)
-    } else {
-      // Get all products
-      products = await getAllProducts()
-    }
+    // Delete the product
+    await deleteProduct(id)
 
-    // Return the products
+    // Return success response
     return NextResponse.json(
       {
-        message: "Products retrieved successfully",
-        products,
+        message: "Product deleted successfully",
       },
       { status: 200 },
     )
   } catch (error) {
-    console.error("Error retrieving products:", error)
+    console.error("Error deleting product:", error)
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 })
   }
 }

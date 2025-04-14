@@ -17,7 +17,7 @@ const pawPaint2 = Lobster({
 const PetVallyLogo = () => {
   return (
     <div className="flex items-center gap-2 justify-center">
-       <PawPrint  className="w-8 h-8  text-pink-600 font-bold" />
+       <PawPrint  className="w-10 h-9.5 text-pink-600 fill-current font-bold" />
       <h1
         className={`text-3xl md:text-4xl font-bold text-black ${pawPaint.className} flex items-center`}
       >

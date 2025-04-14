@@ -12,41 +12,7 @@ import { toast } from "sonner"
 import { ArrowLeft, CreditCard, CheckCircle, ShoppingBag } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
-
-type ShippingInfo = {
-  name: string
-  address: string
-  city: string
-  state: string
-  zip: string
-  country: string
-}
-
-type PaymentInfo = {
-  cardNumber: string
-  cardholderName: string
-  expiryDate: string
-  cvv: string
-}
-
-type CartItem = {
-  id: string
-  quantity: number
-  product: {
-    id: string
-    name: string
-    price: number
-    image: string
-  }
-  totalPrice: number
-}
-
-type Cart = {
-  id: string
-  userId: string
-  items: CartItem[]
-  totalPrice: number
-}
+import { User,PaymentInfo,ShippingInfo,Cart } from "@/types"
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -56,6 +22,9 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [orderId, setOrderId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [userData, setUserData] = useState<User | null>(null)
+  const [userDataLoading, setUserDataLoading] = useState(false)
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     name: "",
@@ -72,6 +41,59 @@ export default function CheckoutPage() {
     expiryDate: "",
     cvv: "",
   })
+
+  // Fetch user ID from localStorage
+  useEffect(() => {
+    const id = localStorage.getItem("userId");
+    if (id) {
+      setUserId(id);
+    }
+  }, []);
+
+  // Fetch user data when userId is available
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!userId) return;
+      
+      setUserDataLoading(true);
+      try {
+        const token = localStorage.getItem("userToken");
+        if (!token) {
+          return;
+        }
+
+        const response = await fetch(`/api/users/userdata?id=${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const data = await response.json();
+        setUserData(data.user);
+        
+        // Pre-fill shipping information with user data
+        setShippingInfo(prev => ({
+          ...prev,
+          name: data.user.name || "",
+          address: data.user.area || "",
+          city: data.user.city || "",
+          country: data.user.country || "",
+          // State and zip remain empty as specified
+        }));
+        
+      } catch (err: any) {
+        console.error("Error fetching user data:", err);
+      } finally {
+        setUserDataLoading(false);
+      }
+    }
+
+    fetchUserData();
+  }, [userId]);
 
   // Fetch cart data on component mount
   useEffect(() => {
@@ -207,15 +229,22 @@ export default function CheckoutPage() {
 
   if (loading) {
     return (
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <Skeleton className="h-8 w-64 mb-6" />
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <div className="grid grid-cols-2 gap-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-8 my-10">
+        <Skeleton className="h-10 w-72 mb-8" />
+        <div className="space-y-6">
+          <Skeleton className="h-32 w-full rounded-md mb-8" />
+          <div className="space-y-5">
+            <Skeleton className="h-12 w-full rounded-md" />
+            <Skeleton className="h-12 w-full rounded-md" />
+            <Skeleton className="h-12 w-full rounded-md" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Skeleton className="h-12 w-full rounded-md" />
+              <Skeleton className="h-12 w-full rounded-md" />
+            </div>
+          </div>
+          <div className="flex justify-between mt-8 pt-4">
+            <Skeleton className="h-12 w-36 rounded-md" />
+            <Skeleton className="h-12 w-36 rounded-md" />
           </div>
         </div>
       </div>
@@ -224,19 +253,19 @@ export default function CheckoutPage() {
 
   if (error) {
     return (
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-4">Checkout Error</h1>
-        <div className="bg-red-50 text-red-700 p-4 rounded-md mb-4">
-          <p>{error}</p>
+      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-8 my-10">
+        <h1 className="text-2xl font-bold mb-6">Checkout Error</h1>
+        <div className="bg-red-50 text-red-700 p-6 rounded-lg mb-6">
+          <p className="text-lg">{error}</p>
         </div>
-        <Button onClick={() => router.push("/user/cart")}>Return to Cart</Button>
+        <Button className="mt-4 px-6 py-2.5" onClick={() => router.push("/user/cart")}>Return to Cart</Button>
       </div>
     )
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
-      <h1 className="text-2xl font-bold mb-6">
+    <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-8 my-10">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">
         {step === "shipping" && "Shipping Information"}
         {step === "payment" && "Payment Information"}
         {step === "confirmation" && "Order Confirmation"}
@@ -245,105 +274,157 @@ export default function CheckoutPage() {
       {step === "shipping" && (
         <>
           {/* Order Summary */}
-          <div className="bg-gray-50 p-4 rounded-lg mb-6">
-            <h2 className="font-semibold text-lg mb-2">Order Summary</h2>
-            <div className="flex justify-between mb-2">
+          <div className="bg-gray-50 p-6 rounded-lg mb-8 shadow-sm">
+            <h2 className="font-semibold text-xl mb-4 text-gray-700">Order Summary</h2>
+            <div className="flex justify-between items-center mb-3 text-gray-700">
               <span>Subtotal ({cart?.items.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-              <span>${cart?.totalPrice.toFixed(2)}</span>
+              <span className="font-medium">${cart?.totalPrice.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between mb-2">
+            <div className="flex justify-between items-center mb-3 text-gray-700">
               <span>Shipping</span>
-              <span>Free</span>
+              <span className="text-green-600 font-medium">Free</span>
             </div>
-            <Separator className="my-2" />
-            <div className="flex justify-between font-bold">
+            <Separator className="my-4" />
+            <div className="flex justify-between items-center font-bold text-gray-800 text-lg mt-3">
               <span>Total</span>
               <span>${cart?.totalPrice.toFixed(2)}</span>
             </div>
           </div>
 
-          <form onSubmit={handleShippingSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <Label htmlFor="name">Full Name</Label>
-                <Input id="name" name="name" value={shippingInfo.name} onChange={handleShippingChange} required />
+          {userDataLoading ? (
+            <div className="space-y-6 my-8">
+              <Skeleton className="h-12 w-full rounded-md" />
+              <Skeleton className="h-12 w-full rounded-md" />
+              <Skeleton className="h-12 w-full rounded-md" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Skeleton className="h-12 w-full rounded-md" />
+                <Skeleton className="h-12 w-full rounded-md" />
               </div>
-
-              <div>
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  name="address"
-                  value={shippingInfo.address}
-                  onChange={handleShippingChange}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            </div>
+          ) : (
+            <form onSubmit={handleShippingSubmit} className="space-y-6 mt-8">
+              <div className="grid grid-cols-1 gap-6">
                 <div>
-                  <Label htmlFor="city">City</Label>
-                  <Input id="city" name="city" value={shippingInfo.city} onChange={handleShippingChange} required />
-                </div>
-                <div>
-                  <Label htmlFor="state">State/Province</Label>
-                  <Input id="state" name="state" value={shippingInfo.state} onChange={handleShippingChange} required />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="zip">Postal/ZIP Code</Label>
-                  <Input id="zip" name="zip" value={shippingInfo.zip} onChange={handleShippingChange} required />
-                </div>
-                <div>
-                  <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    name="country"
-                    value={shippingInfo.country}
-                    onChange={handleShippingChange}
-                    required
+                  <Label htmlFor="name" className="text-gray-700 font-medium mb-2 block">Full Name</Label>
+                  <Input 
+                    id="name" 
+                    name="name" 
+                    value={shippingInfo.name} 
+                    onChange={handleShippingChange} 
+                    required 
+                    className="h-12 px-4"
                   />
                 </div>
-              </div>
-            </div>
 
-            <div className="flex justify-between mt-6">
-              <Button type="button" variant="outline" onClick={() => router.push("/cart")}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Cart
-              </Button>
-              <Button type="submit">Continue to Payment</Button>
-            </div>
-          </form>
+                <div>
+                  <Label htmlFor="address" className="text-gray-700 font-medium mb-2 block">Address</Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    value={shippingInfo.address}
+                    onChange={handleShippingChange}
+                    required
+                    className="h-12 px-4"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="city" className="text-gray-700 font-medium mb-2 block">City</Label>
+                    <Input 
+                      id="city" 
+                      name="city" 
+                      value={shippingInfo.city} 
+                      onChange={handleShippingChange} 
+                      required 
+                      className="h-12 px-4"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state" className="text-gray-700 font-medium mb-2 block">State/Province</Label>
+                    <Input 
+                      id="state" 
+                      name="state" 
+                      value={shippingInfo.state} 
+                      onChange={handleShippingChange} 
+                      required 
+                      className="h-12 px-4"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="zip" className="text-gray-700 font-medium mb-2 block">Postal/ZIP Code</Label>
+                    <Input 
+                      id="zip" 
+                      name="zip" 
+                      value={shippingInfo.zip} 
+                      onChange={handleShippingChange} 
+                      required 
+                      className="h-12 px-4"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="country" className="text-gray-700 font-medium mb-2 block">Country</Label>
+                    <Input
+                      id="country"
+                      name="country"
+                      value={shippingInfo.country}
+                      onChange={handleShippingChange}
+                      required
+                      className="h-12 px-4"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center mt-8 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => router.push("/cart")}
+                  className="h-12 px-6"
+                >
+                  <ArrowLeft className="mr-3 h-5 w-5" />
+                  Back to Cart
+                </Button>
+                <Button 
+                  type="submit"
+                  className="h-12 px-8 bg-blue-600 hover:bg-blue-700"
+                >
+                  Continue to Payment
+                </Button>
+              </div>
+            </form>
+          )}
         </>
       )}
 
       {step === "payment" && (
         <>
           {/* Order Summary */}
-          <div className="bg-gray-50 p-4 rounded-lg mb-6">
-            <h2 className="font-semibold text-lg mb-2">Order Summary</h2>
-            <div className="flex justify-between mb-2">
+          <div className="bg-gray-50 p-6 rounded-lg mb-8 shadow-sm">
+            <h2 className="font-semibold text-xl mb-4 text-gray-700">Order Summary</h2>
+            <div className="flex justify-between items-center mb-3 text-gray-700">
               <span>Subtotal ({cart?.items.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-              <span>${cart?.totalPrice.toFixed(2)}</span>
+              <span className="font-medium">${cart?.totalPrice.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between mb-2">
+            <div className="flex justify-between items-center mb-3 text-gray-700">
               <span>Shipping</span>
-              <span>Free</span>
+              <span className="text-green-600 font-medium">Free</span>
             </div>
-            <Separator className="my-2" />
-            <div className="flex justify-between font-bold">
+            <Separator className="my-4" />
+            <div className="flex justify-between items-center font-bold text-gray-800 text-lg mt-3">
               <span>Total</span>
               <span>${cart?.totalPrice.toFixed(2)}</span>
             </div>
           </div>
 
-          <form onSubmit={handlePaymentSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
+          <form onSubmit={handlePaymentSubmit} className="space-y-6 mt-8">
+            <div className="grid grid-cols-1 gap-6">
               <div>
-                <Label htmlFor="cardNumber">Card Number</Label>
+                <Label htmlFor="cardNumber" className="text-gray-700 font-medium mb-2 block">Card Number</Label>
                 <Input
                   id="cardNumber"
                   name="cardNumber"
@@ -355,24 +436,26 @@ export default function CheckoutPage() {
                   }}
                   maxLength={19}
                   required
+                  className="h-12 px-4"
                 />
-                <p className="text-xs text-gray-500 mt-1">For testing, use any 16-digit number</p>
+                <p className="text-xs text-gray-500 mt-2 ml-1">For testing, use any 16-digit number</p>
               </div>
 
               <div>
-                <Label htmlFor="cardholderName">Cardholder Name</Label>
+                <Label htmlFor="cardholderName" className="text-gray-700 font-medium mb-2 block">Cardholder Name</Label>
                 <Input
                   id="cardholderName"
                   name="cardholderName"
-                  value={paymentInfo.cardholderName}
+                  value={paymentInfo.cardholderName || shippingInfo.name} // Default to shipping name if not set
                   onChange={handlePaymentChange}
                   required
+                  className="h-12 px-4"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="expiryDate">Expiry Date (MM/YY)</Label>
+                  <Label htmlFor="expiryDate" className="text-gray-700 font-medium mb-2 block">Expiry Date (MM/YY)</Label>
                   <Input
                     id="expiryDate"
                     name="expiryDate"
@@ -384,11 +467,12 @@ export default function CheckoutPage() {
                     }}
                     maxLength={5}
                     required
+                    className="h-12 px-4"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Any future date</p>
+                  <p className="text-xs text-gray-500 mt-2 ml-1">Any future date</p>
                 </div>
                 <div>
-                  <Label htmlFor="cvv">CVV</Label>
+                  <Label htmlFor="cvv" className="text-gray-700 font-medium mb-2 block">CVV</Label>
                   <Input
                     id="cvv"
                     name="cvv"
@@ -402,38 +486,50 @@ export default function CheckoutPage() {
                     }}
                     maxLength={4}
                     required
+                    className="h-12 px-4"
                   />
-                  <p className="text-xs text-gray-500 mt-1">3 or 4 digits</p>
+                  <p className="text-xs text-gray-500 mt-2 ml-1">3 or 4 digits</p>
                 </div>
               </div>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-8" />
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Shipping Address</h3>
-              <p>{shippingInfo.name}</p>
-              <p>{shippingInfo.address}</p>
-              <p>
-                {shippingInfo.city}, {shippingInfo.state} {shippingInfo.zip}
-              </p>
-              <p>{shippingInfo.country}</p>
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
+              <h3 className="font-medium text-lg mb-4 text-gray-700">Shipping Address</h3>
+              <div className="space-y-2 text-gray-700">
+                <p className="font-medium">{shippingInfo.name}</p>
+                <p>{shippingInfo.address}</p>
+                <p>
+                  {shippingInfo.city}, {shippingInfo.state} {shippingInfo.zip}
+                </p>
+                <p>{shippingInfo.country}</p>
+              </div>
             </div>
 
-            <div className="flex justify-between mt-6">
-              <Button type="button" variant="outline" onClick={() => setStep("shipping")}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
+            <div className="flex justify-between items-center mt-8 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setStep("shipping")}
+                className="h-12 px-6"
+              >
+                <ArrowLeft className="mr-3 h-5 w-5" />
                 Back to Shipping
               </Button>
-              <Button type="submit" disabled={processing} className="bg-green-600 hover:bg-green-700">
+              <Button 
+                type="submit" 
+                disabled={processing} 
+                className="h-12 px-8 bg-green-600 hover:bg-green-700"
+              >
                 {processing ? (
                   <>
-                    <span className="animate-spin mr-2">⟳</span>
+                    <span className="animate-spin mr-3">⟳</span>
                     Processing...
                   </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    <CreditCard className="mr-3 h-5 w-5" />
                     Place Order
                   </>
                 )}
@@ -444,33 +540,40 @@ export default function CheckoutPage() {
       )}
 
       {step === "confirmation" && (
-        <div className="text-center py-8">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+        <div className="text-center py-12">
+          <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+            <CheckCircle className="h-10 w-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-green-600 mb-2">Order Confirmed!</h2>
-          <p className="text-gray-600 mb-2">Thank you for your purchase. We&apos;ll send you a confirmation email soon.</p>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-3xl font-bold text-green-600 mb-4">Order Confirmed!</h2>
+          <p className="text-gray-600 text-lg mb-3">Thank you for your purchase. We&apos;ll send you a confirmation email soon.</p>
+          <p className="text-gray-600 mb-8 text-lg">
             Your order number is: <span className="font-semibold">{orderId}</span>
           </p>
 
-          <div className="bg-gray-50 p-4 rounded-lg max-w-md mx-auto mb-8 text-left">
-            <h3 className="font-medium mb-2">Shipping Address</h3>
-            <p>{shippingInfo.name}</p>
-            <p>{shippingInfo.address}</p>
-            <p>
-              {shippingInfo.city}, {shippingInfo.state} {shippingInfo.zip}
-            </p>
-            <p>{shippingInfo.country}</p>
+          <div className="bg-gray-50 p-6 rounded-lg max-w-md mx-auto mb-10 text-left shadow-sm">
+            <h3 className="font-medium text-lg mb-4 text-gray-700">Shipping Address</h3>
+            <div className="space-y-2 text-gray-700">
+              <p className="font-medium">{shippingInfo.name}</p>
+              <p>{shippingInfo.address}</p>
+              <p>
+                {shippingInfo.city}, {shippingInfo.state} {shippingInfo.zip}
+              </p>
+              <p>{shippingInfo.country}</p>
+            </div>
           </div>
 
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center space-x-6">
             <Link href="/store">
-              <Button variant="outline">Continue Shopping</Button>
+              <Button 
+                variant="outline"
+                className="h-12 px-6 text-lg"
+              >
+                Continue Shopping
+              </Button>
             </Link>
             <Link href="/myorders">
-              <Button>
-                <ShoppingBag className="mr-2 h-4 w-4" />
+              <Button className="h-12 px-6 text-lg bg-blue-600 hover:bg-blue-700">
+                <ShoppingBag className="mr-3 h-5 w-5" />
                 View My Orders
               </Button>
             </Link>

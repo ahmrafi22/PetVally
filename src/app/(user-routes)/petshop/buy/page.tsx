@@ -20,7 +20,7 @@ import {
   MapPin,
   Home
 } from "lucide-react";
-import type { Pet, PaymentFormData } from "@/types";
+import type {User, Pet, PaymentFormData } from "@/types";
 
 export default function BuyPet() {
   const router = useRouter();
@@ -33,6 +33,9 @@ export default function BuyPet() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [adoptionComplete, setAdoptionComplete] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
+  const [userDataLoading, setUserDataLoading] = useState(false);
 
   const [formData, setFormData] = useState<PaymentFormData>({
     cardNumber: "",
@@ -44,6 +47,59 @@ export default function BuyPet() {
     country: "",
     zipCode: "",
   });
+
+  // Fetch user ID from localStorage
+  useEffect(() => {
+    const id = localStorage.getItem("userId");
+    if (id) {
+      setUserId(id);
+    }
+  }, []);
+
+  // Fetch user data when userId is available
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!userId) return;
+      
+      setUserDataLoading(true);
+      try {
+        const token = localStorage.getItem("userToken");
+        if (!token) {
+          return;
+        }
+
+        const response = await fetch(`/api/users/userdata?id=${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const data = await response.json();
+        setUserData(data.user);
+        
+        // Pre-fill form with user data
+        setFormData(prev => ({
+          ...prev,
+          cardholderName: data.user.name || "",
+          address: data.user.area || "",
+          city: data.user.city || "",
+          country: data.user.country || "",
+          // Zip code remains empty
+        }));
+        
+      } catch (err: any) {
+        console.error("Error fetching user data:", err);
+      } finally {
+        setUserDataLoading(false);
+      }
+    }
+
+    fetchUserData();
+  }, [userId]);
 
   useEffect(() => {
     if (!petId) {
@@ -95,6 +151,35 @@ export default function BuyPet() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Format card number with spaces
+  const formatCardNumber = (value: string) => {
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+    const matches = v.match(/\d{4,16}/g);
+    const match = (matches && matches[0]) || "";
+    const parts = [];
+
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+
+    if (parts.length) {
+      return parts.join(" ");
+    } else {
+      return value;
+    }
+  };
+
+  // Format expiry date
+  const formatExpiryDate = (value: string) => {
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+
+    if (v.length >= 2) {
+      return `${v.substring(0, 2)}/${v.substring(2, 4)}`;
+    }
+
+    return v;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -253,129 +338,153 @@ export default function BuyPet() {
                 <CreditCard className="mr-2 h-5 w-5 text-pink-500" /> Payment Information
               </h2>
               
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                  <Label className="mb-2 text-purple-700" htmlFor="cardNumber">Card Number</Label>
-                  <Input
-                    id="cardNumber"
-                    name="cardNumber"
-                    placeholder="1234 5678 9012 3456"
-                    value={formData.cardNumber}
-                    onChange={handleChange}
-                    className="border-pink-200 focus:border-purple-400 rounded-xl"
-                    required
-                  />
+              {userDataLoading ? (
+                <div className="space-y-4">
+                  <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100 h-16 animate-pulse"></div>
+                  <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100 h-16 animate-pulse"></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100 h-16 animate-pulse"></div>
+                    <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100 h-16 animate-pulse"></div>
+                  </div>
                 </div>
-
-                <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                  <Label className="mb-2 text-purple-700" htmlFor="cardholderName">Cardholder Name</Label>
-                  <Input
-                    id="cardholderName"
-                    name="cardholderName"
-                    placeholder="John Doe"
-                    value={formData.cardholderName}
-                    onChange={handleChange}
-                    className="border-pink-200 focus:border-purple-400 rounded-xl"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <Label className="mb-2 text-purple-700" htmlFor="expiryDate">Expiry Date</Label>
+                    <Label className="mb-2 text-purple-700" htmlFor="cardNumber">Card Number</Label>
                     <Input
-                      id="expiryDate"
-                      name="expiryDate"
-                      placeholder="MM/YY"
-                      value={formData.expiryDate}
+                      id="cardNumber"
+                      name="cardNumber"
+                      placeholder="1234 5678 9012 3456"
+                      value={formData.cardNumber}
+                      onChange={(e) => {
+                        const formattedValue = formatCardNumber(e.target.value);
+                        setFormData((prev) => ({ ...prev, cardNumber: formattedValue }));
+                      }}
+                      maxLength={19}
+                      className="border-pink-200 focus:border-purple-400 rounded-xl"
+                      required
+                    />
+                  </div>
+
+                  <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
+                    <Label className="mb-2 text-purple-700" htmlFor="cardholderName">Cardholder Name</Label>
+                    <Input
+                      id="cardholderName"
+                      name="cardholderName"
+                      placeholder="John Doe"
+                      value={formData.cardholderName}
                       onChange={handleChange}
                       className="border-pink-200 focus:border-purple-400 rounded-xl"
                       required
                     />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
+                      <Label className="mb-2 text-purple-700" htmlFor="expiryDate">Expiry Date</Label>
+                      <Input
+                        id="expiryDate"
+                        name="expiryDate"
+                        placeholder="MM/YY"
+                        value={formData.expiryDate}
+                        onChange={(e) => {
+                          const formattedValue = formatExpiryDate(e.target.value);
+                          setFormData((prev) => ({ ...prev, expiryDate: formattedValue }));
+                        }}
+                        maxLength={5}
+                        className="border-pink-200 focus:border-purple-400 rounded-xl"
+                        required
+                      />
+                    </div>
+                    <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
+                      <Label className="mb-2 text-purple-700" htmlFor="cvv">CVV</Label>
+                      <Input
+                        id="cvv"
+                        name="cvv"
+                        placeholder="123"
+                        value={formData.cvv}
+                        onChange={(e) => {
+                          // Only allow numbers and limit to 3-4 digits
+                          const value = e.target.value.replace(/\D/g, "").substring(0, 4);
+                          setFormData((prev) => ({ ...prev, cvv: value }));
+                        }}
+                        maxLength={4}
+                        className="border-pink-200 focus:border-purple-400 rounded-xl"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <h3 className="text-lg font-medium mt-6 mb-2 text-purple-700 flex items-center">
+                    <MapPin className="mr-2 h-5 w-5 text-pink-500" /> Billing Address
+                  </h3>
+
                   <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <Label className="mb-2 text-purple-700" htmlFor="cvv">CVV</Label>
+                    <Label className="mb-2 text-purple-700" htmlFor="address">Address</Label>
                     <Input
-                      id="cvv"
-                      name="cvv"
-                      placeholder="123"
-                      value={formData.cvv}
+                      id="address"
+                      name="address"
+                      placeholder="123 Main St"
+                      value={formData.address}
                       onChange={handleChange}
                       className="border-pink-200 focus:border-purple-400 rounded-xl"
                       required
                     />
                   </div>
-                </div>
 
-                <h3 className="text-lg font-medium mt-6 mb-2 text-purple-700 flex items-center">
-                  <MapPin className="mr-2 h-5 w-5 text-pink-500" /> Billing Address
-                </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
+                      <Label className="mb-2 text-purple-700" htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        name="city"
+                        placeholder="Dhaka"
+                        value={formData.city}
+                        onChange={handleChange}
+                        className="border-pink-200 focus:border-purple-400 rounded-xl"
+                        required
+                      />
+                    </div>
+                    <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
+                      <Label className="mb-2 text-purple-700" htmlFor="zipCode">Zip Code</Label>
+                      <Input
+                        id="zipCode"
+                        name="zipCode"
+                        placeholder="12000"
+                        value={formData.zipCode}
+                        onChange={handleChange}
+                        className="border-pink-200 focus:border-purple-400 rounded-xl"
+                        required
+                      />
+                    </div>
+                  </div>
 
-                <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                  <Label className="mb-2 text-purple-700" htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    placeholder="123 Main St"
-                    value={formData.address}
-                    onChange={handleChange}
-                    className="border-pink-200 focus:border-purple-400 rounded-xl"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <Label className="mb-2 text-purple-700" htmlFor="city">City</Label>
+                    <Label className="mb-2 text-purple-700" htmlFor="country">Country</Label>
                     <Input
-                      id="city"
-                      name="city"
-                      placeholder="Dhaka"
-                      value={formData.city}
+                      id="country"
+                      name="country"
+                      placeholder="Bangladesh"
+                      value={formData.country}
                       onChange={handleChange}
                       className="border-pink-200 focus:border-purple-400 rounded-xl"
                       required
                     />
                   </div>
-                  <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <Label className="mb-2 text-purple-700" htmlFor="zipCode">Zip Code</Label>
-                    <Input
-                      id="zipCode"
-                      name="zipCode"
-                      placeholder="12000"
-                      value={formData.zipCode}
-                      onChange={handleChange}
-                      className="border-pink-200 focus:border-purple-400 rounded-xl"
-                      required
-                    />
+
+                  <div className="pt-3">
+                    <Button
+                      type="submit"
+                      className="w-full py-6 text-lg rounded-full transition-all duration-300 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-md hover:shadow-lg"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting
+                        ? "Processing..."
+                        : `Complete Adoption - $${(pet ? pet.price + 25 : 0).toFixed(2)}`}
+                    </Button>
                   </div>
-                </div>
-
-                <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                  <Label className="mb-2 text-purple-700" htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    name="country"
-                    placeholder="Bangladesh"
-                    value={formData.country}
-                    onChange={handleChange}
-                    className="border-pink-200 focus:border-purple-400 rounded-xl"
-                    required
-                  />
-                </div>
-
-                <div className="pt-3">
-                  <Button
-                    type="submit"
-                    className="w-full py-6 text-lg rounded-full transition-all duration-300 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-md hover:shadow-lg"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting
-                      ? "Processing..."
-                      : `Complete Adoption - $${(pet ? pet.price + 25 : 0).toFixed(2)}`}
-                  </Button>
-                </div>
-              </form>
+                </form>
+              )}
             </div>
           </div>
         </div>

@@ -48,14 +48,7 @@ type Order = {
   shippingCountry: string
 }
 
-type ProductRating = {
-  id: string
-  rating: number
-  comment: string | null
-  userId: string
-  productId: string
-  createdAt: string
-}
+import { ProductRating} from "@/types"
 
 export default function MyOrdersPage() {
   const router = useRouter()

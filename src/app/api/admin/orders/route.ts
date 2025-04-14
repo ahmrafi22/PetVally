@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getAllProducts, getProductsByCategory, getFeaturedProducts } from "@/controllers/storedata"
+import { getAllOrders } from "@/controllers/admin"
 import { verifyJwtToken } from "@/lib/auth"
 
+// Get all orders
 export async function GET(request: NextRequest) {
   try {
     // Get the authorization header
@@ -18,38 +19,23 @@ export async function GET(request: NextRequest) {
     // Verify the token
     const payload = await verifyJwtToken(token)
 
-    if (!payload || payload.role !== "user") {
+    if (!payload || payload.role !== "admin") {
       return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 })
     }
 
-    // Get query parameters
-    const { searchParams } = new URL(request.url)
-    const category = searchParams.get("category")
-    const featured = searchParams.get("featured")
+    // Get all orders
+    const orders = await getAllOrders()
 
-    let products
-
-    if (featured === "true") {
-      // Get featured products
-      products = await getFeaturedProducts(10) 
-    } else if (category) {
-      // Get products by category
-      products = await getProductsByCategory(category)
-    } else {
-      // Get all products
-      products = await getAllProducts()
-    }
-
-    // Return the products
+    // Return the orders
     return NextResponse.json(
       {
-        message: "Products retrieved successfully",
-        products,
+        message: "Orders retrieved successfully",
+        orders,
       },
       { status: 200 },
     )
   } catch (error) {
-    console.error("Error retrieving products:", error)
+    console.error("Error retrieving orders:", error)
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 })
   }
 }

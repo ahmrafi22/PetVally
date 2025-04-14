@@ -2,8 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { compare } from "bcrypt"
 import { signJwtToken } from "@/lib/auth"
 import { uploadImage, deleteImage } from "@/lib/utils/cloudinary"
-// Import the notification service at the top to avoid circular dependencies
-import { createNotificationForAllUsers } from "@/controllers/notifications"
+import { createNotificationForAllUsers, createNotification } from "@/controllers/notifications"
 
 // Verify admin credentials
 export async function verifyAdminCredentials(username: string, password: string) {
@@ -65,11 +64,32 @@ export async function getDashboardStats() {
     // Get total pet orders count
     const petOrdersCount = await prisma.petOrder.count()
 
+    // Get total products count
+    const totalProducts = await prisma.product.count()
+
+    // Get total orders count
+    const totalOrders = await prisma.order.count()
+
+    // Get total earnings
+    const orders = await prisma.order.findMany({
+      where: {
+        status: "COMPLETED",
+      },
+      select: {
+        totalPrice: true,
+      },
+    })
+
+    const totalEarnings = orders.reduce((sum, order) => sum + Number(order.totalPrice), 0)
+
     return {
       userCount,
       availablePetsCount,
       caregiverCount,
       petOrdersCount,
+      totalProducts,
+      totalOrders,
+      totalEarnings,
     }
   } catch (error) {
     console.error("Error getting dashboard stats:", error)
@@ -109,7 +129,7 @@ export async function getAllPets(onlyAvailable = false) {
       ? {
           isAvailable: true,
           orders: {
-            none: {}, 
+            none: {}, // No orders means the pet hasn't been adopted
           },
         }
       : {}
@@ -169,6 +189,7 @@ export async function createPet(data: any) {
 
     // Create notifications for all users
     try {
+      // Import the function here to avoid circular dependencies
       await createNotificationForAllUsers(
         "NEW_PET",
         `A new pet named ${pet.name} (${pet.breed}) is now available for adoption!`,
@@ -223,6 +244,214 @@ export async function deletePet(id: string) {
     return true
   } catch (error) {
     console.error("Error deleting pet:", error)
+    throw error
+  }
+}
+
+// Get all products
+export async function getAllProducts() {
+  try {
+    const products = await prisma.product.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    // Convert Decimal to number for JSON serialization
+    return products.map((product) => ({
+      ...product,
+      price: Number(product.price),
+    }))
+  } catch (error) {
+    console.error("Error getting all products:", error)
+    throw error
+  }
+}
+
+// Create a new product
+export async function createProduct(data: any) {
+  try {
+    // Upload image to Cloudinary
+    const uploadResponse = await uploadImage(data.imageBase64, "products")
+
+    // Create product in database
+    const product = await prisma.product.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        stock: data.stock,
+        image: uploadResponse.secure_url,
+        category: data.category,
+      },
+    })
+
+    // Convert Decimal to number for JSON serialization
+    return {
+      ...product,
+      price: Number(product.price),
+    }
+  } catch (error) {
+    console.error("Error creating product:", error)
+    throw error
+  }
+}
+
+// Delete a product
+export async function deleteProduct(id: string) {
+  try {
+    // Get the product to get the image URL
+    const product = await prisma.product.findUnique({
+      where: { id },
+    })
+
+    if (!product) {
+      throw new Error("Product not found")
+    }
+
+    // Check if product has order items
+    const orderItems = await prisma.orderItem.findMany({
+      where: { productId: id },
+    })
+
+    if (orderItems.length > 0) {
+      throw new Error("Cannot delete product with existing orders")
+    }
+
+    // Delete the image from Cloudinary
+    if (product.image) {
+      await deleteImage(product.image)
+    }
+
+    // Delete cart items with this product
+    await prisma.cartItem.deleteMany({
+      where: { productId: id },
+    })
+
+    // Delete product ratings
+    await prisma.productRating.deleteMany({
+      where: { productId: id },
+    })
+
+    // Delete the product from the database
+    await prisma.product.delete({
+      where: { id },
+    })
+
+    return true
+  } catch (error) {
+    console.error("Error deleting product:", error)
+    throw error
+  }
+}
+
+// Get all orders with user and product details
+export async function getAllOrders() {
+  try {
+    const orders = await prisma.order.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    // Convert Decimal to number for JSON serialization
+    return orders.map((order) => ({
+      ...order,
+      totalPrice: Number(order.totalPrice),
+      items: order.items.map((item) => ({
+        ...item,
+        price: Number(item.price),
+      })),
+    }))
+  } catch (error) {
+    console.error("Error getting all orders:", error)
+    throw error
+  }
+}
+
+// Update order status
+export async function updateOrderStatus(id: string, status: "COMPLETED" | "CANCELLED") {
+  try {
+    const order = await prisma.order.update({
+      where: { id },
+      data: { status },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    })
+
+    // If order is cancelled, restore product stock
+    if (status === "CANCELLED") {
+      for (const item of order.items) {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        })
+      }
+    }
+
+    // Create notification for the user
+    try {
+      await createNotification(
+        order.userId,
+        status === "COMPLETED" ? "ORDER_COMPLETED" : "ORDER_CANCELLED",
+        `Your order #${order.id.substring(0, 8)} has been ${status === "COMPLETED" ? "approved" : "cancelled"}.`,
+      )
+    } catch (notificationError) {
+      console.error("Error creating notification:", notificationError)
+      // Don't throw the error, as we still want to return the order
+    }
+
+    // Convert Decimal to number for JSON serialization
+    return {
+      ...order,
+      totalPrice: Number(order.totalPrice),
+      items: order.items.map((item) => ({
+        ...item,
+        price: Number(item.price),
+        product: {
+          ...item.product,
+          price: Number(item.product.price),
+        },
+      })),
+    }
+  } catch (error) {
+    console.error("Error updating order status:", error)
     throw error
   }
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
-import { LayoutDashboard, PawPrint, Users, Settings, LogOut, Menu, X, ShoppingCartIcon } from "lucide-react"
+import { LayoutDashboard, PawPrint,  LogOut, Menu, X, ShoppingCartIcon, Package, ShoppingCart } from "lucide-react"
 
 export default function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -45,7 +45,8 @@ export default function AdminSidebar() {
   const navItems = [
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, href: "/admin/dashboard" },
     { name: "Pet Management", icon: <PawPrint size={20} />, href: "/admin/petadd" },
-    { name: "Shop", icon: <ShoppingCartIcon size={20} />, href: "/admin/shop" },
+    { name: "Product Management", icon: <Package size={20} />, href: "/admin/productadd" },
+    { name: "Order Management", icon: <ShoppingCart size={20} />, href: "/admin/orderconfirm" }
 
   ]
 
@@ -53,7 +54,7 @@ export default function AdminSidebar() {
     <>
       {/* Mobile menu button */}
       <button
-        className="md:hidden fixed top-4 left-4 z-30 bg-purple-600 text-white p-2 rounded-md"
+        className="md:hidden fixed top-4 left-4 z-30  text-gray-500 p-2 rounded-md"
         onClick={toggleMobileMenu}
         aria-label="Toggle menu"
       >

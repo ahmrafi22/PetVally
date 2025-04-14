@@ -3,13 +3,19 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Camera, Edit, Settings } from "lucide-react";
+import { 
+  Calendar, Camera, Edit, Settings, ShoppingBag, 
+  MessageSquare, Star, Clock, PawPrint, MapPin, Heart, 
+  Award
+} from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import ProfileUpdateDialog from "../../_components/ProfileUpdateDialog";
 import PreferencesUpdateDialog from "../../_components/PreferencesUpdateDialog";
 import ImageUploadDialog from "../../_components/image-upload-dialog";
+import Link from "next/link";
 import type { User } from "@/types";
+import ExploreButton from "../_components/button";
 
-// Client component to fetch user data from API
 export default function UserProfile() {
   const params = useParams();
   const id = params.id as string;
@@ -63,11 +69,7 @@ export default function UserProfile() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   if (error) {
@@ -100,13 +102,13 @@ export default function UserProfile() {
       case 1:
         return "Beginner";
       case 2:
-        return "Intermediate";
+        return "Novice";
       case 3:
-        return "Advanced";
+        return "Intermediate";
       case 4:
-        return "Expert";
+        return "Advanced";
       case 5:
-        return "Professional";
+        return "Expert";
       default:
         return "Intermediate";
     }
@@ -114,194 +116,281 @@ export default function UserProfile() {
 
   return (
     <>
-      <div className="bg-white shadow sm:rounded-lg overflow-hidden">
-        {/* Profile header with image */}
-        <div className="relative bg-blue-600 h-32 sm:h-48">
-          <div className="absolute -bottom-16 left-4 sm:left-8">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-white">
-                {user.image ? (
-                  <img
-                    src={user.image || "/placeholder.svg"}
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <Camera size={40} className="text-gray-400" />
-                  </div>
-                )}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Header Section - Glass Card Design */}
+          <div className="glass-card p-8 mb-8 relative overflow-hidden bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg shadow-lg">
+            <div className="absolute top-0 right-0 w-full h-full pet-pattern opacity-50 z-0"></div>
+            <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
+              <div className="relative">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                  {user.image ? (
+                    <img
+                      src={user.image || "/placeholder.svg"}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-purple-50">
+                      <Camera size={40} className="text-purple-300" />
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setImageDialogOpen(true)}
+                  className="absolute -bottom-2 -right-2 bg-pink-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-pink-600 transition-colors"
+                  aria-label="Update profile picture"
+                >
+                  <Camera size={16} />
+                </button>
               </div>
-              <button
-                onClick={() => setImageDialogOpen(true)}
-                className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600"
-                aria-label="Update profile picture"
-              >
-                <Camera size={16} />
-              </button>
+
+              <div className="text-center md:text-left">
+                <h1 className="text-3xl font-bold text-purple-800">{user.name}</h1>
+                <p className="text-gray-600">{user.email}</p>
+                <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-gray-600">
+                  <MapPin className="w-4 h-4 text-pink-500" />
+                  <span>
+                    {user.city ? user.city + ", " : ""}{user.country || "Location not specified"}
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
+                  <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">Pet Owner</span>
+                  <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">
+                    {getExperienceLevel(user.experienceLevel)} Pet Parent
+                  </span>
+                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                    {user.petOrders?.length || 0} Pets Adopted
+                  </span>
+                </div>
+              </div>
+
+              <div className="ml-auto flex flex-col items-end gap-4">
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={() => setProfileDialogOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="bg-white hover:bg-gray-50 text-purple-700 border-purple-200 shadow-sm transition-all duration-200"
+                  >
+                    <Edit size={16} className="mr-2" />
+                    Edit Profile
+                  </Button>
+                  <Button
+                    onClick={() => setPreferencesDialogOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="bg-white hover:bg-gray-50 text-purple-700 border-purple-200 shadow-sm transition-all duration-200"
+                  >
+                    <Settings size={16} className="mr-2" />
+                    Preferences
+                  </Button>
+                </div>
+                <div className="glass-card p-4 text-center hidden md:block bg-white/70 rounded-lg">
+                  <div className="text-sm text-gray-500">Member since</div>
+                  <div className="font-medium">
+                    {new Date(user.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="absolute bottom-4 right-4 sm:right-8 flex space-x-2">
-            <Button
-              onClick={() => setProfileDialogOpen(true)}
-              variant="outline"
-              size="sm"
-              className="bg-white hover:bg-gray-100"
-            >
-              <Edit size={16} className="mr-2" />
-              Edit Profile
-            </Button>
-            <Button
-              onClick={() => setPreferencesDialogOpen(true)}
-              variant="outline"
-              size="sm"
-              className="bg-white hover:bg-gray-100"
-            >
-              <Settings size={16} className="mr-2" />
-              Preferences
-            </Button>
-          </div>
-        </div>
+          {/* Main Content */}
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Left Column */}
+            <div className="md:col-span-1 space-y-8">
+              {/* Quick stat cards */}
+              <div className="glass-card p-6 bg-white/80 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2">
+                  <Star className="w-5 h-5 text-pink-500" />
+                  Stats
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Experience Level */}
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <div className="text-purple-600 text-sm font-medium">Experience</div>
+                    <div className="mt-1 text-xl font-bold text-purple-800">
+                      {getExperienceLevel(user.experienceLevel)}
+                    </div>
+                  </div>
+                  
+                  {/* Availability */}
+                  <div className="bg-pink-50 p-3 rounded-lg">
+                    <div className="text-pink-600 text-sm font-medium">Available</div>
+                    <div className="mt-1 text-xl font-bold text-pink-800">
+                      {user.dailyAvailability} hrs
+                    </div>
+                  </div>
+                  
+                  {/* Pet Count */}
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="text-blue-600 text-sm font-medium">Pets</div>
+                    <div className="mt-1 text-xl font-bold text-blue-800">
+                      {user.petOrders?.length || 0}
+                    </div>
+                  </div>
+                  
+                  {/* Age */}
+                  <div className="bg-amber-50 p-3 rounded-lg">
+                    <div className="text-amber-600 text-sm font-medium">Age</div>
+                    <div className="mt-1 text-xl font-bold text-amber-800">
+                      {user.age || "N/A"}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-        {/* Profile info */}
-        <div className="pt-20 px-4 sm:px-6 pb-6">
-          <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-          <p className="text-gray-600">{user.email}</p>
+              {/* Pet Preferences */}
+              <div className="glass-card p-6 bg-white/80 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-pink-500" />
+                  Pet Preferences
+                </h2>
 
-          {/* Location info */}
-          {(user.country || user.city || user.area) && (
-            <div className="mt-4">
-              <h2 className="text-lg font-semibold text-gray-900">Location</h2>
-              <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {user.country && (
+                <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Country</p>
-                    <p className="mt-1">{user.country}</p>
+                    <div className="text-sm text-gray-500 mb-1">Daily Availability</div>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <Clock
+                          key={i}
+                          className={`w-5 h-5 ${i <= user.dailyAvailability ? "text-pink-500" : "text-gray-300"}`}
+                        />
+                      ))}
+                    </div>
                   </div>
-                )}
-                {user.city && (
+
                   <div>
-                    <p className="text-sm font-medium text-gray-500">City</p>
-                    <p className="mt-1">{user.city}</p>
+                    <div className="text-sm text-gray-500 mb-1">Experience Level</div>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <Award
+                          key={i}
+                          className={`w-5 h-5 ${i <= user.experienceLevel ? "text-pink-500" : "text-gray-300"}`}
+                        />
+                      ))}
+                    </div>
                   </div>
-                )}
-                {user.area && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Area</p>
-                    <p className="mt-1">{user.area}</p>
+
+                  <div className="pt-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className={`w-3 h-3 rounded-full ${user.hasOutdoorSpace ? "bg-green-500" : "bg-gray-300"}`}
+                      ></div>
+                      <span className="text-sm">Has outdoor space</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className={`w-3 h-3 rounded-full ${user.hasChildren ? "bg-green-500" : "bg-gray-300"}`}
+                      ></div>
+                      <span className="text-sm">Has children</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-3 h-3 rounded-full ${user.hasAllergies ? "bg-red-500" : "bg-gray-300"}`}
+                      ></div>
+                      <span className="text-sm">Has pet allergies</span>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Personal info */}
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Personal Information
-            </h2>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {user.age && (
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Age</p>
-                  <p className="mt-1">{user.age} years</p>
+            {/* Middle & Right Columns */}
+            <div className="md:col-span-2 space-y-8">
+              {/* Location info */}
+              {(user.country || user.city || user.area) && (
+                <div className="glass-card p-6 bg-white/80 rounded-lg shadow-sm">
+                  <h2 className="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-pink-500" />
+                    Location
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    {user.country && (
+                      <div className="flex flex-col p-3 bg-purple-50 rounded-lg">
+                        <p className="text-sm font-medium text-purple-500">Country</p>
+                        <p className="mt-1 font-medium text-purple-800">{user.country}</p>
+                      </div>
+                    )}
+                    {user.city && (
+                      <div className="flex flex-col p-3 bg-pink-50 rounded-lg">
+                        <p className="text-sm font-medium text-pink-500">City</p>
+                        <p className="mt-1 font-medium text-pink-800">{user.city}</p>
+                      </div>
+                    )}
+                    {user.area && (
+                      <div className="flex flex-col p-3 bg-blue-50 rounded-lg">
+                        <p className="text-sm font-medium text-blue-500">Area</p>
+                        <p className="mt-1 font-medium text-blue-800">{user.area}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Member Since
-                </p>
-                <p className="mt-1">
-                  {new Date(user.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          </div>
 
-          {/* Pet care preferences */}
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Pet Care Preferences
-            </h2>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Daily Availability
-                </p>
-                <p className="mt-1">{user.dailyAvailability} hours</p>
+              {/* Pet Adoptions */}
+              <div className="glass-card p-6 bg-white/80 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2">
+                  <PawPrint className="w-5 h-5 text-pink-500" />
+                  Pet Family
+                </h2>
+
+                {user.petOrders && user.petOrders.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {user.petOrders.map((order) => (
+                      <div
+                        key={order.id}
+                        onClick={() => (window.location.href = `/petshop/${order.pet?.id}`)}
+                        className="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg hover:shadow-md cursor-pointer transition-all duration-200"
+                      >
+                        <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden">
+                          {order.pet?.images ? (
+                            <img
+                              src={order.pet.images}
+                              alt={order.pet.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <PawPrint className="w-8 h-8 text-pink-500" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-purple-800">{order.pet?.name}</h3>
+                          <p className="text-sm text-gray-600">
+                            {order.pet?.breed}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Age: {order.pet?.age} {order.pet?.age === 1 ? "year" : "years"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">No pets adopted yet</p>
+                )}
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Experience Level
-                </p>
-                <p className="mt-1">
-                  {getExperienceLevel(user.experienceLevel)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Has Outdoor Space
-                </p>
-                <p className="mt-1">{user.hasOutdoorSpace ? "Yes" : "No"}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Has Children
-                </p>
-                <p className="mt-1">{user.hasChildren ? "Yes" : "No"}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Has Allergies
-                </p>
-                <p className="mt-1">{user.hasAllergies ? "Yes" : "No"}</p>
+
+              {/* All Explore Buttons in One Row */}
+              <div className="glass-card p-6 bg-white/80 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2">
+                  <Star className="w-5 h-5 text-pink-500" />
+                  Quick Actions
+                </h2>
+                <div className="flex flex-wrap gap-4 justify-between">
+                  <ExploreButton text="Go to orders" href="/myorders" />
+                  <ExploreButton text="Go to appointments" href="/myappointments" />
+                  <ExploreButton text="Go to ratings" href="/myoratings" />
+                </div>
               </div>
             </div>
           </div>
-          {/* Pet Information */}
-          {user.petOrders && user.petOrders.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Pet Information
-              </h2>
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {user.petOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    onClick={() =>
-                      (window.location.href = `/petshop/${order.pet?.id}`)
-                    }
-                    className="bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200"
-                  >
-                    <div className="aspect-square rounded-md overflow-hidden mb-3">
-                      {order?.pet?.images ? (
-                        <img
-                          src={order.pet.images}
-                          alt={order.pet.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                          <Camera size={40} className="text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="font-medium text-gray-900">
-                      {order?.pet?.name}
-                    </h3>
-                    <div className="mt-1 text-sm text-gray-500">
-                      <p>Breed: {order?.pet?.breed}</p>
-                      <p>
-                        Age: {order.pet?.age}{" "}
-                        {order.pet?.age === 1 ? "year" : "years"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -327,5 +416,131 @@ export default function UserProfile() {
         onUpdate={handleUserUpdate}
       />
     </>
+  );
+}
+
+// Skeleton component for loading state
+function ProfileSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Header Section Skeleton */}
+        <div className="p-8 mb-8 bg-gray-100 rounded-lg shadow-lg">
+          <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
+            {/* Profile Image Skeleton */}
+            <Skeleton className="w-32 h-32 rounded-full" />
+
+            {/* Profile Info Skeleton */}
+            <div className="text-center md:text-left space-y-2 flex-1">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-40" />
+              <div className="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <Skeleton className="h-6 w-24 rounded-full" />
+                <Skeleton className="h-6 w-28 rounded-full" />
+              </div>
+            </div>
+
+            {/* Action Buttons Skeleton */}
+            <div className="flex flex-col items-end gap-4">
+              <div className="flex space-x-3">
+                <Skeleton className="h-9 w-28" />
+                <Skeleton className="h-9 w-28" />
+              </div>
+              <Skeleton className="h-16 w-32 rounded-lg hidden md:block" />
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Skeleton */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Left Column Skeleton */}
+          <div className="md:col-span-1 space-y-8">
+            {/* Stats Card Skeleton */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="h-6 w-24" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {[...Array(4)].map((_, index) => (
+                  <Skeleton key={index} className="h-16 rounded-lg" />
+                ))}
+              </div>
+            </div>
+
+            {/* Preferences Card Skeleton */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="h-6 w-32" />
+              </div>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="space-y-1">
+                    <Skeleton className="h-4 w-24" />
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="h-5 w-5 rounded-full" />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Middle & Right Columns Skeleton */}
+          <div className="md:col-span-2 space-y-8">
+            {/* Location Skeleton */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="h-6 w-24" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, index) => (
+                  <Skeleton key={index} className="h-16 rounded-lg" />
+                ))}
+              </div>
+            </div>
+
+            {/* Pet Family Skeleton */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="h-6 w-28" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[...Array(2)].map((_, index) => (
+                  <div key={index} className="flex items-center gap-4 p-4 rounded-lg">
+                    <Skeleton className="h-16 w-16 rounded-full" />
+                    <div className="space-y-1">
+                      <Skeleton className="h-5 w-20" />
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions Skeleton */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="h-6 w-28" />
+              </div>
+              <div className="flex flex-wrap gap-4 justify-between">
+                {[...Array(3)].map((_, index) => (
+                  <Skeleton key={index} className="h-10 w-32" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

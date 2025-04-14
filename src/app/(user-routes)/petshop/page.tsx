@@ -199,10 +199,13 @@ export default function PetShop() {
   )
 
   return (
-    <div className="overflow-hidden p-6 bg-gradient-to-b">
+    <div className=" container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
+        <div className="bg-pink-50 p-6 rounded-lg mb-8">
+
+        
         <div className="text-center mb-8">
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-700 text-lg">
             Find your perfect companion! Browse our available pets for adoption.
           </p>
         </div>
@@ -236,6 +239,7 @@ export default function PetShop() {
               Searching for: {searchTerm.split(" ").filter(Boolean).slice(0, 3).join(", ")}
             </p>
           )}
+        </div>
         </div>
 
         {loading ? (
@@ -286,7 +290,7 @@ export default function PetShop() {
             {!searchTerm && recommendedPets.length > 0 && (
               <div className="mb-10">
                 <h2 className="text-xl font-semibold mb-4 text-violet-600 flex items-center justify-center sm:justify-start">
-                  <Heart className="mr-2 text-pink-600 animate-bounce" />
+                  <Heart className="mr-2 text-pink-600 fill-current animate-bounce" />
                   <span className="relative ">
                     Suggested Pets for You
                     <span className="absolute -top-1 -right-2 flex h-3 w-3">

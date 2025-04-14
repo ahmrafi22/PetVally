@@ -194,7 +194,7 @@ export default function PetDetail() {
 
               <div className="mt-6">
                 <h2 className="text-xl font-semibold flex items-center text-orange-600">
-                  <Paw className="mr-2 h-5 w-5 text-orange-500" />
+                  <Paw className="mr-2 h-5 w-5 text-orange-500 fill-current" />
                   Compatibility
                 </h2>
 

@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Bell,  Calendar, Info, Cat } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Bell,  Calendar, Info, Cat, PackageCheck, PackageX } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import type { Notification } from "@/types"
@@ -51,13 +50,17 @@ export default function NotificationsPage() {
     fetchNotifications()
   }, [router])
 
-  // Function to get icon based on notification type
+  // Function to get icon based on notification type  "" : "",
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "NEW_PET":
-        return <Cat className="h-5 w-5 text-blue-500" />
+        return <Cat className="h-8 w-8 text-blue-500" />
       case "APPOINTMENT":
         return <Calendar className="h-5 w-5 text-purple-500" />
+      case "ORDER_COMPLETED":
+        return <PackageCheck className="h-8 w-8 text-purple-500" />
+      case "ORDER_CANCELLED":
+        return <PackageX className="h-8 w-8 text-purple-500" />
       default:
         return <Info className="h-5 w-5 text-gray-500" />
     }
@@ -90,7 +93,7 @@ export default function NotificationsPage() {
 
   if (error) {
     return (
-      <div className="bg-white shadow-md rounded-lg p-6">
+      <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">Notifications</h1>
         <div className="bg-red-50 text-red-700 p-4 rounded-md">
           <p>{error}</p>
@@ -100,14 +103,9 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
+    <div className=" p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Notifications</h1>
-        {notifications.length > 0 && (
-          <Button variant="outline" size="sm" onClick={() => router.push("/user/petshop")}>
-            View Pet Shop
-          </Button>
-        )}
       </div>
 
       {notifications.length === 0 ? (

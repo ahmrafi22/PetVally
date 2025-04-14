@@ -9,17 +9,18 @@ import {
   User,
   LogOut,
   Menu,
-  X,
   ChevronLeft,
   ChevronRight,
   PawPrint,
   Bell,
   ShoppingCart,
 } from "lucide-react";
-import gsap from "gsap"
+import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { useIsMobile } from "@/hooks/use-mobile"; 
+import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "next/image";
+import { useCartStore } from "@/stores/cart-store";
+import { useNotificationStore } from "@/stores/notification-store";
 
 gsap.registerPlugin(useGSAP);
 
@@ -28,14 +29,17 @@ export default function UserNavigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userName, setUserName] = useState<string>("");
   const [userPic, setUserPic] = useState<string>("");
-  const [notificationCount, setNotificationCount] = useState(0);
   const router = useRouter();
   const isMobile = useIsMobile();
   const [userId, setUserId] = useState<string | null>(null);
+  const { cart } = useCartStore();
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Use the notification store
+  const { count: notificationCount, fetchCount } = useNotificationStore();
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
-
     setUserId(id);
   }, []);
 
@@ -71,31 +75,22 @@ export default function UserNavigation() {
           setUserPic(data.user.image);
         }
 
-        // Fetch notification count
-        const countResponse = await fetch("/api/users/notifications/count", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (countResponse.ok) {
-          const countData = await countResponse.json();
-          setNotificationCount(countData.count);
-
-          // Animate notification badge if there are unread notifications
-          if (countData.count > 0) {
-            gsap.fromTo(
-              ".notification-badge",
-              { scale: 0.5, opacity: 0 },
-              {
-                scale: 1,
-                opacity: 1,
-                duration: 0.5,
-                ease: "back.out(1.7)",
-                delay: 0.5,
-              }
-            );
-          }
+        // Fetch notification count using the store
+        await fetchCount();
+        
+        // Animate notification badge if there are unread notifications
+        if (notificationCount > 0) {
+          gsap.fromTo(
+            ".notification-badge",
+            { scale: 0.5, opacity: 0 },
+            {
+              scale: 1,
+              opacity: 1,
+              duration: 0.5,
+              ease: "back.out(1.7)",
+              delay: 0.5,
+            }
+          );
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -105,45 +100,39 @@ export default function UserNavigation() {
     fetchUserData();
 
     // Set up interval to check for new notifications every minute
-    const intervalId = setInterval(async () => {
+    const intervalId = async () => {
       try {
         const token = localStorage.getItem("userToken");
         if (!token) return;
 
-        const countResponse = await fetch("/api/users/notifications/count", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Get previous count before fetching
+        const prevCount = useNotificationStore.getState().count;
+        
+        // Fetch new count using the store
+        await fetchCount();
+        
+        // Get updated count after fetching
+        const newCount = useNotificationStore.getState().count;
 
-        if (countResponse.ok) {
-          const countData = await countResponse.json();
-          const newCount = countData.count;
-
-          // Only animate if the count has increased
-          if (newCount > notificationCount) {
-            setNotificationCount(newCount);
-            gsap.fromTo(
-              ".notification-badge",
-              { scale: 0.5, opacity: 0 },
-              {
-                scale: 1,
-                opacity: 1,
-                duration: 0.5,
-                ease: "back.out(1.7)",
-              }
-            );
-          } else {
-            setNotificationCount(newCount);
-          }
+        // Only animate if the count has increased
+        if (newCount > prevCount) {
+          gsap.fromTo(
+            ".notification-badge",
+            { scale: 0.5, opacity: 0 },
+            {
+              scale: 1,
+              opacity: 1,
+              duration: 0.5,
+              ease: "back.out(1.7)",
+            }
+          );
         }
       } catch (error) {
         console.error("Error fetching notification count:", error);
       }
-    }, 60000); // Check every minute
+    }; 
 
-    return () => clearInterval(intervalId);
-  }, [userId, notificationCount]);
+  }, [userId, fetchCount]);
 
   // GSAP animations for sidebar expand/collapse
   useEffect(() => {
@@ -229,11 +218,24 @@ export default function UserNavigation() {
     }
   };
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const itemCount = isMounted
+    ? cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0
+    : 0;
+
   // Navigation items
   const navItems = [
     { name: "Pet Shop", icon: <PawPrint size={25} />, href: "/petshop" },
     { name: "Store", icon: <ShoppingBag size={25} />, href: "/store" },
-    { name: "Cart", icon: <ShoppingCart size={25} />, href: "/cart" },
+    {
+      name: "Cart",
+      icon: <ShoppingCart size={25} />,
+      href: "/cart",
+      badge: itemCount > 0 ? itemCount : null,
+    },
     { name: "Forum", icon: <MessageSquare size={25} />, href: "/user/forum" },
     {
       name: "Notifications",
@@ -308,7 +310,7 @@ export default function UserNavigation() {
                     href={item.href}
                     className="flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700 hover:text-blue-600 relative"
                   >
-                    <span className="inline-block">{item.icon}</span>
+                    <span className="inline-block ">{item.icon}</span>
                     {(expanded || mobileOpen) && (
                       <span ref={addToRefs} className="ml-3">
                         {item.name}
@@ -356,7 +358,7 @@ export default function UserNavigation() {
           <div className="p-4 border-t">
             <button
               onClick={handleLogout}
-              className={`flex items-center p-2 w-full rounded-md text-red-600 hover:bg-red-50 ${
+              className={`flex cursor-pointer items-center p-2 w-full rounded-md text-red-600 hover:bg-red-50 ${
                 expanded || mobileOpen ? "justify-start" : "justify-center"
               }`}
             >

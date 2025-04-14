@@ -68,7 +68,7 @@ export async function getProductsByCategory(category: string) {
 }
 
 // Get featured products (top rated)
-export async function getFeaturedProducts(limit = 5) {
+export async function getFeaturedProducts(limit = 10) {
   try {
     // Get all products with their ratings
     const products = await prisma.product.findMany({
