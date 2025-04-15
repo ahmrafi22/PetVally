@@ -49,7 +49,7 @@ export default function LoadingScreen() {
 
         <div className="w-full max-w-md bg-gray-200  h-[3.5px] mt-4">
           <div
-            className="bg-green-500 h-[3.5px] rounded-sm transition-all duration-100 ease-linear"
+            className="bg-green-400 h-[3.5px] rounded-sm transition-all duration-100 ease-linear"
             style={{ width: `${progress+4}%` }}
           ></div>
         </div>

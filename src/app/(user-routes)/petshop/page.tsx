@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Pet } from "@/types"
+import { ReactLenis, useLenis } from 'lenis/react'
 
 type ScoredPet = Pet & { compatibilityScore: number }
 
@@ -21,6 +22,8 @@ export default function PetShop() {
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const router = useRouter()
+  const lenis = useLenis(({ scroll }) => {
+  })
 
   useEffect(() => {
     async function fetchPets() {
@@ -125,7 +128,7 @@ export default function PetShop() {
             <img
               src={pet.images || "/placeholder.svg?height=300&width=300"}
               alt={pet.name}
-              className="w-full h-full object-cover "
+              className="w-full h-full object-cover object-[0%_40%]"
             />
             {showScore && scoredPet.compatibilityScore && (
               <div className="absolute top-2 right-2 bg-gradient-to-br from-pink-400 to-purple-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold shadow-md animate-pulse">
@@ -136,7 +139,7 @@ export default function PetShop() {
           </div>
           <div className="p-4">
             <div className="flex justify-between items-start">
-              <h2 className="text-xl font-semibold text-purple-700">{pet.name}</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{pet.name}</h2>
               <span className="text-green-600 font-bold bg-green-100 px-2 py-1 rounded-full text-sm">${pet.price.toFixed(2)}</span>
             </div>
             <p className="text-gray-600 font-medium">{pet.breed}</p>
@@ -199,6 +202,7 @@ export default function PetShop() {
   )
 
   return (
+    <ReactLenis root>
     <div className=" container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
         <div className="bg-pink-50 p-6 rounded-lg mb-8">
@@ -324,5 +328,6 @@ export default function PetShop() {
         )}
       </div>
     </div>
+    </ReactLenis>
   )
 }

@@ -3,13 +3,14 @@
 import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Star, Tag, ArrowUpRight, ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { Star, Tag, ArrowUpRight, ChevronLeft, ChevronRight, Search, ToyBrick, BriefcaseMedical, Cookie } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { AddToCartButton } from "./_components/add-to-cart"
 import { useCartStore } from "@/stores/cart-store"
 import { Badge } from "@/components/ui/badge"
+import { ReactLenis, useLenis } from 'lenis/react'
 
 import type { Product } from "@/types"
 
@@ -28,7 +29,11 @@ export default function Shop() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const slideInterval = useRef<NodeJS.Timeout | null>(null)
   const productsPerSlide = 4
-  const autoSlideTime = 3000 // Increased from 1500ms to 3000ms (3 seconds)
+  const autoSlideTime = 3000
+
+  const lenis = useLenis(({ scroll }) => {
+  })
+  
 
   // Fetch all products on initial load
   useEffect(() => {
@@ -209,9 +214,9 @@ export default function Shop() {
     const isInCart = cart?.items.some(item => item.product.id === product.id)
     
     return (
-      <div key={product.id} className="bg-white border hover:scale-105 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all group">
+      <div key={product.id} className="bg-white border hover:scale-105 duration-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all group">
         <Link href={`/store/${product.id}`} className="block relative">
-          <div className="h-52 relative overflow-hidden">
+          <div className="h-70 relative overflow-hidden">
             <img
               src={product.image || "/placeholder.svg?height=300&width=300"}
               alt={product.name}
@@ -279,7 +284,7 @@ export default function Shop() {
   // Skeleton loader for product cards
   const renderSkeletonCard = () => (
     <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
-      <Skeleton className="h-52 w-full" />
+      <Skeleton className="h-70 w-full" />
       <div className="p-4 space-y-3">
         <div className="flex justify-between">
           <Skeleton className="h-6 w-32" />
@@ -295,6 +300,7 @@ export default function Shop() {
   )
 
   return (
+    <ReactLenis root>
     <div className="container mx-auto px-4 py-8"> 
       {/* Search Bar */}
 
@@ -303,6 +309,7 @@ export default function Shop() {
         <p className="text-gray-700 text-center text-lg">
           Find the best products for your pet! Browse our selection of food, toys, and medicine.
         </p>
+        
 
         <div className="mb-4 mt-6">
         <div className="relative max-w-md mx-auto">
@@ -326,28 +333,28 @@ export default function Shop() {
             onClick={() => handleCategoryClick(null)}
             className="min-w-20"
           >
-            All Products
+            <Tag className="mr-2 h-4 w-4" />All Products
           </Button>
           <Button 
             variant={activeCategory === "food" ? "default" : "outline"} 
             onClick={() => handleCategoryClick("food")}
             className="min-w-20"
           >
-            <Tag className="mr-2 h-4 w-4" /> Food
+            <Cookie className="mr-2 h-4 w-4" /> Food
           </Button>
           <Button 
             variant={activeCategory === "toy" ? "default" : "outline"} 
             onClick={() => handleCategoryClick("toy")}
             className="min-w-20"
           >
-            <Tag className="mr-2 h-4 w-4" /> Toys
+            <ToyBrick className="mr-2 h-4 w-4" /> Toys
           </Button>
           <Button
             variant={activeCategory === "medicine" ? "default" : "outline"}
             onClick={() => handleCategoryClick("medicine")}
             className="min-w-20"
           >
-            <Tag className="mr-2 h-4 w-4" /> Medicine
+            <BriefcaseMedical className="mr-2 h-4 w-4" /> Medicine
           </Button>
         </div>
       </div>
@@ -362,7 +369,7 @@ export default function Shop() {
           
           <div className="relative overflow-hidden">
             <div 
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 transition-transform duration-1300 ease-in-out"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 transition-transform duration-1400 ease-in-out"
               style={{ 
                 transform: `translateX(-${currentSlide * 33.33}%)`,
                 display: 'flex',
@@ -462,5 +469,6 @@ export default function Shop() {
         )}
       </section>
     </div>
+    </ReactLenis>
   )
 }

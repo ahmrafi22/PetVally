@@ -21,28 +21,22 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "next/image";
 import { useCartStore } from "@/stores/cart-store";
 import { useNotificationStore } from "@/stores/notification-store";
+import { useUserStore } from "@/stores/user-store"; // Import the new user store
 
 gsap.registerPlugin(useGSAP);
 
 export default function UserNavigation() {
   const [expanded, setExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [userName, setUserName] = useState<string>("");
-  const [userPic, setUserPic] = useState<string>("");
   const router = useRouter();
   const isMobile = useIsMobile();
-  const [userId, setUserId] = useState<string | null>(null);
   const { cart } = useCartStore();
   const [isMounted, setIsMounted] = useState(false);
   
-  // Use the notification store
+  // Use the stores
   const { count: notificationCount, fetchCount } = useNotificationStore();
-
-  useEffect(() => {
-    const id = localStorage.getItem("userId");
-    setUserId(id);
-  }, []);
-
+  const { userData, fetchUserData } = useUserStore();
+  
   // Refs for GSAP animations
   const sidebarRef = useRef(null);
   const textElementsRef = useRef<HTMLSpanElement[]>([]);
@@ -56,83 +50,63 @@ export default function UserNavigation() {
 
   // Fetch user data and notification count on mount
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!userId) return;
-
-      try {
-        const token = localStorage.getItem("userToken");
-        if (!token) return;
-
-        const response = await fetch(`/api/users/userdata?id=${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUserName(data.user.name);
-          setUserPic(data.user.image);
-        }
-
-        // Fetch notification count using the store
-        await fetchCount();
-        
-        // Animate notification badge if there are unread notifications
-        if (notificationCount > 0) {
-          gsap.fromTo(
-            ".notification-badge",
-            { scale: 0.5, opacity: 0 },
-            {
-              scale: 1,
-              opacity: 1,
-              duration: 0.5,
-              ease: "back.out(1.7)",
-              delay: 0.5,
-            }
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+    // Check if we already have user data in the store
+    const userId = localStorage.getItem("userId");
+    
+    if (userId) {
+      // If we don't have user data or it's for a different user, fetch it
+      if (!userData.id || userData.id !== userId) {
+        fetchUserData();
       }
-    };
-
-    fetchUserData();
-
+      
+      // Fetch notification count
+      fetchCount();
+      
+      // Animate notification badge if there are unread notifications
+      if (notificationCount > 0) {
+        gsap.fromTo(
+          ".notification-badge",
+          { scale: 0.5, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.5,
+            ease: "back.out(1.7)",
+            delay: 0.5,
+          }
+        );
+      }
+    }
+    
     // Set up interval to check for new notifications every minute
     const intervalId = async () => {
-      try {
-        const token = localStorage.getItem("userToken");
-        if (!token) return;
-
-        // Get previous count before fetching
-        const prevCount = useNotificationStore.getState().count;
-        
-        // Fetch new count using the store
-        await fetchCount();
-        
-        // Get updated count after fetching
-        const newCount = useNotificationStore.getState().count;
-
-        // Only animate if the count has increased
-        if (newCount > prevCount) {
-          gsap.fromTo(
-            ".notification-badge",
-            { scale: 0.5, opacity: 0 },
-            {
-              scale: 1,
-              opacity: 1,
-              duration: 0.5,
-              ease: "back.out(1.7)",
-            }
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching notification count:", error);
+      if (!localStorage.getItem("userToken")) return;
+      
+      // Get previous count before fetching
+      const prevCount = useNotificationStore.getState().count;
+      
+      // Fetch new count using the store
+      await fetchCount();
+      
+      // Get updated count after fetching
+      const newCount = useNotificationStore.getState().count;
+      
+      // Only animate if the count has increased
+      if (newCount > prevCount) {
+        gsap.fromTo(
+          ".notification-badge",
+          { scale: 0.5, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.5,
+            ease: "back.out(1.7)",
+          }
+        );
       }
-    }; 
-
-  }, [userId, fetchCount]);
+    }; // Check every minute
+    
+  }, [fetchUserData, fetchCount, notificationCount, userData.id]);
 
   // GSAP animations for sidebar expand/collapse
   useEffect(() => {
@@ -207,6 +181,8 @@ export default function UserNavigation() {
     await fetch("/api/users/logout", { method: "POST" });
     localStorage.removeItem("userToken");
     localStorage.removeItem("userId");
+    // Clear user data from store
+    useUserStore.getState().clearUserData();
     router.push("/");
   }
 
@@ -244,6 +220,8 @@ export default function UserNavigation() {
       badge: notificationCount > 0 ? notificationCount : null,
     },
   ];
+
+  const userId = userData.id;
 
   return (
     <>
@@ -308,9 +286,9 @@ export default function UserNavigation() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700 hover:text-blue-600 relative"
+                    className="flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700 hover:text-blue-600, relative"
                   >
-                    <span className="inline-block ">{item.icon}</span>
+                    <span className="inline-block">{item.icon}</span>
                     {(expanded || mobileOpen) && (
                       <span ref={addToRefs} className="ml-3">
                         {item.name}
@@ -332,21 +310,21 @@ export default function UserNavigation() {
                   className="flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700 hover:text-blue-600"
                 >
                   <span className="inline-block">
-                    {userPic ? (
+                    {userData.image ? (
                       <Image
-                        src={userPic}
+                        src={userData.image}
                         alt="Profile"
                         width={28}
                         height={28}
                         className="w-7 h-7 rounded-full object-cover"
                       />
                     ) : (
-                      <User size={20} />
+                      <User size={25} />
                     )}
                   </span>
                   {(expanded || mobileOpen) && (
                     <span ref={addToRefs} className="ml-3 truncate">
-                      {userName ? `Profile (${userName})` : "Profile"}
+                      {userData.name ? `Profile (${userData.name})` : "You"}
                     </span>
                   )}
                 </Link>
