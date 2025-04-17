@@ -5,22 +5,22 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  ArrowLeft, 
-  Heart, 
+import {
+  ArrowLeft,
+  Heart,
   CheckCircle,
   CreditCard,
   MapPin,
-  Home
+  Home,
 } from "lucide-react";
-import type {User, Pet, PaymentFormData } from "@/types";
+import type { User, Pet, PaymentFormData } from "@/types";
 
 export default function BuyPet() {
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function BuyPet() {
   useEffect(() => {
     async function fetchUserData() {
       if (!userId) return;
-      
+
       setUserDataLoading(true);
       try {
         const token = localStorage.getItem("userToken");
@@ -80,17 +80,15 @@ export default function BuyPet() {
 
         const data = await response.json();
         setUserData(data.user);
-        
+
         // Pre-fill form with user data
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           cardholderName: data.user.name || "",
           address: data.user.area || "",
           city: data.user.city || "",
           country: data.user.country || "",
-          // Zip code remains empty
         }));
-        
       } catch (err: any) {
         console.error("Error fetching user data:", err);
       } finally {
@@ -220,7 +218,9 @@ export default function BuyPet() {
       setDialogOpen(true);
     } catch (err: any) {
       console.error("Error completing adoption:", err);
-      setError(err.message || "An error occurred while completing the adoption.");
+      setError(
+        err.message || "An error occurred while completing the adoption."
+      );
       setDialogOpen(true);
     } finally {
       setIsSubmitting(false);
@@ -248,7 +248,9 @@ export default function BuyPet() {
       <div className="p-6 bg-gradient-to-b from-pink-50 to-purple-50 min-h-screen">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white shadow-md overflow-hidden rounded-3xl border-2 border-pink-200 p-6">
-            <h3 className="text-lg leading-6 font-medium text-red-600">Error</h3>
+            <h3 className="text-lg leading-6 font-medium text-red-600">
+              Error
+            </h3>
             <p className="mt-1 text-sm text-gray-500">{error}</p>
             <Button
               onClick={handleReturnToPetShop}
@@ -288,19 +290,21 @@ export default function BuyPet() {
   return (
     <div className="p-6">
       <div className="max-w-6xl mx-auto">
-        
         <div className="bg-white shadow-md overflow-hidden rounded-sm border-2  p-6">
           <h1 className="text-2xl font-bold text-purple-700 mb-6 flex items-center">
-            <Heart className="mr-2 h-5 w-5 text-pink-500" /> Complete Your Adoption
+            <Heart className="mr-2 h-5 w-5 text-pink-500" /> Complete Your
+            Adoption
           </h1>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Pet Summary */}
             <div className="bg-gradient-to-b from-purple-50 to-pink-50 rounded-3xl p-6 shadow-sm border border-pink-100">
-              <h2 className="text-xl font-semibold mb-4 text-purple-700">Adoption Summary</h2>
+              <h2 className="text-xl font-semibold mb-4 text-purple-700">
+                Adoption Summary
+              </h2>
 
               <div className="flex items-center mb-4">
-                <div className="w-32 h-32 bg-gray-200 rounded-2xl overflow-hidden mr-4 border-2 ">
+                <div className="w-56 h-56 bg-gray-200 rounded-2xl overflow-hidden mr-4 border-2 ">
                   <img
                     src={pet?.images || "/placeholder.svg?height=128&width=128"}
                     alt={pet?.name}
@@ -308,7 +312,9 @@ export default function BuyPet() {
                   />
                 </div>
                 <div>
-                  <h3 className="font-medium text-lg text-purple-700">{pet?.name}</h3>
+                  <h3 className="font-medium text-lg text-purple-700">
+                    {pet?.name}
+                  </h3>
                   <p className="text-gray-600">{pet?.breed}</p>
                   <p className="text-gray-500 text-sm">
                     Age: {pet?.age} {pet?.age === 1 ? "year" : "years"}
@@ -327,7 +333,9 @@ export default function BuyPet() {
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t border-pink-200 pt-2 mt-2">
                   <span className="text-purple-700">Total:</span>
-                  <span className="text-purple-700">${(pet ? pet.price + 25 : 0).toFixed(2)}</span>
+                  <span className="text-purple-700">
+                    ${(pet ? pet.price + 25 : 0).toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -335,9 +343,10 @@ export default function BuyPet() {
             {/* Payment Form */}
             <div>
               <h2 className="text-xl font-semibold mb-4 text-purple-700 flex items-center">
-                <CreditCard className="mr-2 h-5 w-5 text-pink-500" /> Payment Information
+                <CreditCard className="mr-2 h-5 w-5 text-pink-500" /> Payment
+                Information
               </h2>
-              
+
               {userDataLoading ? (
                 <div className="space-y-4">
                   <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100 h-16 animate-pulse"></div>
@@ -350,7 +359,12 @@ export default function BuyPet() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <Label className="mb-2 text-purple-700" htmlFor="cardNumber">Card Number</Label>
+                    <Label
+                      className="mb-2 text-purple-700"
+                      htmlFor="cardNumber"
+                    >
+                      Card Number
+                    </Label>
                     <Input
                       id="cardNumber"
                       name="cardNumber"
@@ -358,7 +372,10 @@ export default function BuyPet() {
                       value={formData.cardNumber}
                       onChange={(e) => {
                         const formattedValue = formatCardNumber(e.target.value);
-                        setFormData((prev) => ({ ...prev, cardNumber: formattedValue }));
+                        setFormData((prev) => ({
+                          ...prev,
+                          cardNumber: formattedValue,
+                        }));
                       }}
                       maxLength={19}
                       className="border-pink-200 focus:border-purple-400 rounded-xl"
@@ -367,7 +384,12 @@ export default function BuyPet() {
                   </div>
 
                   <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <Label className="mb-2 text-purple-700" htmlFor="cardholderName">Cardholder Name</Label>
+                    <Label
+                      className="mb-2 text-purple-700"
+                      htmlFor="cardholderName"
+                    >
+                      Cardholder Name
+                    </Label>
                     <Input
                       id="cardholderName"
                       name="cardholderName"
@@ -381,15 +403,25 @@ export default function BuyPet() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                      <Label className="mb-2 text-purple-700" htmlFor="expiryDate">Expiry Date</Label>
+                      <Label
+                        className="mb-2 text-purple-700"
+                        htmlFor="expiryDate"
+                      >
+                        Expiry Date
+                      </Label>
                       <Input
                         id="expiryDate"
                         name="expiryDate"
                         placeholder="MM/YY"
                         value={formData.expiryDate}
                         onChange={(e) => {
-                          const formattedValue = formatExpiryDate(e.target.value);
-                          setFormData((prev) => ({ ...prev, expiryDate: formattedValue }));
+                          const formattedValue = formatExpiryDate(
+                            e.target.value
+                          );
+                          setFormData((prev) => ({
+                            ...prev,
+                            expiryDate: formattedValue,
+                          }));
                         }}
                         maxLength={5}
                         className="border-pink-200 focus:border-purple-400 rounded-xl"
@@ -397,7 +429,9 @@ export default function BuyPet() {
                       />
                     </div>
                     <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                      <Label className="mb-2 text-purple-700" htmlFor="cvv">CVV</Label>
+                      <Label className="mb-2 text-purple-700" htmlFor="cvv">
+                        CVV
+                      </Label>
                       <Input
                         id="cvv"
                         name="cvv"
@@ -405,7 +439,9 @@ export default function BuyPet() {
                         value={formData.cvv}
                         onChange={(e) => {
                           // Only allow numbers and limit to 3-4 digits
-                          const value = e.target.value.replace(/\D/g, "").substring(0, 4);
+                          const value = e.target.value
+                            .replace(/\D/g, "")
+                            .substring(0, 4);
                           setFormData((prev) => ({ ...prev, cvv: value }));
                         }}
                         maxLength={4}
@@ -416,11 +452,14 @@ export default function BuyPet() {
                   </div>
 
                   <h3 className="text-lg font-medium mt-6 mb-2 text-purple-700 flex items-center">
-                    <MapPin className="mr-2 h-5 w-5 text-pink-500" /> Billing Address
+                    <MapPin className="mr-2 h-5 w-5 text-pink-500" /> Billing
+                    Address
                   </h3>
 
                   <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <Label className="mb-2 text-purple-700" htmlFor="address">Address</Label>
+                    <Label className="mb-2 text-purple-700" htmlFor="address">
+                      Address
+                    </Label>
                     <Input
                       id="address"
                       name="address"
@@ -434,7 +473,9 @@ export default function BuyPet() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                      <Label className="mb-2 text-purple-700" htmlFor="city">City</Label>
+                      <Label className="mb-2 text-purple-700" htmlFor="city">
+                        City
+                      </Label>
                       <Input
                         id="city"
                         name="city"
@@ -446,7 +487,9 @@ export default function BuyPet() {
                       />
                     </div>
                     <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                      <Label className="mb-2 text-purple-700" htmlFor="zipCode">Zip Code</Label>
+                      <Label className="mb-2 text-purple-700" htmlFor="zipCode">
+                        Zip Code
+                      </Label>
                       <Input
                         id="zipCode"
                         name="zipCode"
@@ -460,7 +503,9 @@ export default function BuyPet() {
                   </div>
 
                   <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <Label className="mb-2 text-purple-700" htmlFor="country">Country</Label>
+                    <Label className="mb-2 text-purple-700" htmlFor="country">
+                      Country
+                    </Label>
                     <Input
                       id="country"
                       name="country"
@@ -473,15 +518,18 @@ export default function BuyPet() {
                   </div>
 
                   <div className="pt-3">
-                    <Button
+                    <button
                       type="submit"
-                      className="w-full py-6 text-lg rounded-full transition-all duration-300 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-md hover:shadow-lg"
                       disabled={isSubmitting}
+                      className="w-full py-3 text-lg font-medium text-white/90 rounded-full bg-gradient-to-r from-amber-400 via-pink-500  to-blue-500 bg-[length:600%] animate-gradient ease-in-out hover:scale-105 transition-all duration-300  shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       {isSubmitting
                         ? "Processing..."
-                        : `Complete Adoption - $${(pet ? pet.price + 25 : 0).toFixed(2)}`}
-                    </Button>
+                        : `Complete Adoption - $${(pet
+                            ? pet.price + 25
+                            : 0
+                          ).toFixed(2)}`}
+                    </button>
                   </div>
                 </form>
               )}
@@ -494,23 +542,39 @@ export default function BuyPet() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-white rounded-3xl border-2 border-pink-200 shadow-lg">
           <DialogHeader>
-            <DialogTitle className={`text-2xl ${adoptionComplete ? 'text-purple-700' : 'text-red-600'} flex items-center`}>
-              {adoptionComplete 
-                ? <><CheckCircle className="mr-2 h-6 w-6 text-green-500" /> Adoption Successful!</>
-                : <><Home className="mr-2 h-6 w-6 text-red-500" /> Pet Not Available</>
-              }
+            <DialogTitle
+              className={`text-2xl ${
+                adoptionComplete ? "text-purple-700" : "text-red-600"
+              } flex items-center`}
+            >
+              {adoptionComplete ? (
+                <>
+                  <CheckCircle className="mr-2 h-6 w-6 text-green-500" />{" "}
+                  Adoption Successful!
+                </>
+              ) : (
+                <>
+                  <Home className="mr-2 h-6 w-6 text-red-500" /> Pet Not
+                  Available
+                </>
+              )}
             </DialogTitle>
             <DialogDescription className="text-lg mt-2">
-              {adoptionComplete 
-                ? <span>Congratulations! {pet?.name} will be delivered to your location very soon. You will get a call from our representative very soon</span>
-                : <span>{error}</span>
-              }
+              {adoptionComplete ? (
+                <span>
+                  Congratulations! {pet?.name} will be delivered to your
+                  location very soon. You will get a call from our
+                  representative very soon. Thank you for choosing to adopt and provide a loving home! 
+                </span>
+              ) : (
+                <span>{error}</span>
+              )}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="mt-4">
-            <Button 
-              onClick={handleReturnToPetShop} 
+            <Button
+              onClick={handleReturnToPetShop}
               className="w-full py-4 text-lg rounded-full transition-all duration-300 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-md hover:shadow-lg"
             >
               Return to Pet Shop

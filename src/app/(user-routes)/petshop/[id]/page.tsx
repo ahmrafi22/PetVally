@@ -39,7 +39,6 @@ export default function PetDetail() {
         }
 
         const data = await response.json()
-        // console.log("Pet data:", data)
         setPet(data.pet)
       } catch (err: any) {
         console.error("Error fetching pet details:", err)
@@ -58,12 +57,12 @@ export default function PetDetail() {
 
   if (loading) {
     return (
-      <div className="p-6  ">
-        <div className="max-w-6xl mx-auto">
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
           
           <div className="bg-white shadow-md overflow-hidden rounded-sm border-2 ">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Pet Image Skeleton */}
+
               <Skeleton className="h-64 md:h-full w-full " />
 
               {/* Pet Details Skeleton */}
@@ -150,15 +149,14 @@ export default function PetDetail() {
       <div className="max-w-6xl mx-auto">
         
         <div className="bg-white shadow-md overflow-hidden rounded-sm border-2 ">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Pet Image */}
-            <div className="h-64 md:h-full bg-gray-200 relative overflow-hidden">
+            <div className="h-[50vh] md:h-full bg-gray-200 relative overflow-hidden">
               <img
                 src={pet.images || "/placeholder.svg?height=500&width=500"}
                 alt={pet.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top  -[0%_40%]  "
               />
-              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-pink-100 to-transparent opacity-70"></div>
             </div>
 
             {/* Pet Details */}
@@ -181,7 +179,7 @@ export default function PetDetail() {
 
               <div className="mt-6">
                 <h2 className="text-xl font-semibold flex items-center text-pink-600">
-                  <Heart className="mr-2 h-5 w-5 text-pink-500 animate-pulse" />
+                  <Heart className="mr-2 h-5 w-5 fill-current text-pink-500 " />
                   About {pet.name}
                 </h2>
                 <p className="mt-2 text-gray-700 bg-pink-50 p-4 rounded-2xl border border-pink-100">{pet.bio}</p>
@@ -198,7 +196,7 @@ export default function PetDetail() {
                   Compatibility
                 </h2>
 
-                <div className="mt-3 grid grid-cols-2 gap-4 bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                <div className="mt-3 space-y-1 grid grid-cols-1 sm:grid-cols-2  gap-4 bg-orange-50 p-4 rounded-2xl border border-orange-100">
                   <div>
                     <div className="flex items-center">
                       <Activity className="mr-2 h-4 w-4 text-blue-500" />
@@ -208,7 +206,7 @@ export default function PetDetail() {
                       {[1, 2, 3, 4, 5].map((level) => (
                         <span
                           key={level}
-                          className={`h-3 w-8 mr-1 rounded-full ${level <= pet.energyLevel ? "bg-blue-500 animate-pulse" : "bg-gray-200"}`}
+                          className={`h-3 w-8 mr-1 rounded-full ${level <= pet.energyLevel ? "bg-blue-500" : "bg-gray-200"}`}
                         />
                       ))}
                     </div>
@@ -308,7 +306,7 @@ export default function PetDetail() {
                   <h2 className="text-lg font-semibold text-gray-900">Tags</h2>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {pet.tags.map((tag) => (
-                      <Badge key={tag} className="bg-pink-100 text-pink-800 hover:bg-pink-200 rounded-full border border-pink-200">
+                      <Badge key={tag} className="bg-pink-100 cursor-default text-pink-800 hover:bg-pink-200 rounded-full border border-pink-200">
                         {tag}
                       </Badge>
                     ))}
@@ -317,19 +315,19 @@ export default function PetDetail() {
               )}
 
               <div className="mt-8">
-                <Button 
+                <button 
                   onClick={handleBuyClick} 
-                  className={`w-full py-6 text-lg rounded-full transition-all duration-300 ${
+                  className={`w-full py-3 text-lg rounded-full transition-all duration-300 ${
                     pet.isAvailable 
-                      ? "bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-md hover:shadow-lg" 
+                      ? "w-full  text-lg font-medium text-white/90 rounded-full bg-gradient-to-r from-amber-400 via-pink-500  to-blue-500 bg-[length:600%] animate-gradient ease-in-out hover:scale-105 transition-all duration-300  shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-70 disabled:cursor-not-allowed"
                       : "bg-gray-300"
                   }`}
                   disabled={!pet.isAvailable}
                 >
                   {pet.isAvailable 
-                    ? <span className="flex items-center justify-center"><Heart className="mr-2 h-5 w-5" /> Adopt Now</span> 
+                    ? <span className="flex items-center justify-center"><Heart className="mr-2 h-5 fill-current w-5" /> Adopt Now</span> 
                     : "Already Adopted"}
-                </Button>
+                </button>
               </div>
             </div>
           </div>

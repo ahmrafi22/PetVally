@@ -214,13 +214,13 @@ export default function Shop() {
     const isInCart = cart?.items.some(item => item.product.id === product.id)
     
     return (
-      <div key={product.id} className="bg-white border hover:scale-105 duration-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all group">
+      <div key={product.id} className="bg-white border group duration-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all group">
         <Link href={`/store/${product.id}`} className="block relative">
           <div className="h-70 relative overflow-hidden">
             <img
               src={product.image || "/placeholder.svg?height=300&width=300"}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full group-hover:scale-105 transition-all duration-300 h-full object-cover"
             />
             {product.stock <= 5 && product.stock > 0 && (
               <Badge className="absolute top-2 right-2 bg-amber-500">
@@ -422,8 +422,8 @@ export default function Shop() {
 
       {/* All Products Section */}
       <section>
-        <div className="flex items-center mb-6 border-b pb-2">
-          <h2 className="text-xl font-semibold text-blue-700">
+        <div className="flex  justify-center items-center mb-8 border-b pb-2">
+          <h2 className="text-xl text-center font-semibold text-blue-700">
             {searchTerm 
               ? `Search Results for "${searchTerm}"` 
               : activeCategory

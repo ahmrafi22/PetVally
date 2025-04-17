@@ -30,13 +30,13 @@ export default async function UserLayout({
 
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <header className="w-full bg-gray-100 shadow-sm z-10">
-          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-center">
+        <header className="w-full fixed z-10  bg-white/25 backdrop-blur-[4px] border shadow border-white/20 ">
+          <div className="w-full py-4  sm:px-6 lg:px-8">
             <PetVallyLogo />
           </div>
         </header>
         <UserNavigation />
-        <div className="md:ml-20 transition-all duration-300">
+        <div className="md:ml-20 mt-15 transition-all duration-300">
           <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 pt-16 md:pt-6">
             {children}
           </main>

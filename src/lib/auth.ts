@@ -11,7 +11,7 @@ export async function signJwtToken(payload: any, options = {}) {
   const token = await new SignJWT(serializablePayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("4d") // Token expires in 4 days
+    .setExpirationTime("4d") 
     .sign(JWT_SECRET)
 
   return token

@@ -69,6 +69,8 @@ export default function MyOrdersPage() {
     async function fetchOrders() {
       try {
         const token = localStorage.getItem("userToken")
+
+        
         if (!token) {
           router.push("/userlogin")
           return
@@ -229,19 +231,19 @@ export default function MyOrdersPage() {
         <div className="bg-red-50 text-red-700 p-4 rounded-md mb-4">
           <p>{error}</p>
         </div>
-        <Button onClick={() => router.push("/user/store")}>Return to Store</Button>
+        <Button onClick={() => router.push("/profile")}>Return to Profile</Button>
       </div>
     )
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Orders</h1>
-        <Link href="/user/store">
+        <Link href="/profile">
           <Button variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Store
+            Back to Profile
           </Button>
         </Link>
       </div>
@@ -376,12 +378,12 @@ export default function MyOrdersPage() {
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Your Rating</label>
+              <label className="text-sm font-medium mb-3">Your Rating</label>
               <StarRating value={ratingValue} onChange={setRatingValue} />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="comment" className="text-sm font-medium">
+              <label htmlFor="comment" className="text-sm font-medium mb-4">
                 Your Review (Optional)
               </label>
               <Textarea

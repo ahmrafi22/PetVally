@@ -132,6 +132,7 @@
   }
 }
 
+/* Glass button */
 @property --angle-1 {
   syntax: "<angle>";
   inherits: false;
@@ -142,4 +143,23 @@
   syntax: "<angle>";
   inherits: false;
   initial-value: -45deg;
+}
+
+@layer utilities {
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .animate-gradient {
+    animation: gradient 4s linear infinite;
+    background-size: 200% 200%;
+  }
 }

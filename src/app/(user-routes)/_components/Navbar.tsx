@@ -21,7 +21,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "next/image";
 import { useCartStore } from "@/stores/cart-store";
 import { useNotificationStore } from "@/stores/notification-store";
-import { useUserStore } from "@/stores/user-store"; // Import the new user store
+import { useUserStore } from "@/stores/user-store";
 
 gsap.registerPlugin(useGSAP);
 
@@ -32,16 +32,15 @@ export default function UserNavigation() {
   const isMobile = useIsMobile();
   const { cart } = useCartStore();
   const [isMounted, setIsMounted] = useState(false);
-  
-  // Use the stores
+
+  // zustand stores
   const { count: notificationCount, fetchCount } = useNotificationStore();
   const { userData, fetchUserData } = useUserStore();
-  
-  // Refs for GSAP animations
-  const sidebarRef = useRef(null);
+
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
   const textElementsRef = useRef<HTMLSpanElement[]>([]);
 
-  // Set initial expanded state based on screen size
+  // initial expanded state based on screen size
   useEffect(() => {
     if (isMobile) {
       setExpanded(false);
@@ -52,16 +51,16 @@ export default function UserNavigation() {
   useEffect(() => {
     // Check if we already have user data in the store
     const userId = localStorage.getItem("userId");
-    
+
     if (userId) {
       // If we don't have user data or it's for a different user, fetch it
       if (!userData.id || userData.id !== userId) {
         fetchUserData();
       }
-      
+
       // Fetch notification count
       fetchCount();
-      
+
       // Animate notification badge if there are unread notifications
       if (notificationCount > 0) {
         gsap.fromTo(
@@ -77,20 +76,20 @@ export default function UserNavigation() {
         );
       }
     }
-    
+
     // Set up interval to check for new notifications every minute
     const intervalId = async () => {
       if (!localStorage.getItem("userToken")) return;
-      
+
       // Get previous count before fetching
       const prevCount = useNotificationStore.getState().count;
-      
+
       // Fetch new count using the store
       await fetchCount();
-      
+
       // Get updated count after fetching
       const newCount = useNotificationStore.getState().count;
-      
+
       // Only animate if the count has increased
       if (newCount > prevCount) {
         gsap.fromTo(
@@ -104,8 +103,7 @@ export default function UserNavigation() {
           }
         );
       }
-    }; // Check every minute
-    
+    };
   }, [fetchUserData, fetchCount, notificationCount, userData.id]);
 
   // GSAP animations for sidebar expand/collapse
@@ -194,6 +192,33 @@ export default function UserNavigation() {
     }
   };
 
+  // Handle closing navigation
+  const handleNavClose = () => {
+    if (isMobile) {
+      setMobileOpen(false);
+    } else {
+      setExpanded(false);
+    }
+  };
+
+  //cliking outside handle
+  useEffect(() => {
+    if (!isMobile && expanded) {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          sidebarRef.current && 
+          !sidebarRef.current.contains(event.target as Node) &&
+          !(event.target as Element).closest('button[aria-label*="sidebar"]')
+        ) {
+          setExpanded(false);
+        }
+      };
+      
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isMobile, expanded])
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -247,7 +272,7 @@ export default function UserNavigation() {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className="fixed top-0 left-0 h-full bg-white shadow-lg z-20 transition-all duration-200"
+        className="fixed top-0 left-0 h-full bg-white/90 shadow-lg z-20 transition-all duration-200"
         style={{
           width: isMobile ? "256px" : expanded ? "256px" : "80px",
           transform:
@@ -256,7 +281,7 @@ export default function UserNavigation() {
       >
         <div className="flex flex-col h-full">
           {/* Sidebar header */}
-          <div className="flex items-center justify-between p-4.5 border-b">
+          <div className="flex items-center justify-between p-[19px] border-b">
             <div className="flex items-center gap-2">
               {(expanded || mobileOpen) && (
                 <h2 ref={addToRefs} className="text-xl font-bold text-pink-600">
@@ -286,6 +311,7 @@ export default function UserNavigation() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
+                    onClick={handleNavClose}
                     className="flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700 hover:text-blue-600, relative"
                   >
                     <span className="inline-block">{item.icon}</span>
@@ -307,6 +333,7 @@ export default function UserNavigation() {
               <li>
                 <Link
                   href={`/profile/${userId}`}
+                  onClick={handleNavClose}
                   className="flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700 hover:text-blue-600"
                 >
                   <span className="inline-block">

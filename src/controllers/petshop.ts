@@ -138,13 +138,12 @@ export async function getRecommendedPets(userId: string) {
       },
     })
 
-    // Calculate compatibility score for each pet
+    // Calculate compatibility score for each available pets 
     const scoredPets = availablePets.map((pet) => {
-      // Convert Prisma Pet to our application Pet type with number price
       const appPet = {
         ...pet,
         price: Number(pet.price),
-        createdAt: pet.createdAt.toISOString(), // Convert Date to string
+        createdAt: pet.createdAt.toISOString(), 
       }
 
       const score = calculateCompatibilityScore(user, appPet)

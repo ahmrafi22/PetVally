@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Search, CheckCircle, Sparkle, Heart, X } from "lucide-react"
+import { Search, CheckCircle, Heart, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -34,7 +34,7 @@ export default function PetShop() {
           return
         }
 
-        // Fetch pet recommendations
+        // Fetch pet recommendations + all pets
         const recommendationsResponse = await fetch("api/users/petShop/recommendations", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -103,10 +103,10 @@ export default function PetShop() {
     const filtered = allPets.filter((pet) => {
       if (!pet.tags || pet.tags.length === 0) return false
 
-      // Convert pet tags to lowercase for case-insensitive comparison
+      
       const petTagsLower = pet.tags.map((tag) => tag.toLowerCase())
 
-      // Check if any of the search tags match any of the pet tags
+      
       return searchTags.some((searchTag) => petTagsLower.some((petTag) => petTag.includes(searchTag)))
     })
 
@@ -117,7 +117,7 @@ export default function PetShop() {
     setSearchTerm(e.target.value)
   }
 
-  // Function to render a pet card
+  // render a pet card
   const renderPetCard = (pet: Pet, showScore = false) => {
     const scoredPet = pet as ScoredPet
 
@@ -135,7 +135,7 @@ export default function PetShop() {
                 {Math.round(scoredPet.compatibilityScore)}%
               </div>
             )}
-            {/* <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-t from-black to-transparent opacity-70"></div> */}
+            
           </div>
           <div className="p-4">
             <div className="flex justify-between items-start">
@@ -184,14 +184,14 @@ export default function PetShop() {
 
   // Skeleton loader for pet cards
   const renderSkeletonCard = () => (
-    <div className="border-2 border-pink-100 rounded-sm overflow-hidden shadow-sm bg-white">
-      <Skeleton className="h-72 w-full" />
+    <div className="border-2 border-pink-100 overflow-hidden shadow-sm bg-white">
+      <Skeleton className="h-80 w-full" />
       <div className="p-4 space-y-2">
         <div className="flex justify-between">
           <Skeleton className="h-6 w-24 rounded-full" />
           <Skeleton className="h-6 w-16 rounded-full" />
         </div>
-        <Skeleton className="h-4 w-32 rounded-full" />
+        <Skeleton className="h-4 w-26 rounded-full" />
         <Skeleton className="h-4 w-20 rounded-full" />
         <div className="flex gap-1 mt-2">
           <Skeleton className="h-6 w-16 rounded-full" />
@@ -216,26 +216,24 @@ export default function PetShop() {
 
         {/* Search Bar */}
         <div className="mb-8">
-          <div className="relative max-w-md mx-auto">
+          <div className="relative max-w-md mx-auto ">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Search className="h-5 w-5 text-pink-400" />
             </div>
             <Input
               type="text"
               placeholder="Search by tags (e.g., dog friendly gentle)"
-              className="pl-10 py-2 border-2 border-pink-200 rounded-full focus:border-pink-400 focus:ring focus:ring-pink-200 focus:ring-opacity-50"
+              className="pl-10 py-2 border-2 overflow-hidden border-pink-200 rounded-full focus:border-pink-400 focus:ring focus:ring-pink-200 focus:ring-opacity-50"
               value={searchTerm}
               onChange={handleSearch}
             />
             {searchTerm && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute inset-y-0 right-0 px-3 text-pink-500 hover:text-pink-700"
+              <button
+                className="absolute inset-y-1 right-2 rounded-full  text-pink-500 hover:text-pink-700"
                 onClick={() => setSearchTerm("")}
               >
-                <X size={16} />
-              </Button>
+                <X size={16}/>
+              </button>
             )}
           </div>
           {searchTerm && (

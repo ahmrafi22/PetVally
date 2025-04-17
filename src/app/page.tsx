@@ -21,14 +21,8 @@ export default function Home() {
   return (
     <ReactLenis root>
       <main className="min-h-screen">
-        {isLoading && <LoadingScreen />}
-
-        {/* MainPage is always rendered but only visible when not loading */}
-        <div
-          className={`transition-opacity duration-300 ${
-            isLoading ? "opacity-0" : "opacity-100"
-          }`}
-        >
+        {isLoading && (<LoadingScreen />)}
+        <div>
           <MainPage />
           <Second />
         </div>

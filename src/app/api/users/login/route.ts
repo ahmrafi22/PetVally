@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, password } = body
 
-    // Validate input
+
     if (!email || !password) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 })
     }
@@ -21,12 +21,11 @@ export async function POST(request: NextRequest) {
     // Set cookie and get token
     const token = await setUserCookie(user)
 
-    // Set token in response header for Postman testing
     const response = NextResponse.json(
       {
         message: "Login successful",
         user,
-        token, // Return token for Postman testing
+        token, 
       },
       { status: 200 },
     )

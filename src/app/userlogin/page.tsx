@@ -11,19 +11,16 @@ export default function UserLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
 
-  // Check if user is already logged in on component mount
+
   useEffect(() => {
     const userToken = localStorage.getItem("userToken");
     if (userToken) {
-      // User is already logged in, redirect to petshop
       router.push("/petshop");
     } else {
-      // User is not logged in, allow them to view the login page
       setCheckingAuth(false);
     }
   }, [router]);
@@ -46,25 +43,19 @@ export default function UserLogin() {
         throw new Error(data.message || "Login failed");
       }
 
-      // Save token and userId to localStorage
+
       localStorage.setItem("userToken", data.token);
       localStorage.setItem("userId", data.user.id);
 
-      // Save token for display
-      setToken(data.token);
-
-      // Redirect to user profile or dashboard
       setTimeout(() => {
         router.push("/petshop");
       }, 300);
     } catch (err: any) {
       setError(err.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
-  // Show loading indicator while checking authentication status
+
   if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-tl from-red-200 to-blue-200">
@@ -74,18 +65,17 @@ export default function UserLogin() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-tl from-red-200 to-blue-200 px-4 sm:px-6 lg:px-5">
-      {/* Logo/Header at the top */}
-      <header className="w-full pt-6 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+    <div className="min-h-screen flex flex-col bg-gradient-to-tl from-red-200 to-blue-200">
+      <header className="w-full z-10 absolute top-0">
+        <div className="max-w-7xl mx-auto py-4  sm:px-6  flex justify-center">
           <PetVallyLogo />
         </div>
       </header>
 
-      {/* Main content centered in remaining space */}
+
       <div className="flex-grow flex items-center justify-center">
         <div className="w-full lg:h-[70vh] max-w-7xl mx-auto flex flex-col md:flex-row bg-white/25 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 overflow-hidden">
-          {/* Lottie Animation - Hidden on small screens */}
+
           <div className="hidden md:flex md:w-1/2 items-center justify-center p-8 bg-indigo-50/30">
             <DotLottieReact
               src="https://lottie.host/58ed2b94-1c5f-47c3-b62a-ff7d1ffad8f8/wjmYfbGUjd.lottie"
@@ -95,7 +85,7 @@ export default function UserLogin() {
             />
           </div>
 
-          {/* Login Form */}
+
           <div className="w-full md:w-1/2 p-8 flex items-center justify-center">
             <div className="max-w-md mx-auto space-y-6">
               <div>

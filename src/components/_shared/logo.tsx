@@ -3,12 +3,12 @@ import { Satisfy, Lobster } from "next/font/google";
 import { PawPrint } from "lucide-react";
 
 // Initialize the font
-const pawPaint = Satisfy({
+const text = Satisfy({
   weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
-const pawPaint2 = Lobster({
+const text2 = Lobster({
   weight: "400",
   subsets: ["latin"],
   display: "swap",
@@ -19,10 +19,10 @@ const PetVallyLogo = () => {
     <div className="flex items-center gap-2 justify-center">
        <PawPrint  className="w-10 h-9.5 text-pink-600 fill-current font-bold" />
       <h1
-        className={`text-3xl md:text-4xl font-bold text-black ${pawPaint.className} flex items-center`}
+        className={`text-3xl md:text-4xl font-bold text-black ${text.className} flex items-center`}
       >
         Pet&nbsp;
-        <span className={`${pawPaint2.className}`}>Vally</span>
+        <span className={`${text2.className}`}>Vally</span>
       </h1>
     </div>
   );

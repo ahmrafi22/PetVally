@@ -2,10 +2,7 @@ import { NextResponse } from "next/server"
 import { clearUserCookie } from "@/lib/auth"
 
 export async function POST(request: Request) {
-  // Clear the user cookie
   clearUserCookie()
-
-  // Create a response with redirect
   const url = new URL("/", request.url) 
 
   const response = NextResponse.redirect(url, { status: 303 })
