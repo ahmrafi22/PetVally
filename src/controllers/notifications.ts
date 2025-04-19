@@ -18,6 +18,30 @@ export async function createNotification(userId: string, type: string, message: 
   }
 }
 
+// Create notifications for specific users
+export async function createNotificationForUsers(userIds: string[], type: string, message: string) {
+  try {
+    // Create a notification for each specified user
+    const notifications = await Promise.all(
+      userIds.map((userId) =>
+        prisma.notification.create({
+          data: {
+            userId,
+            type,
+            message,
+            read: false,
+          },
+        }),
+      ),
+    )
+
+    return notifications
+  } catch (error) {
+    console.error("Error creating notifications for users:", error)
+    throw error
+  }
+}
+
 // Create notifications for all users
 export async function createNotificationForAllUsers(type: string, message: string) {
   try {

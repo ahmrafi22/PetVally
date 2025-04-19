@@ -1,7 +1,7 @@
 import PetVallyLogo from "@/components/_shared/logo";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useRef } from "react";
-import gsap from "gsap";
+import gsap from "gsap"
 import { useGSAP } from "@gsap/react";
 import GlassButton from "./glass-button";
 
@@ -120,7 +120,7 @@ export default function MainPage() {
         </div>
       </div>
 
-      <div className="flex justify-center hover:scale-110 transition-transform duration-300 mt-20 md:mt-16 ">
+      <div className="flex justify-center hover:scale-110 transition-transform duration-300 mt-16 ">
         <GlassButton href="/userlogin" text=" JOIN NOW " />
       </div>
     </div>

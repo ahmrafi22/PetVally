@@ -30,8 +30,8 @@ export default async function AdminLayout({
 
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <header className="w-full bg-white shadow-sm z-10">
-          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-center">
+        <header className="w-full fixed z-10  bg-white/25 backdrop-blur-[4px] border shadow border-white/20 ">
+          <div className="w-full py-4  sm:px-6 lg:px-8">
             <PetVallyLogo />
           </div>
         </header>
@@ -42,7 +42,7 @@ export default async function AdminLayout({
           <AdminSidebar />
           
           {/* Main content */}
-          <div className="md:ml-64 flex-1 transition-all duration-300">
+          <div className="md:ml-64 flex-1 mt-10 transition-all duration-300">
             <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
               {children}
             </main>

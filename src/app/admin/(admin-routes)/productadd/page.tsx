@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { Trash2, Upload, PlusCircle, RefreshCw, AlertTriangle } from "lucide-react"
+import { Trash2, Upload, PlusCircle, RefreshCw, AlertTriangle, Edit, Check } from "lucide-react"
 import type { Product } from "@/types"
 
 export default function ProductAddPage() {
@@ -39,6 +39,20 @@ export default function ProductAddPage() {
     stock: "",
     category: "food", // Default category
   })
+
+  // Add this state for the update dialog
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
+  const [productToUpdate, setProductToUpdate] = useState<Product | null>(null)
+  const [updateFormData, setUpdateFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    stock: "",
+    category: "food",
+  })
+  const [updatePreviewImage, setUpdatePreviewImage] = useState<string | null>(null)
+  const updateFileInputRef = useRef<HTMLInputElement>(null)
+  const [updating, setUpdating] = useState(false)
 
   // Fetch products on mount
   useEffect(() => {
@@ -169,6 +183,20 @@ export default function ProductAddPage() {
     setDeleteDialogOpen(true)
   }
 
+  // Add this function to open the update dialog
+  const openUpdateDialog = (product: Product) => {
+    setProductToUpdate(product)
+    setUpdateFormData({
+      name: product.name,
+      description: product.description,
+      price: product.price.toString(),
+      stock: product.stock.toString(),
+      category: product.category,
+    })
+    setUpdatePreviewImage(product.image ?? null)
+    setUpdateDialogOpen(true)
+  }
+
   // Handle delete confirmation
   const confirmDelete = async () => {
     if (!productToDelete) return
@@ -202,6 +230,91 @@ export default function ProductAddPage() {
       setDeleting(null)
       setProductToDelete(null)
     }
+  }
+
+  // Add this function to handle update form input changes
+  const handleUpdateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setUpdateFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  // Add this function to handle update form select changes
+  const handleUpdateSelectChange = (name: string) => (value: string) => {
+    setUpdateFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  // Add this function to handle update form file changes
+  const handleUpdateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File too large. Please select an image smaller than 5MB.")
+      return
+    }
+
+    // Check file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Invalid file type. Please select an image file.")
+      return
+    }
+
+    // Create preview
+    const reader = new FileReader()
+    reader.onload = () => {
+      setUpdatePreviewImage(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Add this function to handle update form submission
+  const handleUpdateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!productToUpdate) return
+
+    setUpdating(true)
+
+    try {
+      const token = localStorage.getItem("adminToken")
+
+      const response = await fetch(`/api/admin/products/${productToUpdate.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...updateFormData,
+          price: Number.parseFloat(updateFormData.price),
+          stock: Number.parseInt(updateFormData.stock),
+          imageBase64: updatePreviewImage !== productToUpdate.image ? updatePreviewImage : null,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to update product")
+      }
+
+      toast.success("Product updated successfully")
+      setUpdateDialogOpen(false)
+
+      // Refresh product list
+      fetchProducts()
+    } catch (error: any) {
+      console.error("Error updating product:", error)
+      toast.error(error.message || "Failed to update product")
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  // Add this function to handle update image upload click
+  const handleUpdateUploadClick = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent event bubbling
+    updateFileInputRef.current?.click()
   }
 
   return (
@@ -406,6 +519,15 @@ export default function ProductAddPage() {
 
                   <div className="mt-4 flex justify-between">
                     <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openUpdateDialog(product)}
+                      className="flex items-center"
+                    >
+                      <Edit className="mr-1 h-3 w-3" />
+                      Edit
+                    </Button>
+                    <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => openDeleteDialog(product)}
@@ -464,6 +586,170 @@ export default function ProductAddPage() {
               Delete
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Product Dialog */}
+      <Dialog open={updateDialogOpen} onOpenChange={setUpdateDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-purple-600">
+              <Edit className="h-5 w-5" />
+              Update Product
+            </DialogTitle>
+            <DialogDescription>
+              Update the details of this product. Fields marked with * are required.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleUpdateSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="update-name" className="text-sm font-medium mb-1.5 block text-gray-700">
+                    Product Name *
+                  </Label>
+                  <Input
+                    id="update-name"
+                    name="name"
+                    value={updateFormData.name}
+                    onChange={handleUpdateInputChange}
+                    className="focus:ring-2 focus:ring-purple-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="update-description" className="text-sm font-medium mb-1.5 block text-gray-700">
+                    Description *
+                  </Label>
+                  <Textarea
+                    id="update-description"
+                    name="description"
+                    value={updateFormData.description}
+                    onChange={handleUpdateInputChange}
+                    required
+                    className="resize-none h-32 focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="update-price" className="text-sm font-medium mb-1.5 block text-gray-700">
+                      Price ($) *
+                    </Label>
+                    <Input
+                      id="update-price"
+                      name="price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={updateFormData.price}
+                      onChange={handleUpdateInputChange}
+                      className="focus:ring-2 focus:ring-purple-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="update-stock" className="text-sm font-medium mb-1.5 block text-gray-700">
+                      Stock Quantity *
+                    </Label>
+                    <Input
+                      id="update-stock"
+                      name="stock"
+                      type="number"
+                      min="0"
+                      value={updateFormData.stock}
+                      onChange={handleUpdateInputChange}
+                      className="focus:ring-2 focus:ring-purple-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="update-category" className="text-sm font-medium mb-1.5 block text-gray-700">
+                    Category *
+                  </Label>
+                  <Select value={updateFormData.category} onValueChange={handleUpdateSelectChange("category")}>
+                    <SelectTrigger className="focus:ring-2 focus:ring-purple-500">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="food">Food</SelectItem>
+                      <SelectItem value="toy">Toy</SelectItem>
+                      <SelectItem value="medicine">Medicine</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-sm font-medium mb-1.5 block text-gray-700">Product Image</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  {updatePreviewImage ? (
+                    <div className="relative w-full h-40 mb-4">
+                      <img
+                        src={updatePreviewImage || "/placeholder.svg"}
+                        alt="Preview"
+                        className="w-full h-full object-contain rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setUpdatePreviewImage(null)}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center cursor-pointer py-6" onClick={handleUpdateUploadClick}>
+                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                      <p className="mt-2 text-sm text-gray-500">Click to upload</p>
+                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                    </div>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 w-full"
+                    onClick={handleUpdateUploadClick}
+                  >
+                    {updatePreviewImage ? "Change Image" : "Select Image"}
+                  </Button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUpdateFileChange}
+                    className="hidden"
+                    ref={updateFileInputRef}
+                  />
+                  <p className="text-xs text-gray-500 mt-2 text-center">Leave unchanged to keep the current image</p>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setUpdateDialogOpen(false)} disabled={updating}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updating} className="bg-purple-600 hover:bg-purple-700">
+                {updating ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Update Product
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

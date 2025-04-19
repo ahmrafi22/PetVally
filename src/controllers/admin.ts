@@ -345,6 +345,56 @@ export async function deleteProduct(id: string) {
   }
 }
 
+// Update a product
+export async function updateProduct(id: string, data: any) {
+  try {
+    // Get the current product
+    const product = await prisma.product.findUnique({
+      where: { id },
+    })
+
+    if (!product) {
+      throw new Error("Product not found")
+    }
+
+    // Prepare update data
+    const updateData: any = {
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      stock: data.stock,
+      category: data.category,
+    }
+
+    // If a new image is provided, upload it and update the image URL
+    if (data.imageBase64 && data.imageBase64 !== product.image) {
+      // Upload new image to Cloudinary
+      const uploadResponse = await uploadImage(data.imageBase64, "products")
+      updateData.image = uploadResponse.secure_url
+
+      // Delete the old image from Cloudinary
+      if (product.image) {
+        await deleteImage(product.image)
+      }
+    }
+
+    // Update the product in the database
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data: updateData,
+    })
+
+    // Convert Decimal to number for JSON serialization
+    return {
+      ...updatedProduct,
+      price: Number(updatedProduct.price),
+    }
+  } catch (error) {
+    console.error("Error updating product:", error)
+    throw error
+  }
+}
+
 // Get all orders with user and product details
 export async function getAllOrders() {
   try {

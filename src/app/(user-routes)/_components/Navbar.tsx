@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ShoppingBag,
-  MessageSquare,
   User,
   LogOut,
   Menu,
@@ -14,8 +13,9 @@ import {
   PawPrint,
   Bell,
   ShoppingCart,
+  HeartHandshake,
 } from "lucide-react";
-import gsap from "gsap";
+import gsap from "gsap"
 import { useGSAP } from "@gsap/react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "next/image";
@@ -237,7 +237,7 @@ export default function UserNavigation() {
       href: "/cart",
       badge: itemCount > 0 ? itemCount : null,
     },
-    { name: "Forum", icon: <MessageSquare size={25} />, href: "/user/forum" },
+    { name: "Pet Donations", icon: <HeartHandshake size={25} />, href: "/donation" },
     {
       name: "Notifications",
       icon: <Bell size={25} />,
@@ -312,7 +312,7 @@ export default function UserNavigation() {
                   <Link
                     href={item.href}
                     onClick={handleNavClose}
-                    className="flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700 hover:text-blue-600, relative"
+                    className="flex items-center p-2 rounded-full hover:bg-blue-50 text-gray-700, relative hover:text-blue-600"
                   >
                     <span className="inline-block">{item.icon}</span>
                     {(expanded || mobileOpen) && (
@@ -334,7 +334,7 @@ export default function UserNavigation() {
                 <Link
                   href={`/profile/${userId}`}
                   onClick={handleNavClose}
-                  className="flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700 hover:text-blue-600"
+                  className="flex items-center p-2 rounded-full hover:bg-blue-50 text-gray-700 hover:text-blue-600"
                 >
                   <span className="inline-block">
                     {userData.image ? (
@@ -363,7 +363,7 @@ export default function UserNavigation() {
           <div className="p-4 border-t">
             <button
               onClick={handleLogout}
-              className={`flex cursor-pointer items-center p-2 w-full rounded-md text-red-600 hover:bg-red-50 ${
+              className={`flex cursor-pointer items-center p-2 w-full rounded-full text-red-600 hover:bg-red-50 ${
                 expanded || mobileOpen ? "justify-start" : "justify-center"
               }`}
             >

@@ -275,25 +275,32 @@ model ProductRating {
 // =============================================
 
 model DonationPost {
-  id          String @id @default(uuid())  // Unique post identifier
-  title       String                       // Post title (e.g. "Labrador Puppy for Adoption")
-  description String                       // Detailed description of pet
-  images      String[]                     // Array of image URLs for pet
-  country     String                       // Full address for meetup
-  city        String                       // City for location filtering
-  area        String                       // Neighborhood for precise matching
-  isAvailable Boolean @default(true)       // Whether pet is still available
-  upvotesCount Int @default(0)             // Count of upvotes (cached for performance)
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  images        String
+  country       String
+  city          String
+  area          String
+  isAvailable   Boolean  @default(true)
+  upvotesCount  Int      @default(0)
 
-  // ===== Relationships =====
-  user       User @relation(fields: [userId], references: [id])  // Posting user
-  userId     String                       // Reference to posting user
-  adoptionForms AdoptionForm[]            // Adoption applications received
-  upvotes    Upvote[]                     // Upvotes received
-  comments   Comment[]                    // Comments received
+  // Pet-specific fields
+  species       String
+  breed         String
+  gender        String
+  age           Int
+  vaccinated    Boolean  @default(false)
+  neutered      Boolean  @default(false)
 
-  createdAt DateTime @default(now())      // When post was created
+  // Relations
+  user           User        @relation(fields: [userId], references: [id])
+  userId         String
+  adoptionForms  AdoptionForm[]
+  upvotes        Upvote[]
+  comments       Comment[]
 
+  createdAt      DateTime    @default(now())
   // Purpose: Facilitate pet rehoming through community
   // Relations: Connects pet donors to potential adopters
 }
@@ -302,7 +309,7 @@ model MissingPost {
   id          String @id @default(uuid())  // Unique post identifier
   title       String                       // Post title (e.g. "Lost Siamese Cat")
   description String                       // Detailed description of missing pet
-  images      String[]                     // Array of image URLs for pet
+  images      String                       // Image URL for pet
   country     String                       // Last seen address
   city        String                       // City for location filtering
   area        String                       // Neighborhood for precise matching
@@ -338,7 +345,6 @@ model Upvote {
   // Purpose: Track community engagement with posts
   // Relations: Links users to posts they've supported
   // Business Rules:
-  // - Users can only upvote posts from their city/area first
   // - Each user gets one upvote per post
 }
 
@@ -378,7 +384,6 @@ model AdoptionForm {
   // Purpose: Formalize pet adoption process
   // Relations: Connects applicants to donation posts
   // Business Rules:
-  // - Only users with complete profiles can apply
   // - Donor can only accept one application per pet
 }
 
@@ -529,6 +534,10 @@ model Notification {
   // - Location-based for community posts
   // - Mark as read when viewed
 }
+
+
+
+
 
 // =============================================
 // ADMIN SYSTEM

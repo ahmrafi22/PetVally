@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Users, PawPrint, UserCheck, ShoppingBag } from "lucide-react"
+import { Users, PawPrint, UserCheck, ShoppingBag, DollarSign, Package, ShoppingCart } from "lucide-react"
 import StatCard from "../_components/stat-card"
 
 type DashboardStats = {
@@ -9,6 +9,9 @@ type DashboardStats = {
   availablePetsCount: number
   caregiverCount: number
   petOrdersCount: number
+  totalEarnings: number
+  totalProducts: number
+  totalOrders: number
 }
 
 export default function Dashboard() {
@@ -112,6 +115,28 @@ export default function Dashboard() {
             description="Completed adoptions"
             color="amber"
           />
+          <StatCard
+            title="Total Products"
+            value={stats.totalProducts}
+            icon={<Package className="h-8 w-8 text-indigo-500" />}
+            description="Available products"
+            color="purple"
+          />
+          <StatCard
+            title="Total Orders"
+            value={stats.totalOrders}
+            icon={<ShoppingCart className="h-8 w-8 text-orange-500" />}
+            description="Product orders"
+            color="amber"
+          />
+          <StatCard
+            title="Total Earnings"
+            value={stats.totalEarnings}
+            icon={<DollarSign className="h-8 w-8 text-emerald-500" />}
+            description="Revenue from orders"
+            color="green"
+            isCurrency={true}
+          />
         </div>
       )}
 
@@ -184,4 +209,3 @@ export default function Dashboard() {
     </div>
   )
 }
-

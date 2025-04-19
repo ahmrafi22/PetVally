@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Bell,  Calendar, Info, Cat, PackageCheck, PackageX } from "lucide-react"
+import { Bell,  Calendar, Info, Cat, PackageCheck, PackageX, MapPinPlus, MessageSquare, HeartPulse, HeartHandshake } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import type { Notification } from "@/types"
@@ -61,6 +61,14 @@ export default function NotificationsPage() {
         return <PackageCheck className="h-8 w-8 text-purple-500" />
       case "ORDER_CANCELLED":
         return <PackageX className="h-8 w-8 text-purple-500" />
+      case "NEW_DONATION_POST":
+        return <MapPinPlus className="h-8 w-8 text-green-500" />
+      case "NEW_COMMENT":
+          return <MessageSquare className="h-8 w-8 text-green-700" />
+      case "NEW_ADOPTION_APPLICATION":
+        return <HeartPulse className="h-8 w-8 text-red-500" />
+      case "ADOPTION_ACCEPTED":
+        return <HeartHandshake className="h-8 w-8 text-pink-500" />
       default:
         return <Info className="h-5 w-5 text-gray-500" />
     }

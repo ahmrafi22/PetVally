@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { updateOrderStatus } from "@/controllers/admin"
+import { addComment } from "@/controllers/donation-post-data"
 import { verifyJwtToken } from "@/lib/auth"
 
-// Update order status
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }>  }) {
+// Add comment to a post
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Get the authorization header
     const authHeader = request.headers.get("Authorization")
@@ -19,34 +19,38 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     // Verify the token
     const payload = await verifyJwtToken(token)
 
-    if (!payload || payload.role !== "admin") {
+    if (!payload || payload.role !== "user") {
       return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 })
     }
-    // Get the order ID from the URL params
+
+    // Get the user ID from the payload
+    const userId = payload.id as string
+
+    // Get the post ID from the URL params
     const awaitedParams = await params
     const id = awaitedParams.id
 
     // Get the request body
     const body = await request.json()
-    const { status } = body
+    const { content } = body
 
-    if (!status || (status !== "COMPLETED" && status !== "CANCELLED")) {
-      return NextResponse.json({ message: "Bad Request: Invalid status" }, { status: 400 })
+    if (!content || !content.trim()) {
+      return NextResponse.json({ message: "Comment content is required" }, { status: 400 })
     }
 
-    // Update the order status
-    const updatedOrder = await updateOrderStatus(id, status)
+    // Add comment to the post
+    const comment = await addComment(userId, id, content)
 
-    // Return the updated order
+    // Return the comment
     return NextResponse.json(
       {
-        message: `Order ${status === "COMPLETED" ? "approved" : "cancelled"} successfully`,
-        order: updatedOrder,
+        message: "Comment added successfully",
+        comment,
       },
-      { status: 200 },
+      { status: 201 },
     )
-  } catch (error) {
-    console.error("Error updating order status:", error)
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Error adding comment:", error)
+    return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 })
   }
 }

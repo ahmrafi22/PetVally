@@ -39,6 +39,13 @@ model User {
   cart        Cart?          // User's active shopping cart
   orders      Order[]        // History of all product orders placed
   ratings     ProductRating[] // Product reviews submitted by user
+
+  // ========== Community ==========
+  donations     DonationPost[]  // Pets user has listed for donation
+  missingPosts  MissingPost[]   // Missing pet reports created by user
+  adoptionForms AdoptionForm[]  // Adoption applications submitted by user
+  upvotes       Upvote[]        // Posts user has upvoted
+  comments      Comment[]       // Comments user has posted
 }
 
 model Caregiver {
@@ -247,4 +254,123 @@ enum OrderStatus {
   PENDING    // Order is created but payment/processing not completed
   COMPLETED  // Order has been successfully processed and fulfilled
   CANCELLED  // Order was cancelled by user or system
+}
+
+
+
+model DonationPost {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  images        String
+  country       String
+  city          String
+  area          String
+  isAvailable   Boolean  @default(true)
+  upvotesCount  Int      @default(0)
+
+  // Pet-specific fields
+  species       String
+  breed         String
+  gender        String
+  age           Int
+  vaccinated    Boolean  @default(false)
+  neutered      Boolean  @default(false)
+
+  // Relations
+  user           User        @relation(fields: [userId], references: [id])
+  userId         String
+  adoptionForms  AdoptionForm[]
+  upvotes        Upvote[]
+  comments       Comment[]
+
+  createdAt      DateTime    @default(now())
+  
+  @@index([userId])
+  @@index([city])
+  @@index([area])
+}
+
+model Upvote {
+  id      String @id @default(uuid())  // Unique upvote identifier
+  user    User @relation(fields: [userId], references: [id])  // Voting user
+  userId  String                       // Reference to voting user
+  donationPost DonationPost? @relation(fields: [donationPostId], references: [id])  // Donation post reference
+  donationPostId String?               // Reference to donation post
+  missingPost  MissingPost? @relation(fields: [missingPostId], references: [id])    // Missing post reference
+  missingPostId  String?               // Reference to missing post
+
+  createdAt DateTime @default(now())   // When upvote was given
+
+  @@unique([userId, donationPostId])  // One vote per user per donation post
+  @@unique([userId, missingPostId])   // One vote per user per missing post
+  
+  @@index([userId])
+  @@index([donationPostId])
+  @@index([missingPostId])
+}
+
+model Comment {
+  id      String @id @default(uuid())  // Unique comment identifier
+  content String                       // Comment text content
+  user    User @relation(fields: [userId], references: [id])  // Commenting user
+  userId  String                       // Reference to commenting user
+  donationPost DonationPost? @relation(fields: [donationPostId], references: [id])  // Donation post reference
+  donationPostId String?               // Reference to donation post
+  missingPost  MissingPost? @relation(fields: [missingPostId], references: [id])    // Missing post reference
+  missingPostId  String?               // Reference to missing post
+
+  createdAt DateTime @default(now())   // When comment was posted
+  
+  @@index([userId])
+  @@index([donationPostId])
+  @@index([missingPostId])
+}
+
+model AdoptionForm {
+  id              String @id @default(uuid())  // Unique form identifier
+  description     String                       // Why applicant wants to adopt
+  meetingSchedule DateTime                     // Proposed meeting date/time
+  status          AdoptionStatus @default(PENDING) // Current application status
+
+  // ===== Relationships =====
+  user           User @relation(fields: [userId], references: [id])  // Applicant
+  userId         String                       // Reference to applicant
+  donationPost   DonationPost @relation(fields: [donationPostId], references: [id])  // Target pet post
+  donationPostId String                       // Reference to donation post
+
+  createdAt DateTime @default(now())          // When application was submitted
+  
+  @@index([userId])
+  @@index([donationPostId])
+}
+
+enum AdoptionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model MissingPost {
+  id          String @id @default(uuid())  // Unique post identifier
+  title       String                       // Post title (e.g. "Lost Siamese Cat")
+  description String                       // Detailed description of missing pet
+  images      String                       // Image URL for pet
+  country     String                       // Last seen address
+  city        String                       // City for location filtering
+  area        String                       // Neighborhood for precise matching
+  status      String @default("NOT_FOUND") // Current status ("FOUND"/"NOT_FOUND")
+  upvotesCount Int @default(0)             // Count of upvotes (cached)
+
+  // ===== Relationships =====
+  user       User @relation(fields: [userId], references: [id])  // Reporting user
+  userId     String                       // Reference to reporting user
+  upvotes    Upvote[]                     // Upvotes received
+  comments   Comment[]                    // Comments received
+
+  createdAt DateTime @default(now())      // When post was created
+  
+  @@index([userId])
+  @@index([city])
+  @@index([area])
 }

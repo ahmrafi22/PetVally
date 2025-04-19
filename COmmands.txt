@@ -39,3 +39,8 @@ npx shadcn@latest add switch
 npx shadcn@latest add select
 npx shadcn@latest add input
 npx shadcn@latest add textarea
+
+TO do:
+Seed fix
+notifications fix 
+Ui change 
