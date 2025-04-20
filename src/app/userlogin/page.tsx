@@ -52,7 +52,9 @@ export default function UserLogin() {
       }, 300);
     } catch (err: any) {
       setError(err.message || "Something went wrong");
-    } 
+    } finally {
+      setLoading(false);
+    }
   };
 
 
