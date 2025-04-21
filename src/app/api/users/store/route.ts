@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getAllProducts, getProductsByCategory, getFeaturedProducts } from "@/controllers/storedata"
+import { getAllProducts, getProductsByCategory, getFeaturedProducts } from "@/controllers/store-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {

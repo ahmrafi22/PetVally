@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { updateUserProfileImage } from "@/controllers/userData"
+import { updateUserProfileImage } from "@/controllers/user-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 export async function PUT(request: NextRequest) {

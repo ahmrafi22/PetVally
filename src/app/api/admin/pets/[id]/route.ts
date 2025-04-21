@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { deletePet } from "@/controllers/admin"
+import { deletePet } from "@/controllers/admin-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Delete a pet

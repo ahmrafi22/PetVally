@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { verifyAdminCredentials, generateAdminToken } from "@/controllers/admin"
+import { verifyAdminCredentials, generateAdminToken } from "@/controllers/admin-data"
 import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {

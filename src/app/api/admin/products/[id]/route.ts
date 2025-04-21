@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { deleteProduct, updateProduct } from "@/controllers/admin"
+import { deleteProduct, updateProduct } from "@/controllers/admin-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Delete a product

@@ -14,11 +14,13 @@ We are Building a comunity of petowners and caregivers. More info will be added 
 
 ### 👨‍💻 Team Members
 
-- [@Rafi](https://github.com/ahmrafi22)
+- [@Rafi](https://github.com/ahmrafi22) 
 - [@Wasi](https://github.com/KOOKIEKAT123)
 - [@Montasir](https://github.com/)
 - [@Mahi](https://github.com/)
 
+<!-- So Far time spent on this <br>
+ [![wakatime](https://wakatime.com/badge/user/d7d5cf63-4ec9-422f-a677-8823091fc3db/project/990c11bf-1cc3-4dda-a67d-17cfaf30e6d1.svg)](https://wakatime.com/badge/user/d7d5cf63-4ec9-422f-a677-8823091fc3db/project/990c11bf-1cc3-4dda-a67d-17cfaf30e6d1)  -->
 
 🚀 Getting Started
 ------------------

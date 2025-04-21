@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getAllUsers } from "@/controllers/admin"
+import { getAllUsers } from "@/controllers/admin-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {

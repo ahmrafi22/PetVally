@@ -14,6 +14,7 @@ import {
   Bell,
   ShoppingCart,
   HeartHandshake,
+  OctagonAlert,
 } from "lucide-react";
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react";
@@ -110,7 +111,7 @@ export default function UserNavigation() {
   useEffect(() => {
     if (!isMobile && sidebarRef.current) {
       gsap.to(sidebarRef.current, {
-        width: expanded ? "256px" : "80px",
+        width: expanded ? "256px" : "70px",
         duration: 0.2,
         ease: "power2.out",
       });
@@ -161,7 +162,7 @@ export default function UserNavigation() {
         });
       } else {
         gsap.set(sidebarRef.current, {
-          width: expanded ? "256px" : "80px",
+          width: expanded ? "256px" : "70px",
           x: 0,
         });
       }
@@ -238,6 +239,7 @@ export default function UserNavigation() {
       badge: itemCount > 0 ? itemCount : null,
     },
     { name: "Pet Donations", icon: <HeartHandshake size={25} />, href: "/donation" },
+    { name: "Missing Pets", icon: <OctagonAlert size={25} />, href: "/missingposts" },
     {
       name: "Notifications",
       icon: <Bell size={25} />,
@@ -274,7 +276,7 @@ export default function UserNavigation() {
         ref={sidebarRef}
         className="fixed top-0 left-0 h-full bg-white/90 shadow-lg z-20 transition-all duration-200"
         style={{
-          width: isMobile ? "256px" : expanded ? "256px" : "80px",
+          width: isMobile ? "256px" : expanded ? "256px" : "70px", 
           transform:
             isMobile && !mobileOpen ? "translateX(-100%)" : "translateX(0)",
         }}
@@ -312,7 +314,7 @@ export default function UserNavigation() {
                   <Link
                     href={item.href}
                     onClick={handleNavClose}
-                    className="flex items-center p-2 rounded-full hover:bg-blue-50 text-gray-700, relative hover:text-blue-600"
+                    className="flex items-center p-2 rounded-full  text-gray-700, relative hover:text-blue-600"
                   >
                     <span className="inline-block">{item.icon}</span>
                     {(expanded || mobileOpen) && (
@@ -334,7 +336,7 @@ export default function UserNavigation() {
                 <Link
                   href={`/profile/${userId}`}
                   onClick={handleNavClose}
-                  className="flex items-center p-2 rounded-full hover:bg-blue-50 text-gray-700 hover:text-blue-600"
+                  className="flex items-center p-2 rounded-full text-gray-700 hover:text-blue-600"
                 >
                   <span className="inline-block">
                     {userData.image ? (

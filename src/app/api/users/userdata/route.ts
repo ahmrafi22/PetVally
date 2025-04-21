@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getUserById } from "@/controllers/userData"
+import { getUserById } from "@/controllers/user-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Controller function to handle user data requests

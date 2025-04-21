@@ -6,13 +6,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowBigUp, MessageSquare, Users, Plus, User, MapPin } from "lucide-react";
+import { ArrowBigUp, MapPin, MessageSquare, Plus, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { CreatePostDialog } from "./_components/create-post-dialog";
-import { MyPostsDialog } from "./_components/my-posts-dialog";
+import { CreateMissingPostDialog } from "./_components/create-missing-post-dialog";
 import { cn } from "@/lib/utils";
 
-type DonationPost = {
+type MissingPost = {
   id: string;
   title: string;
   description: string;
@@ -20,14 +19,11 @@ type DonationPost = {
   country: string;
   city: string;
   area: string;
-  isAvailable: boolean;
-  upvotesCount: number;
   species: string;
   breed: string;
-  gender: string;
   age: number;
-  vaccinated: boolean;
-  neutered: boolean;
+  status: string;
+  upvotesCount: number;
   user: {
     id: string;
     name: string;
@@ -35,14 +31,14 @@ type DonationPost = {
   };
   _count: {
     comments: number;
-    adoptionForms: number;
+    upvotes: number;
   };
   createdAt: string;
 };
 
-export default function DonationPage() {
-  const [localPosts, setLocalPosts] = useState<DonationPost[]>([]);
-  const [allPosts, setAllPosts] = useState<DonationPost[]>([]);
+export default function MissingPetsPage() {
+  const [localPosts, setLocalPosts] = useState<MissingPost[]>([]);
+  const [allPosts, setAllPosts] = useState<MissingPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{
@@ -53,7 +49,6 @@ export default function DonationPage() {
     area: null,
   });
   const [createPostOpen, setCreatePostOpen] = useState(false);
-  const [myPostsOpen, setMyPostsOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -110,14 +105,14 @@ export default function DonationPage() {
         return;
       }
 
-      const response = await fetch("/api/users/donation", {
+      const response = await fetch("/api/users/missingposts", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch donation posts");
+        throw new Error("Failed to fetch missing pet posts");
       }
 
       const data = await response.json();
@@ -127,7 +122,7 @@ export default function DonationPage() {
         const trimmedCity = userLocation.city.trim();
         const trimmedArea = userLocation.area.trim();
         const localResponse = await fetch(
-          `/api/users/donation?city=${encodeURIComponent(
+          `/api/users/missingposts?city=${encodeURIComponent(
             trimmedCity
           )}&area=${encodeURIComponent(trimmedArea)}`,
           {
@@ -148,9 +143,9 @@ export default function DonationPage() {
         setLocalPosts([]);
       }
     } catch (error: any) {
-      console.error("Error fetching donation posts:", error);
+      console.error("Error fetching missing pet posts:", error);
       setError(
-        error.message || "An error occurred while fetching donation posts"
+        error.message || "An error occurred while fetching missing pet posts"
       );
     } finally {
       setLoading(false);
@@ -160,7 +155,7 @@ export default function DonationPage() {
   const handleCreatePostSuccess = () => {
     setCreatePostOpen(false);
     fetchPosts();
-    toast.success("Post created successfully!");
+    toast.success("Missing pet post created successfully!");
   };
 
   const capitalizeFirstLetter = (str: string): string => {
@@ -197,13 +192,13 @@ export default function DonationPage() {
     </div>
   );
 
-  const renderPostCard = (post: DonationPost) => {
+  const renderPostCard = (post: MissingPost) => {
     return (
       <div
         key={post.id}
-        className="bg-gray-100 group mx-auto rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg  transition-all duration-300"
+        className="bg-gray-100 group mx-auto rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg  "
       >
-        <Link href={`/donation/${post.id}`} className="block">
+        <Link href={`/missingposts/${post.id}`} className="block">
           <div className="flex flex-col lg:flex-row relative">
 
             <div className="w-full lg:w-1/3 h-80 md:h-120 transition-all lg:h-auto relative">
@@ -212,9 +207,9 @@ export default function DonationPage() {
                 alt={post.title}
                 className="w-full h-full object-cover object-[0%_50%] group-hover:scale-105 transition-transform duration-300"
               />
-              {!post.isAvailable && (
+              {post.status === "FOUND" && (
                 <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">Adopted</span>
+                  <span className="text-white font-bold text-lg">Found</span>
                 </div>
               )}
             </div>
@@ -226,13 +221,14 @@ export default function DonationPage() {
                   {post.title}
                 </h2>
                 <Badge
-                  className={cn(
-                    post.isAvailable
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800")
+
+                  className={cn( "w-1/3 h-10 text-xl",
+                    post.status === "NOT_FOUND"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-green-100 text-green-800")
                   }
                 >
-                  {post.isAvailable ? "Available" : "Adopted"}
+                  {post.status === "NOT_FOUND" ? "Missing" : "Found"}
                 </Badge>
               </div>
 
@@ -245,8 +241,9 @@ export default function DonationPage() {
               </div>
 
               <div className="mt-1 text-gray-600 text-sm">
-                <span>
-                  <MapPin className="inline w-4 h-4 mb-1 mr-1" />{capitalizeFirstLetter(post.area)} - {capitalizeFirstLetter(post.city)} - {capitalizeFirstLetter(post.country)}
+                <span className="font-medium"><MapPin className="inline w-4 h-4 mb-1 mr-1" /></span>
+                <span className="ml-1">
+                {capitalizeFirstLetter(post.area)} - {capitalizeFirstLetter(post.city)} - {capitalizeFirstLetter(post.country)}
                 </span>
               </div>
 
@@ -267,29 +264,23 @@ export default function DonationPage() {
                     ) : (
                       <User className="h-full w-full p-1 text-gray-400" />
                     )}
-                  </div >
+                  </div>
                   
                   <span className="text-sm text-gray-600 font-medium">{post.user.name}</span>
-                  <span className="text-xs text-gray-500 ml-2 ">• {getRelativeTime(post.createdAt)}</span>
+                  <span className="text-xs text-gray-500 ml-2">• {getRelativeTime(post.createdAt)}</span>
                 </div>
                 
                 {/* Stats indicators in a horizontal row */}
-                <div className="flex flex-wrap gap-2 mt-4 ">
+                <div className="flex flex-wrap gap-2 mt-4">
                   <StatBadge 
                     value={post.upvotesCount} 
                     icon={<ArrowBigUp className="h-3 w-3" />} 
                     color="bg-blue-500"
-                    
                   />
                   <StatBadge 
                     value={post._count.comments} 
                     icon={<MessageSquare className="h-3 w-3" />} 
-                    color="bg-green-500" 
-                  />
-                  <StatBadge 
-                    value={post._count.adoptionForms} 
-                    icon={<Users className="h-3 w-3" />} 
-                    color="bg-purple-500" 
+                    color="bg-amber-500" 
                   />
                 </div>
               </div>
@@ -323,8 +314,7 @@ export default function DonationPage() {
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-12 ml-2" />
             </div>
-            <div className="flex gap-2 mt-2 ml-8">
-              <Skeleton className="h-6 w-16 rounded-full" />
+            <div className="flex gap-2 mt-2">
               <Skeleton className="h-6 w-16 rounded-full" />
               <Skeleton className="h-6 w-16 rounded-full" />
             </div>
@@ -337,14 +327,11 @@ export default function DonationPage() {
   return (
     <div className="container max-w-4xl mx-auto py-6 px-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Pet Donation</h1>
-        <div className="flex flex-wrap  gap-2">
-          <Button onClick={() => setMyPostsOpen(true)} variant="outline" className="sm:w-auto">
-            My Posts
-          </Button>
+        <h1 className="text-2xl font-bold">Missing Pets</h1>
+        <div className="flex flex-wrap gap-2">
           <Button onClick={() => setCreatePostOpen(true)} className="sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
-            Create Post
+            Report Missing Pet
           </Button>
         </div>
       </div>
@@ -361,14 +348,14 @@ export default function DonationPage() {
         <div className="space-y-8">
           {/* Local posts section */}
           {localPosts.length > 0 && userLocation.city && userLocation.area && (
-            <section>
+            <div>
             <h2 className="text-xl font-semibold mb-6 text-gray-800 border-l-4 border-blue-500 pl-3">
-              Pets in Your Area: {userLocation.area}, {userLocation.city}
+              Pets Missing in Your Area: {userLocation.area}, {userLocation.city}
             </h2>
-            <div className="space-y-6">
-              {localPosts.map(renderPostCard)}
+              <div className="space-y-4">
+                {localPosts.map((post) => renderPostCard(post))}
+              </div>
             </div>
-          </section>
           )}
 
           {/* Missing location warning */}
@@ -378,7 +365,7 @@ export default function DonationPage() {
                 Please update your city and area in your profile
               </p>
               <p className="text-sm mt-1">
-                This will help us show you pets available in your area.
+                This will help us show you missing pets in your area.
                 <Link
                   href={`/profile/${localStorage.getItem("userId")}`}
                   className="ml-1 text-blue-600 hover:underline"
@@ -390,35 +377,28 @@ export default function DonationPage() {
           )}
 
           {/* All posts section */}
-          <section>
+          <div>
             <h2 className="text-xl font-semibold mb-6 text-gray-800 border-l-4 border-blue-500 pl-3">
-              All Available Pets
+              All Missing Pets
             </h2>
             {allPosts.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border border-gray-100">
-                No donation posts available.
+              <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
+                No missing pet reports available.
               </div>
             ) : (
-              <div className="space-y-6">
-                {allPosts.map(renderPostCard)}
+              <div className="space-y-4">
+                {allPosts.map((post) => renderPostCard(post))}
               </div>
             )}
-          </section>
+          </div>
         </div>
       )}
 
       {/* Create Post Dialog */}
-      <CreatePostDialog
+      <CreateMissingPostDialog
         open={createPostOpen}
         onOpenChange={setCreatePostOpen}
         onSuccess={handleCreatePostSuccess}
-      />
-
-      {/* My Posts Dialog */}
-      <MyPostsDialog
-        open={myPostsOpen}
-        onOpenChange={setMyPostsOpen}
-        onUpdate={fetchPosts}
       />
     </div>
   );

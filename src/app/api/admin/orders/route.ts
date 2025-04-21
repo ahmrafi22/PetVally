@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getAllOrders } from "@/controllers/admin"
+import { getAllOrders } from "@/controllers/admin-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Get all orders

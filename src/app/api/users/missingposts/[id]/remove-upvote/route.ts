@@ -1,8 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getProductById } from "@/controllers/store-data"
+import { removeUpvoteFromMissingPost } from "@/controllers/missing-post-data"
 import { verifyJwtToken } from "@/lib/auth"
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+// Remove upvote from a post
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Get the authorization header
     const authHeader = request.headers.get("Authorization")
@@ -22,27 +23,25 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 })
     }
 
-    const awitedparams = await params
-    // Get the product ID from the URL params
-    const id = awitedparams.id
+    // Get the user ID from the payload
+    const userId = payload.id as string
 
-    // Get the product by ID
-    const product = await getProductById(id)
+    // Get the post ID from the URL params
+    const awaitedParams = await params
+    const id = awaitedParams.id
 
-    if (!product) {
-      return NextResponse.json({ message: "Product not found" }, { status: 404 })
-    }
+    // Remove upvote from the post
+    await removeUpvoteFromMissingPost(userId, id)
 
-    // Return the product
+    // Return success
     return NextResponse.json(
       {
-        message: "Product retrieved successfully",
-        product,
+        message: "Upvote removed successfully",
       },
       { status: 200 },
     )
-  } catch (error) {
-    console.error("Error retrieving product:", error)
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Error removing upvote:", error)
+    return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 })
   }
 }

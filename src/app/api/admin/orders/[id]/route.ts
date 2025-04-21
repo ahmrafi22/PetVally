@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { updateOrderStatus } from "@/controllers/admin"
+import { updateOrderStatus } from "@/controllers/admin-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Update order status

@@ -15,18 +15,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { Upload, Trash2, Loader2 } from "lucide-react"
 
-type CreatePostDialogProps = {
+type CreateMissingPostDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
 }
 
-export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDialogProps) {
+export function CreateMissingPostDialog({ open, onOpenChange, onSuccess }: CreateMissingPostDialogProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -35,10 +33,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
     area: "",
     species: "",
     breed: "",
-    gender: "male",
     age: "",
-    vaccinated: false,
-    neutered: false,
   })
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -47,14 +42,6 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSelectChange = (name: string) => (value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSwitchChange = (name: string) => (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }))
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +76,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
     e.preventDefault()
 
     if (!previewImage) {
-      toast.error("Please upload an image of the pet")
+      toast.error("Please upload an image of the missing pet")
       return
     }
 
@@ -102,7 +89,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
         return
       }
 
-      const response = await fetch("/api/users/donation", {
+      const response = await fetch("/api/users/missingposts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +104,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to create post")
+        throw new Error(errorData.message || "Failed to create missing pet post")
       }
 
       // Reset form
@@ -129,32 +116,30 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
         area: "",
         species: "",
         breed: "",
-        gender: "male",
         age: "",
-        vaccinated: false,
-        neutered: false,
       })
       setPreviewImage(null)
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
 
+      toast.success("Missing pet post created successfully")
       onSuccess()
     } catch (error: any) {
-      console.error("Error creating post:", error)
-      toast.error(error.message || "Failed to create post")
+      console.error("Error creating missing pet post:", error)
+      toast.error(error.message || "Failed to create missing pet post")
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] bg-accent max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Donation Post</DialogTitle>
+          <DialogTitle>Report Missing Pet</DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a new pet donation post. All fields are required.
+            Fill out the form below to report a missing pet. All fields are required.
           </DialogDescription>
         </DialogHeader>
 
@@ -168,7 +153,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  placeholder="E.g., Friendly Golden Retriever Needs a Home"
+                  placeholder="E.g., Missing Siamese Cat in Downtown"
                   required
                 />
               </div>
@@ -180,7 +165,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Describe the pet, its personality, and why you're donating it"
+                  placeholder="Describe the pet, when and where it was last seen, and any distinguishing features"
                   className="min-h-[100px]"
                   required
                 />
@@ -281,57 +266,24 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                     name="breed"
                     value={formData.breed}
                     onChange={handleInputChange}
-                    placeholder="E.g., Golden Retriever"
+                    placeholder="E.g., Siamese, Labrador"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label className="mb-2" htmlFor="gender">Gender</Label>
-                  <Select value={formData.gender} onValueChange={handleSelectChange("gender")}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="mb-2" htmlFor="age">Age (years)</Label>
-                  <Input
-                    id="age"
-                    name="age"
-                    type="number"
-                    min="0"
-                    value={formData.age}
-                    onChange={handleInputChange}
-                    placeholder="Age in years"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label  htmlFor="vaccinated" className="cursor-pointer mb-2">
-                    Vaccinated
-                  </Label>
-                  <Switch
-                    id="vaccinated"
-                    checked={formData.vaccinated}
-                    onCheckedChange={handleSwitchChange("vaccinated")}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="neutered" className="cursor-pointer mb-2">
-                    Neutered/Spayed
-                  </Label>
-                  <Switch id="neutered" checked={formData.neutered} onCheckedChange={handleSwitchChange("neutered")} />
-                </div>
+              <div>
+                <Label className="mb-2" htmlFor="age">Age (years)</Label>
+                <Input
+                  id="age"
+                  name="age"
+                  type="number"
+                  min="0"
+                  value={formData.age}
+                  onChange={handleInputChange}
+                  placeholder="Age in years"
+                  required
+                />
               </div>
             </div>
           </div>
@@ -344,10 +296,10 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  Submitting...
                 </>
               ) : (
-                "Create Post"
+                "Report Missing Pet"
               )}
             </Button>
           </DialogFooter>

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getAllPets, createPet } from "@/controllers/admin"
+import { getAllPets, createPet } from "@/controllers/admin-data"
 import { verifyJwtToken } from "@/lib/auth"
 
 // Get all pets

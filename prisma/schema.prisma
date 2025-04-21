@@ -338,7 +338,6 @@ model AdoptionForm {
   userId         String                       // Reference to applicant
   donationPost   DonationPost @relation(fields: [donationPostId], references: [id])  // Target pet post
   donationPostId String                       // Reference to donation post
-
   createdAt DateTime @default(now())          // When application was submitted
   
   @@index([userId])
@@ -359,6 +358,9 @@ model MissingPost {
   country     String                       // Last seen address
   city        String                       // City for location filtering
   area        String                       // Neighborhood for precise matching
+  species       String
+  breed         String
+  age           Int
   status      String @default("NOT_FOUND") // Current status ("FOUND"/"NOT_FOUND")
   upvotesCount Int @default(0)             // Count of upvotes (cached)
 
