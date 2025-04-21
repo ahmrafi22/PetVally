@@ -37,10 +37,52 @@ export function CreateMissingPostDialog({ open, onOpenChange, onSuccess }: Creat
   })
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Area input validation function
+  const validateAreaInput = (input: string): boolean => {
+    // Check if input contains any hyphens or underscores
+    if (input.includes('-') || input.includes('_')) {
+      return false;
+    }
+    
+    // Check for spaces around special characters
+    const invalidPatterns = [
+      /\d\s+[/]\s*\d/,  // Catches: "3 / 4"
+      /\d\s*[/]\s+\d/,  // Catches: "3/ 4"
+      /\S+\s+[/]\s+\S+/ // Catches general spaces around forward slash
+    ];
+    
+    for (const pattern of invalidPatterns) {
+      if (pattern.test(input)) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
+    
+    // Special validation for area field
+    if (name === 'area') {
+      if (!validateAreaInput(value)) {
+        setErrors(prev => ({
+          ...prev,
+          area: "Invalid format. Hyphens (-) and underscores (_) are not allowed. Do not use spaces around special characters like /."
+        }))
+      } else {
+        // Clear error if valid
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.area
+          return newErrors
+        })
+      }
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
@@ -74,6 +116,12 @@ export function CreateMissingPostDialog({ open, onOpenChange, onSuccess }: Creat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Check for validation errors
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fix all validation errors before submitting")
+      return
+    }
 
     if (!previewImage) {
       toast.error("Please upload an image of the missing pet")
@@ -119,12 +167,14 @@ export function CreateMissingPostDialog({ open, onOpenChange, onSuccess }: Creat
         age: "",
       })
       setPreviewImage(null)
+      setErrors({})
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
 
       toast.success("Missing pet post created successfully")
       onSuccess()
+      onOpenChange(false)
     } catch (error: any) {
       console.error("Error creating missing pet post:", error)
       toast.error(error.message || "Failed to create missing pet post")
@@ -197,14 +247,20 @@ export function CreateMissingPostDialog({ open, onOpenChange, onSuccess }: Creat
                 </div>
                 <div>
                   <Label className="mb-2" htmlFor="area">Area</Label>
-                  <Input
-                    id="area"
-                    name="area"
-                    value={formData.area}
-                    onChange={handleInputChange}
-                    placeholder="Neighborhood/Area"
-                    required
-                  />
+                  <div className="space-y-1">
+                    <Input
+                      id="area"
+                      name="area"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      placeholder="Neighborhood/Area"
+                      required
+                      className={errors.area ? "border-red-500" : ""}
+                    />
+                    {errors.area && (
+                      <p className="text-xs text-red-500">{errors.area}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

@@ -20,9 +20,11 @@ import gsap from "gsap"
 import { useGSAP } from "@gsap/react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "next/image";
+import { usePathname } from 'next/navigation';
 import { useCartStore } from "@/stores/cart-store";
 import { useNotificationStore } from "@/stores/notification-store";
 import { useUserStore } from "@/stores/user-store";
+import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(useGSAP);
 
@@ -32,6 +34,7 @@ export default function UserNavigation() {
   const router = useRouter();
   const isMobile = useIsMobile();
   const { cart } = useCartStore();
+  const pathname = usePathname()
   const [isMounted, setIsMounted] = useState(false);
 
   // zustand stores
@@ -54,12 +57,10 @@ export default function UserNavigation() {
     const userId = localStorage.getItem("userId");
 
     if (userId) {
-      // If we don't have user data or it's for a different user, fetch it
       if (!userData.id || userData.id !== userId) {
         fetchUserData();
       }
 
-      // Fetch notification count
       fetchCount();
 
       // Animate notification badge if there are unread notifications
@@ -314,7 +315,7 @@ export default function UserNavigation() {
                   <Link
                     href={item.href}
                     onClick={handleNavClose}
-                    className="flex items-center p-2 rounded-full  text-gray-700, relative hover:text-blue-600"
+                    className={cn("flex items-center p-2 rounded-full  text-gray-700, relative hover:text-pink-400",pathname.startsWith(item.href) ? 'text-blue-500 ' : 'text-gray-700')}
                   >
                     <span className="inline-block">{item.icon}</span>
                     {(expanded || mobileOpen) && (

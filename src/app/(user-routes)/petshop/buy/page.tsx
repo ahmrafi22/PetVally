@@ -20,12 +20,16 @@ import {
   MapPin,
   Home,
 } from "lucide-react";
-import type { User, Pet, PaymentFormData } from "@/types";
+import type { Pet, PaymentFormData } from "@/types";
+import { useUserStore } from "@/stores/user-store";
 
 export default function BuyPet() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const petId = searchParams.get("petId");
+
+  // Get user data from Zustand store
+  const { userData, isLoading: userDataLoading, fetchUserData } = useUserStore();
 
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,9 +37,6 @@ export default function BuyPet() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [adoptionComplete, setAdoptionComplete] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userData, setUserData] = useState<User | null>(null);
-  const [userDataLoading, setUserDataLoading] = useState(false);
 
   const [formData, setFormData] = useState<PaymentFormData>({
     cardNumber: "",
@@ -48,57 +49,25 @@ export default function BuyPet() {
     zipCode: "",
   });
 
-  // Fetch user ID from localStorage
+  // Fetch user data on component mount
   useEffect(() => {
-    const id = localStorage.getItem("userId");
-    if (id) {
-      setUserId(id);
-    }
-  }, []);
-
-  // Fetch user data when userId is available
-  useEffect(() => {
-    async function fetchUserData() {
-      if (!userId) return;
-
-      setUserDataLoading(true);
-      try {
-        const token = localStorage.getItem("userToken");
-        if (!token) {
-          return;
-        }
-
-        const response = await fetch(`/api/users/userdata?id=${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-
-        const data = await response.json();
-        setUserData(data.user);
-
-        // Pre-fill form with user data
-        setFormData((prev) => ({
-          ...prev,
-          cardholderName: data.user.name || "",
-          address: data.user.area || "",
-          city: data.user.city || "",
-          country: data.user.country || "",
-        }));
-      } catch (err: any) {
-        console.error("Error fetching user data:", err);
-      } finally {
-        setUserDataLoading(false);
-      }
-    }
-
     fetchUserData();
-  }, [userId]);
+  }, [fetchUserData]);
 
+  // Update form data when user data is available
+  useEffect(() => {
+    if (userData && userData.id) {
+      setFormData((prev) => ({
+        ...prev,
+        cardholderName: userData.name || "",
+        address: userData.area || "",
+        city: userData.city || "",
+        country: userData.country || "",
+      }));
+    }
+  }, [userData]);
+
+  // Fetch pet data
   useEffect(() => {
     if (!petId) {
       router.push("/petshop");

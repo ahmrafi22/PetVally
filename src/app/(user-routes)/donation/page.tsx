@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreatePostDialog } from "./_components/create-post-dialog";
 import { MyPostsDialog } from "./_components/my-posts-dialog";
 import { cn } from "@/lib/utils";
+import { useUserStore } from "@/stores/user-store"
 
 type DonationPost = {
   id: string;
@@ -45,61 +46,32 @@ export default function DonationPage() {
   const [allPosts, setAllPosts] = useState<DonationPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<{
-    city: string | null;
-    area: string | null;
-  }>({
-    city: null,
-    area: null,
-  });
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [myPostsOpen, setMyPostsOpen] = useState(false);
   const router = useRouter();
 
+  // Get user data from the store
+  const { userData, fetchUserData, isLoading: userLoading } = useUserStore();
+
   useEffect(() => {
+    // Check if user is logged in
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("userToken");
+    
+    if (!userId || !token) {
+      router.push("/userlogin");
+      return;
+    }
+    
     fetchUserData();
-  }, []);
+  }, [fetchUserData, router]);
+
 
   useEffect(() => {
-    fetchPosts();
-  }, [userLocation]);
-
-  const fetchUserData = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        router.push("/userlogin");
-        return;
-      }
-
-      const token = localStorage.getItem("userToken");
-      const response = await fetch(`/api/users/userdata?id=${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-
-      const data = await response.json();
-
-      const city =
-        data.user.city && data.user.city.trim() !== "" ? data.user.city.trim() : null;
-      const area =
-        data.user.area && data.user.area.trim() !== "" ? data.user.area.trim() : null;
-
-      setUserLocation({
-        city: city,
-        area: area,
-      });
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setUserLocation({ city: null, area: null });
+    if (!userLoading) {
       fetchPosts();
     }
-  };
+  }, [userData, userLoading]);
 
   const fetchPosts = async () => {
     try {
@@ -123,13 +95,12 @@ export default function DonationPage() {
       const data = await response.json();
       setAllPosts(data.posts);
 
-      if (userLocation.city && userLocation.area) {
-        const trimmedCity = userLocation.city.trim();
-        const trimmedArea = userLocation.area.trim();
+      // Only fetch local posts if user has city and area
+      if (userData.city && userData.area) {
         const localResponse = await fetch(
           `/api/users/donation?city=${encodeURIComponent(
-            trimmedCity
-          )}&area=${encodeURIComponent(trimmedArea)}`,
+            userData.city
+          )}&area=${encodeURIComponent(userData.area)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -349,7 +320,7 @@ export default function DonationPage() {
         </div>
       </div>
 
-      {loading ? (
+      {loading || userLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => renderSkeletonCard(i))}
         </div>
@@ -360,10 +331,10 @@ export default function DonationPage() {
       ) : (
         <div className="space-y-8">
           {/* Local posts section */}
-          {localPosts.length > 0 && userLocation.city && userLocation.area && (
+          {localPosts.length > 0 && userData.city && userData.area && (
             <section>
             <h2 className="text-xl font-semibold mb-6 text-gray-800 border-l-4 border-blue-500 pl-3">
-              Pets in Your Area: {userLocation.area}, {userLocation.city}
+              Pets in Your Area: {userData.area}, {userData.city}
             </h2>
             <div className="space-y-6">
               {localPosts.map(renderPostCard)}
@@ -372,7 +343,7 @@ export default function DonationPage() {
           )}
 
           {/* Missing location warning */}
-          {!userLocation.city && !userLocation.area && (
+          {!userData.city || !userData.area ? (
             <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-md mb-4">
               <p className="font-medium">
                 Please update your city and area in your profile
@@ -387,7 +358,7 @@ export default function DonationPage() {
                 </Link>
               </p>
             </div>
-          )}
+          ) : null}
 
           {/* All posts section */}
           <section>

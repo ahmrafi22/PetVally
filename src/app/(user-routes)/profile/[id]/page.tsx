@@ -15,14 +15,22 @@ import ImageUploadDialog from "../../_components/image-upload-dialog";
 import Link from "next/link";
 import type { User } from "@/types";
 import ExploreButton from "../_components/button";
+import { useUserStore } from "@/stores/user-store";
 
 export default function UserProfile() {
   const params = useParams();
   const id = params.id as string;
 
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use the Zustand store instead of local state
+  const { 
+    userData, 
+    isLoading, 
+    error, 
+    fetchUserData, 
+    updateUserProfile, 
+    updateUserPreferences, 
+    updateUserImage 
+  } = useUserStore();
 
   // Dialog states
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -30,45 +38,15 @@ export default function UserProfile() {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   useEffect(() => {
-    async function fetchUserData() {
-      try {
-        // Get the token from localStorage
-        const token = localStorage.getItem("userToken");
-
-        if (!token) {
-          throw new Error("Authentication token not found");
-        }
-
-        // Fetch user data from the API
-        const response = await fetch(`/api/users/userdata?id=${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to fetch user data");
-        }
-
-        const data = await response.json();
-        setUser(data.user);
-      } catch (err: any) {
-        console.error("Error fetching user data:", err);
-        setError(err.message || "An error occurred while fetching user data");
-      } finally {
-        setLoading(false);
-      }
-    }
-
+    // Fetch user data when the component mounts
     fetchUserData();
-  }, [id]);
+  }, [fetchUserData]);
 
   const handleUserUpdate = (updatedUser: User) => {
-    setUser(updatedUser);
+    updateUserProfile(updatedUser);
   };
 
-  if (loading) {
+  if (isLoading) {
     return <ProfileSkeleton />;
   }
 
@@ -83,7 +61,7 @@ export default function UserProfile() {
     );
   }
 
-  if (!user) {
+  if (!userData || !userData.id) {
     return (
       <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
         <h3 className="text-lg leading-6 font-medium text-red-600">
@@ -124,10 +102,10 @@ export default function UserProfile() {
             <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
               <div className="relative">
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                  {user.image ? (
+                  {userData.image ? (
                     <img
-                      src={user.image || "/placeholder.svg"}
-                      alt={user.name}
+                      src={userData.image || "/placeholder.svg"}
+                      alt={userData.name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -146,21 +124,21 @@ export default function UserProfile() {
               </div>
 
               <div className="text-center md:text-left">
-                <h1 className="text-3xl font-bold text-purple-800">{user.name}</h1>
-                <p className="text-gray-600">{user.email}</p>
+                <h1 className="text-3xl font-bold text-purple-800">{userData.name}</h1>
+                <p className="text-gray-600">{userData.email}</p>
                 <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-gray-600">
                   <MapPin className="w-4 h-4 text-pink-500" />
                   <span>
-                    {user.city ? user.city + ", " : ""}{user.country || "Location not specified"}
+                    {userData.city ? userData.city + ", " : ""}{userData.country || "Location not specified"}
                   </span>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
                   <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">Pet Owner</span>
                   <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">
-                    {getExperienceLevel(user.experienceLevel)} Pet Parent
+                    {getExperienceLevel(userData.experienceLevel)} Pet Parent
                   </span>
                   <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                    {user.petOrders?.length || 0} Pets Adopted
+                    {userData.petOrders?.length || 0} Pets Adopted
                   </span>
                 </div>
               </div>
@@ -189,7 +167,7 @@ export default function UserProfile() {
                 <div className="glass-card p-4 text-center hidden md:block bg-white/70 rounded-lg">
                   <div className="text-sm text-gray-500">Member since</div>
                   <div className="font-medium">
-                    {new Date(user.createdAt).toLocaleDateString("en-US", {
+                    {new Date(userData.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
                     })}
@@ -214,7 +192,7 @@ export default function UserProfile() {
                   <div className="bg-purple-50 p-3 rounded-lg">
                     <div className="text-purple-600 text-sm font-medium">Experience</div>
                     <div className="mt-1 text-xl font-bold text-purple-800">
-                      {getExperienceLevel(user.experienceLevel)}
+                      {getExperienceLevel(userData.experienceLevel)}
                     </div>
                   </div>
                   
@@ -222,7 +200,7 @@ export default function UserProfile() {
                   <div className="bg-pink-50 p-3 rounded-lg">
                     <div className="text-pink-600 text-sm font-medium">Available</div>
                     <div className="mt-1 text-xl font-bold text-pink-800">
-                      {user.dailyAvailability} hrs
+                      {userData.dailyAvailability} hrs
                     </div>
                   </div>
                   
@@ -230,7 +208,7 @@ export default function UserProfile() {
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <div className="text-blue-600 text-sm font-medium">Pets</div>
                     <div className="mt-1 text-xl font-bold text-blue-800">
-                      {user.petOrders?.length || 0}
+                      {userData.petOrders?.length || 0}
                     </div>
                   </div>
                   
@@ -238,7 +216,7 @@ export default function UserProfile() {
                   <div className="bg-amber-50 p-3 rounded-lg">
                     <div className="text-amber-600 text-sm font-medium">Age</div>
                     <div className="mt-1 text-xl font-bold text-amber-800">
-                      {user.age || "N/A"}
+                      {userData.age || "N/A"}
                     </div>
                   </div>
                 </div>
@@ -258,7 +236,7 @@ export default function UserProfile() {
                       {[1, 2, 3, 4, 5].map((i) => (
                         <Clock
                           key={i}
-                          className={`w-5 h-5 ${i <= user.dailyAvailability ? "text-pink-500" : "text-gray-300"}`}
+                          className={`w-5 h-5 ${i <= userData.dailyAvailability ? "text-pink-500" : "text-gray-300"}`}
                         />
                       ))}
                     </div>
@@ -270,7 +248,7 @@ export default function UserProfile() {
                       {[1, 2, 3, 4, 5].map((i) => (
                         <Award
                           key={i}
-                          className={`w-5 h-5 ${i <= user.experienceLevel ? "text-pink-500" : "text-gray-300"}`}
+                          className={`w-5 h-5 ${i <= userData.experienceLevel ? "text-pink-500" : "text-gray-300"}`}
                         />
                       ))}
                     </div>
@@ -279,21 +257,21 @@ export default function UserProfile() {
                   <div className="pt-2">
                     <div className="flex items-center gap-2 mb-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${user.hasOutdoorSpace ? "bg-green-500" : "bg-gray-300"}`}
+                        className={`w-3 h-3 rounded-full ${userData.hasOutdoorSpace ? "bg-green-500" : "bg-gray-300"}`}
                       ></div>
                       <span className="text-sm">Has outdoor space</span>
                     </div>
 
                     <div className="flex items-center gap-2 mb-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${user.hasChildren ? "bg-green-500" : "bg-gray-300"}`}
+                        className={`w-3 h-3 rounded-full ${userData.hasChildren ? "bg-green-500" : "bg-gray-300"}`}
                       ></div>
                       <span className="text-sm">Has children</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${user.hasAllergies ? "bg-red-500" : "bg-gray-300"}`}
+                        className={`w-3 h-3 rounded-full ${userData.hasAllergies ? "bg-red-500" : "bg-gray-300"}`}
                       ></div>
                       <span className="text-sm">Has pet allergies</span>
                     </div>
@@ -305,29 +283,29 @@ export default function UserProfile() {
             {/* Middle & Right Columns */}
             <div className="md:col-span-2 space-y-8">
               {/* Location info */}
-              {(user.country || user.city || user.area) && (
+              {(userData.country || userData.city || userData.area) && (
                 <div className="glass-card p-6 bg-white/80 rounded-lg shadow-sm">
                   <h2 className="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-pink-500" />
                     Location
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {user.country && (
+                    {userData.country && (
                       <div className="flex flex-col p-3 bg-purple-50 rounded-lg">
                         <p className="text-sm font-medium text-purple-500">Country</p>
-                        <p className="mt-1 font-medium text-purple-800">{user.country}</p>
+                        <p className="mt-1 font-medium text-purple-800">{userData.country}</p>
                       </div>
                     )}
-                    {user.city && (
+                    {userData.city && (
                       <div className="flex flex-col p-3 bg-pink-50 rounded-lg">
                         <p className="text-sm font-medium text-pink-500">City</p>
-                        <p className="mt-1 font-medium text-pink-800">{user.city}</p>
+                        <p className="mt-1 font-medium text-pink-800">{userData.city}</p>
                       </div>
                     )}
-                    {user.area && (
+                    {userData.area && (
                       <div className="flex flex-col p-3 bg-blue-50 rounded-lg">
                         <p className="text-sm font-medium text-blue-500">Area</p>
-                        <p className="mt-1 font-medium text-blue-800">{user.area}</p>
+                        <p className="mt-1 font-medium text-blue-800">{userData.area}</p>
                       </div>
                     )}
                   </div>
@@ -341,9 +319,9 @@ export default function UserProfile() {
                   Pet Family
                 </h2>
 
-                {user.petOrders && user.petOrders.length > 0 ? (
+                {userData.petOrders && userData.petOrders.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {user.petOrders.map((order) => (
+                    {userData.petOrders.map((order) => (
                       <div
                         key={order.id}
                         onClick={() => (window.location.href = `/petshop/${order.pet?.id}`)}
@@ -398,22 +376,26 @@ export default function UserProfile() {
       <ProfileUpdateDialog
         isOpen={profileDialogOpen}
         onClose={() => setProfileDialogOpen(false)}
-        user={user}
+        user={userData as User}
         onUpdate={handleUserUpdate}
       />
 
       <PreferencesUpdateDialog
         isOpen={preferencesDialogOpen}
         onClose={() => setPreferencesDialogOpen(false)}
-        user={user}
+        user={userData as User}
         onUpdate={handleUserUpdate}
       />
 
       <ImageUploadDialog
         isOpen={imageDialogOpen}
         onClose={() => setImageDialogOpen(false)}
-        user={user}
-        onUpdate={handleUserUpdate}
+        user={userData as User}
+        onUpdate={(updatedUser: User) => {
+          if (updatedUser.image) {
+            updateUserImage(updatedUser.image);
+          }
+        }}
       />
     </>
   );

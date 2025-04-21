@@ -77,7 +77,31 @@ export function UpdateMissingPostDialog({ open, onOpenChange, post, onSuccess }:
 
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Area input validation function
+  const validateAreaInput = (input: string): boolean => {
+    // Check if input contains any hyphens or underscores
+    if (input.includes('-') || input.includes('_')) {
+      return false;
+    }
+    
+    // Check for spaces around special characters
+    const invalidPatterns = [
+      /\d\s+[/]\s*\d/,  // Catches: "3 / 4"
+      /\d\s*[/]\s+\d/,  // Catches: "3/ 4"
+      /\S+\s+[/]\s+\S+/ // Catches general spaces around forward slash
+    ];
+    
+    for (const pattern of invalidPatterns) {
+      if (pattern.test(input)) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
 
   // Load post data when dialog opens
   useEffect(() => {
@@ -95,6 +119,9 @@ export function UpdateMissingPostDialog({ open, onOpenChange, post, onSuccess }:
         status: post.status
       })
       setImagePreview(post.images || null)
+      
+      // Clear any previous errors
+      setErrors({})
     }
   }, [open, post])
 
@@ -102,6 +129,24 @@ export function UpdateMissingPostDialog({ open, onOpenChange, post, onSuccess }:
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
+    
+    // Special validation for area field
+    if (name === 'area') {
+      if (!validateAreaInput(value)) {
+        setErrors(prev => ({
+          ...prev,
+          area: "Invalid format. Hyphens (-) and underscores (_) are not allowed. Do not use spaces around special characters like /."
+        }))
+      } else {
+        // Clear error if valid
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.area
+          return newErrors
+        })
+      }
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -156,6 +201,12 @@ export function UpdateMissingPostDialog({ open, onOpenChange, post, onSuccess }:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check for validation errors
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fix all validation errors before submitting")
+      return
+    }
     
     try {
       setIsSubmitting(true)
@@ -326,15 +377,20 @@ export function UpdateMissingPostDialog({ open, onOpenChange, post, onSuccess }:
                 <Label htmlFor="area" className="text-sm font-medium">
                   Area*
                 </Label>
-                <Input
-                  id="area"
-                  name="area"
-                  value={formData.area}
-                  onChange={handleInputChange}
-                  placeholder="Area/District"
-                  required
-                  className="mt-1"
-                />
+                <div className="space-y-1">
+                  <Input
+                    id="area"
+                    name="area"
+                    value={formData.area}
+                    onChange={handleInputChange}
+                    placeholder="Area/District"
+                    required
+                    className={`mt-1 ${errors.area ? "border-red-500" : ""}`}
+                  />
+                  {errors.area && (
+                    <p className="text-xs text-red-500">{errors.area}</p>
+                  )}
+                </div>
               </div>
             </div>
 

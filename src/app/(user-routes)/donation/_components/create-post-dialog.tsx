@@ -40,13 +40,58 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
     vaccinated: false,
     neutered: false,
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // Validate area input to ensure no spaces around special characters
+  const validateAreaInput = (input: string): boolean => {
+    if (input.includes('-') || input.includes('_')) {
+      return false;
+    }
+    
+    // Check for spaces around special characters
+    const invalidPatterns = [
+      /\d\s+[/]\s*\d/,  
+      /\d\s*[/]\s+\d/,  
+      /\S+\s+[/]\s+\S+/ 
+    ];
+    
+    for (const pattern of invalidPatterns) {
+      if (pattern.test(input)) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    
+    if (name === 'area') {
+      if (!validateAreaInput(value)) {
+        setErrors(prev => ({
+          ...prev,
+          area: "Invalid format. Hyphens (-) and underscores (_) are not allowed. Do not use spaces around special characters like /."
+        }))
+      } else {
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.area
+          return newErrors
+        })
+      }
+    }
+    
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
   }
 
   const handleSelectChange = (name: string) => (value: string) => {
@@ -88,6 +133,12 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Check for validation errors
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fix all validation errors before submitting")
+      return
+    }
+
     if (!previewImage) {
       toast.error("Please upload an image of the pet")
       return
@@ -120,6 +171,8 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
         throw new Error(errorData.message || "Failed to create post")
       }
 
+      toast.success("Post created successfully!")
+
       // Reset form
       setFormData({
         title: "",
@@ -140,6 +193,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
       }
 
       onSuccess()
+      onOpenChange(false)
     } catch (error: any) {
       console.error("Error creating post:", error)
       toast.error(error.message || "Failed to create post")
@@ -149,7 +203,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] bg-accent max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Donation Post</DialogTitle>
@@ -212,14 +266,20 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                 </div>
                 <div>
                   <Label className="mb-2" htmlFor="area">Area</Label>
-                  <Input
-                    id="area"
-                    name="area"
-                    value={formData.area}
-                    onChange={handleInputChange}
-                    placeholder="Neighborhood/Area"
-                    required
-                  />
+                  <div className="space-y-1">
+                    <Input
+                      id="area"
+                      name="area"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      placeholder="Neighborhood/Area"
+                      required
+                      className={errors.area ? "border-red-500" : ""}
+                    />
+                    {errors.area && (
+                      <p className="text-xs text-red-500">{errors.area}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -317,7 +377,7 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label  htmlFor="vaccinated" className="cursor-pointer mb-2">
+                  <Label htmlFor="vaccinated" className="cursor-pointer mb-2">
                     Vaccinated
                   </Label>
                   <Switch
@@ -330,7 +390,11 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                   <Label htmlFor="neutered" className="cursor-pointer mb-2">
                     Neutered/Spayed
                   </Label>
-                  <Switch id="neutered" checked={formData.neutered} onCheckedChange={handleSwitchChange("neutered")} />
+                  <Switch 
+                    id="neutered" 
+                    checked={formData.neutered} 
+                    onCheckedChange={handleSwitchChange("neutered")} 
+                  />
                 </div>
               </div>
             </div>

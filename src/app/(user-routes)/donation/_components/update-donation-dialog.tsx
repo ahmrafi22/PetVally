@@ -86,10 +86,33 @@ export function UpdateDonationDialog({ open, onOpenChange, post, onSuccess }: Up
     isAvailable: true,
   })
 
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasAcceptedApplicants, setHasAcceptedApplicants] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Area input validation function
+  const validateAreaInput = (input: string): boolean => {
+    if (input.includes('-') || input.includes('_')) {
+      return false;
+    }
+    
+    // Check for spaces around special characters
+    const invalidPatterns = [
+      /\d\s+[/]\s*\d/,  
+      /\d\s*[/]\s+\d/,  
+      /\S+\s+[/]\s+\S+/ 
+    ];
+    
+    for (const pattern of invalidPatterns) {
+      if (pattern.test(input)) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
 
   // Load post data when dialog opens
   useEffect(() => {
@@ -111,6 +134,9 @@ export function UpdateDonationDialog({ open, onOpenChange, post, onSuccess }: Up
       })
       setImagePreview(post.images || null)
 
+      // Clear any previous errors
+      setErrors({})
+
       // Check if there are any accepted applications
       const hasAccepted = post.adoptionForms?.some(form => form.status === "ACCEPTED");
       setHasAcceptedApplicants(hasAccepted);
@@ -121,6 +147,24 @@ export function UpdateDonationDialog({ open, onOpenChange, post, onSuccess }: Up
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
+    
+    // Special validation for area field
+    if (name === 'area') {
+      if (!validateAreaInput(value)) {
+        setErrors(prev => ({
+          ...prev,
+          area: "Invalid format. Do not use spaces around special characters like -, _, or /."
+        }))
+      } else {
+        // Clear error if valid
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.area
+          return newErrors
+        })
+      }
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -176,6 +220,12 @@ export function UpdateDonationDialog({ open, onOpenChange, post, onSuccess }: Up
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Check for validation errors
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fix all validation errors before submitting")
+      return
+    }
+    
     try {
       setIsSubmitting(true)
       const token = localStorage.getItem("userToken")
@@ -228,6 +278,7 @@ export function UpdateDonationDialog({ open, onOpenChange, post, onSuccess }: Up
 
       toast.success("Donation post updated successfully")
       onSuccess()
+      onOpenChange(false)
     } catch (error: any) {
       console.error("Error updating donation post:", error)
       toast.error(error.message || "Failed to update the donation post")
@@ -313,15 +364,20 @@ export function UpdateDonationDialog({ open, onOpenChange, post, onSuccess }: Up
                 <Label htmlFor="area" className="text-sm font-medium">
                   Area*
                 </Label>
-                <Input
-                  id="area"
-                  name="area"
-                  value={formData.area}
-                  onChange={handleInputChange}
-                  placeholder="Area/District"
-                  required
-                  className="mt-1"
-                />
+                <div className="space-y-1">
+                  <Input
+                    id="area"
+                    name="area"
+                    value={formData.area}
+                    onChange={handleInputChange}
+                    placeholder="Area/District"
+                    required
+                    className={`mt-1 ${errors.area ? "border-red-500" : ""}`}
+                  />
+                  {errors.area && (
+                    <p className="text-xs text-red-500">{errors.area}</p>
+                  )}
+                </div>
               </div>
             </div>
 

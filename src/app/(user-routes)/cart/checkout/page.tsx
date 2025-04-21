@@ -13,6 +13,7 @@ import { ArrowLeft, CreditCard, CheckCircle, ShoppingBag } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { User,PaymentInfo,ShippingInfo,Cart } from "@/types"
+import { useUserStore } from "@/stores/user-store"
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -22,9 +23,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [orderId, setOrderId] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [userData, setUserData] = useState<User | null>(null)
   const [userDataLoading, setUserDataLoading] = useState(false)
+  const { userData, isLoading, fetchUserData } = useUserStore();
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     name: "",
@@ -42,58 +42,34 @@ export default function CheckoutPage() {
     cvv: "",
   })
 
-  // Fetch user ID from localStorage
   useEffect(() => {
-    const id = localStorage.getItem("userId");
-    if (id) {
-      setUserId(id);
-    }
-  }, []);
-
-  // Fetch user data when userId is available
-  useEffect(() => {
-    async function fetchUserData() {
-      if (!userId) return;
-      
-      setUserDataLoading(true);
-      try {
-        const token = localStorage.getItem("userToken");
-        if (!token) {
-          return;
-        }
-
-        const response = await fetch(`/api/users/userdata?id=${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-
-        const data = await response.json();
-        setUserData(data.user);
-        
-        // Pre-fill shipping information with user data
-        setShippingInfo(prev => ({
-          ...prev,
-          name: data.user.name || "",
-          address: data.user.area || "",
-          city: data.user.city || "",
-          country: data.user.country || "",
-          // State and zip remain empty as specified
-        }));
-        
-      } catch (err: any) {
-        console.error("Error fetching user data:", err);
-      } finally {
-        setUserDataLoading(false);
-      }
-    }
 
     fetchUserData();
-  }, [userId]);
+  }, [fetchUserData]);
+
+  useEffect(() => {
+    setUserDataLoading(true)
+    try {
+      if (userData.id) {
+        setShippingInfo(prev => ({
+          ...prev,
+          name: userData.name || "",
+          address: userData.area || "",
+          city: userData.city || "",
+          country: userData.country || "",
+        }));
+      } 
+      
+    } catch (error) {
+      console.log(error);
+      
+    } finally {
+      setUserDataLoading(false)
+    }
+
+  }, [userData]);
+
+
 
   // Fetch cart data on component mount
   useEffect(() => {

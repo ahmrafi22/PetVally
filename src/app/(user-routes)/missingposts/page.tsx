@@ -10,6 +10,7 @@ import { ArrowBigUp, MapPin, MessageSquare, Plus, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CreateMissingPostDialog } from "./_components/create-missing-post-dialog";
 import { cn } from "@/lib/utils";
+import { useUserStore } from "@/stores/user-store"; 
 
 type MissingPost = {
   id: string;
@@ -41,60 +42,32 @@ export default function MissingPetsPage() {
   const [allPosts, setAllPosts] = useState<MissingPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<{
-    city: string | null;
-    area: string | null;
-  }>({
-    city: null,
-    area: null,
-  });
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const router = useRouter();
+  
+  // Get user data from the store
+  const { userData, fetchUserData, isLoading: userLoading } = useUserStore();
 
   useEffect(() => {
+    // Check if user is logged in
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("userToken");
+    
+    if (!userId || !token) {
+      router.push("/userlogin");
+      return;
+    }
+    
+    // Fetch user data
     fetchUserData();
-  }, []);
+  }, [fetchUserData, router]);
 
+  // Fetch posts when user data is available
   useEffect(() => {
-    fetchPosts();
-  }, [userLocation]);
-
-  const fetchUserData = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        router.push("/userlogin");
-        return;
-      }
-
-      const token = localStorage.getItem("userToken");
-      const response = await fetch(`/api/users/userdata?id=${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-
-      const data = await response.json();
-
-      const city =
-        data.user.city && data.user.city.trim() !== "" ? data.user.city.trim() : null;
-      const area =
-        data.user.area && data.user.area.trim() !== "" ? data.user.area.trim() : null;
-
-      setUserLocation({
-        city: city,
-        area: area,
-      });
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setUserLocation({ city: null, area: null });
+    if (!userLoading) {
       fetchPosts();
     }
-  };
+  }, [userData, userLoading]);
 
   const fetchPosts = async () => {
     try {
@@ -118,13 +91,12 @@ export default function MissingPetsPage() {
       const data = await response.json();
       setAllPosts(data.posts);
 
-      if (userLocation.city && userLocation.area) {
-        const trimmedCity = userLocation.city.trim();
-        const trimmedArea = userLocation.area.trim();
+      // Only fetch local posts if user has city and area
+      if (userData.city && userData.area) {
         const localResponse = await fetch(
           `/api/users/missingposts?city=${encodeURIComponent(
-            trimmedCity
-          )}&area=${encodeURIComponent(trimmedArea)}`,
+            userData.city
+          )}&area=${encodeURIComponent(userData.area)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -336,7 +308,7 @@ export default function MissingPetsPage() {
         </div>
       </div>
 
-      {loading ? (
+      {loading || userLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => renderSkeletonCard(i))}
         </div>
@@ -347,10 +319,10 @@ export default function MissingPetsPage() {
       ) : (
         <div className="space-y-8">
           {/* Local posts section */}
-          {localPosts.length > 0 && userLocation.city && userLocation.area && (
+          {localPosts.length > 0 && userData.city && userData.area && (
             <div>
             <h2 className="text-xl font-semibold mb-6 text-gray-800 border-l-4 border-blue-500 pl-3">
-              Pets Missing in Your Area: {userLocation.area}, {userLocation.city}
+              Pets Missing in Your Area: {userData.area}, {userData.city}
             </h2>
               <div className="space-y-4">
                 {localPosts.map((post) => renderPostCard(post))}
@@ -359,7 +331,7 @@ export default function MissingPetsPage() {
           )}
 
           {/* Missing location warning */}
-          {!userLocation.city && !userLocation.area && (
+          {!userData.city || !userData.area ? (
             <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-md mb-4">
               <p className="font-medium">
                 Please update your city and area in your profile
@@ -374,7 +346,7 @@ export default function MissingPetsPage() {
                 </Link>
               </p>
             </div>
-          )}
+          ) : null}
 
           {/* All posts section */}
           <div>
