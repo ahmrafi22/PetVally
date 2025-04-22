@@ -184,14 +184,15 @@ export function MyPostsDialog({ open, onOpenChange, onUpdate }: MyPostsDialogPro
                   .map((post) => (
                     <div key={post.id} className="border rounded-lg overflow-hidden">
                       <div className="flex flex-col sm:flex-row">
-                        <div className="sm:w-1/3 h-40 sm:h-auto">
+                        {/* Fixed image container with static dimensions */}
+                        <div className="sm:w-1/3 h-40 sm:h-auto min-w-[120px] min-h-[120px] max-h-[200px]">
                           <img
                             src={post.images || "/placeholder.svg"}
                             alt={post.title}
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        <div className="sm:w-2/3 p-4">
+                        <div className="sm:w-2/3 p-4 overflow-auto">
                           <div className="flex justify-between items-start">
                             <Link
                               href={`/donation/${post.id}`}
@@ -234,7 +235,7 @@ export function MyPostsDialog({ open, onOpenChange, onUpdate }: MyPostsDialogPro
                                   <div key={form.id} className="bg-gray-50 p-3 rounded-md">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center">
-                                        <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2">
+                                        <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2 flex-shrink-0">
                                           {form.user.image ? (
                                             <img
                                               src={form.user.image || "/placeholder.svg"}
@@ -254,6 +255,7 @@ export function MyPostsDialog({ open, onOpenChange, onUpdate }: MyPostsDialogPro
                                         size="sm"
                                         onClick={() => handleAcceptApplication(form.id)}
                                         disabled={processingForm === form.id}
+                                        className="flex-shrink-0 ml-2"
                                       >
                                         {processingForm === form.id ? (
                                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -292,7 +294,8 @@ export function MyPostsDialog({ open, onOpenChange, onUpdate }: MyPostsDialogPro
                     return (
                       <div key={post.id} className="border rounded-lg overflow-hidden">
                         <div className="flex flex-col sm:flex-row">
-                          <div className="sm:w-1/3 h-40 sm:h-auto relative">
+                          {/* Fixed image container with static dimensions */}
+                          <div className="sm:w-1/3 h-40 sm:h-auto min-w-[120px] min-h-[120px] max-h-[200px] relative">
                             <img
                               src={post.images || "/placeholder.svg"}
                               alt={post.title}
@@ -317,7 +320,7 @@ export function MyPostsDialog({ open, onOpenChange, onUpdate }: MyPostsDialogPro
                               <div className="mt-3 bg-green-50 p-3 rounded-md border border-green-100">
                                 <p className="text-sm font-medium text-green-800">Adopted by:</p>
                                 <div className="flex items-center mt-2">
-                                  <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2">
+                                  <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2 flex-shrink-0">
                                     {acceptedForm.user.image ? (
                                       <img
                                         src={acceptedForm.user.image || "/placeholder.svg"}

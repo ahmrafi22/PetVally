@@ -21,6 +21,8 @@ import {
   Pencil,
   Trash2,
   AlertCircle,
+  MapPin,
+  Cat,
 } from "lucide-react"
 import { AdoptionFormDialog } from "../_components/adoption-form-dialog"
 import { UpdateDonationDialog } from "../_components/update-donation-dialog"
@@ -35,6 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import Image from "next/image"
 
 type DonationPost = {
   id: string
@@ -410,10 +413,11 @@ export default function DonationDetailPage() {
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="flex flex-col lg:flex-row transition-all">
           <div className="lg:w-1/2 relative">
-            <img
+            <Image
               src={post.images || "/placeholder.svg"}
               alt={post.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
             {!post.isAvailable && (
               <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
@@ -430,7 +434,7 @@ export default function DonationDetailPage() {
             </div>
 
             <div className="flex flex-wrap items-center mt-2 text-gray-600 text-sm sm:text-base">
-              <span className="mr-2">{post.species}</span>•<span className="mx-2">{post.breed}</span>•
+              <span className="mr-2"> <Cat className="h-4 w-4 mr-1 inline" /> {post.species}</span>•<span className="mx-2">{post.breed}</span>•
               <span className="ml-2">
                 {post.age} {post.age === 1 ? "year" : "years"} old
               </span>
@@ -438,6 +442,7 @@ export default function DonationDetailPage() {
 
             <div className="flex items-center mt-1 text-gray-600 text-sm sm:text-base">
               <span>
+                <MapPin className="h-4 w-4 mr-1 inline" />
                 {capitalizeFirstLetter(post.area)} - {capitalizeFirstLetter(post.city)} - {capitalizeFirstLetter(post.country)}
               </span>
             </div>
@@ -445,10 +450,11 @@ export default function DonationDetailPage() {
             <div className="flex items-center mt-4">
               <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2">
                 {post.user.image ? (
-                  <img
+                  <Image
                     src={post.user.image || "/placeholder.svg"}
                     alt={post.user.name}
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <User className="h-full w-full p-1 text-gray-400" />
@@ -623,10 +629,12 @@ export default function DonationDetailPage() {
                       <div className="flex items-center">
                         <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2">
                           {comment.user.image ? (
-                            <img
+                            <Image
                               src={comment.user.image || "/placeholder.svg"}
                               alt={comment.user.name}
-                              className="h-full w-full object-cover"
+                              height={32}
+                              width={32}
+                              className="object-cover"
                             />
                           ) : (
                             <User className="h-full w-full p-1 text-gray-400" />
@@ -682,10 +690,12 @@ export default function DonationDetailPage() {
                     <div className="flex items-center">
                       <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2">
                         {form.user.image ? (
-                          <img
+                          <Image
                             src={form.user.image || "/placeholder.svg"}
                             alt={form.user.name}
-                            className="h-full w-full object-cover"
+                            height={32}
+                            width={32}
+                            className="object-cover"
                           />
                         ) : (
                           <User className="h-full w-full p-1 text-gray-400" />

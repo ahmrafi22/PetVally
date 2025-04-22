@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Heart, PawPrintIcon as Paw, Activity, Home, Shield, Baby, CheckCircle, Syringe, Scissors, ArrowLeft } from "lucide-react"
 import type { Pet } from "@/types"
+import Image from "next/image"
 
 export default function PetDetail() {
   const params = useParams()
@@ -152,10 +153,11 @@ export default function PetDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Pet Image */}
             <div className="h-[50vh] md:h-full bg-gray-200 relative overflow-hidden">
-              <img
+              <Image
                 src={pet.images || "/placeholder.svg?height=500&width=500"}
                 alt={pet.name}
-                className="w-full h-full object-cover object-top  -[0%_40%]  "
+                fill
+                className="object-cover object-top  -[0%_40%]  "
               />
             </div>
 
@@ -317,7 +319,7 @@ export default function PetDetail() {
               <div className="mt-8">
                 <button 
                   onClick={handleBuyClick} 
-                  className={`w-full py-3 text-lg rounded-full transition-all duration-300 ${
+                  className={`w-full py-3 text-lg rounded-full transition-all cursor-pointer duration-300 ${
                     pet.isAvailable 
                       ? "w-full  text-lg font-medium text-white/90 rounded-full bg-gradient-to-r from-amber-400 via-pink-500  to-blue-500 bg-[length:600%] animate-gradient ease-in-out hover:scale-105 transition-all duration-300  shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-70 disabled:cursor-not-allowed"
                       : "bg-gray-300"

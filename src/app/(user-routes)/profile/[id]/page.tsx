@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image"; 
 import { Button } from "@/components/ui/button";
 import { 
   Calendar, Camera, Edit, Settings, ShoppingBag, 
@@ -12,10 +13,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ProfileUpdateDialog from "../../_components/ProfileUpdateDialog";
 import PreferencesUpdateDialog from "../../_components/PreferencesUpdateDialog";
 import ImageUploadDialog from "../../_components/image-upload-dialog";
-import Link from "next/link";
 import type { User } from "@/types";
 import ExploreButton from "../_components/button";
 import { useUserStore } from "@/stores/user-store";
+import { toast } from "sonner"; // Import toast from sonner instead
 
 export default function UserProfile() {
   const params = useParams();
@@ -38,12 +39,32 @@ export default function UserProfile() {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch user data when the component mounts
-    fetchUserData();
-  }, [fetchUserData]);
+    // Only fetch user data when the component mounts or when id changes
+    if (id) {
+      fetchUserData();
+    }
+  }, [id, fetchUserData]);
 
   const handleUserUpdate = (updatedUser: User) => {
     updateUserProfile(updatedUser);
+  };
+
+  const handleImageUpdate = (updatedUser: User) => {
+    // Don't make a second API call, just update the state
+    if (updatedUser.image) {
+      // Update the local state directly
+      useUserStore.setState(state => ({
+        userData: {
+          ...state.userData,
+          image: updatedUser.image ?? null 
+        }
+      }));
+      
+      toast.success("Profile image updated successfully", {
+        description: "Your new profile picture has been saved.",
+        duration: 3000,
+      });
+    }
   };
 
   if (isLoading) {
@@ -57,6 +78,13 @@ export default function UserProfile() {
           Error loading profile
         </h3>
         <p className="mt-1 text-sm text-gray-500">{error}</p>
+        <Button 
+          onClick={() => fetchUserData()}
+          className="mt-4 bg-red-50 text-red-600 hover:bg-red-100"
+          size="sm"
+        >
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -101,12 +129,15 @@ export default function UserProfile() {
             <div className="absolute top-0 right-0 w-full h-full pet-pattern opacity-50 z-0"></div>
             <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
               <div className="relative">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg relative">
                   {userData.image ? (
-                    <img
-                      src={userData.image || "/placeholder.svg"}
+                    <Image
+                      src={userData.image}
                       alt={userData.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="128px"
+                      className="object-cover"
+                      priority
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-purple-50">
@@ -329,9 +360,11 @@ export default function UserProfile() {
                       >
                         <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden">
                           {order.pet?.images ? (
-                            <img
+                            <Image
                               src={order.pet.images}
                               alt={order.pet.name}
+                              width={64}
+                              height={64}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -391,11 +424,7 @@ export default function UserProfile() {
         isOpen={imageDialogOpen}
         onClose={() => setImageDialogOpen(false)}
         user={userData as User}
-        onUpdate={(updatedUser: User) => {
-          if (updatedUser.image) {
-            updateUserImage(updatedUser.image);
-          }
-        }}
+        onUpdate={handleImageUpdate}
       />
     </>
   );

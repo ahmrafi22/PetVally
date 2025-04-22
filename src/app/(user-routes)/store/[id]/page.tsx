@@ -1,101 +1,120 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Star, ShoppingCart, Calendar, User, ChevronLeft, PlusCircle, MinusCircle, Tag, Heart, Share2 } from "lucide-react"
-import { toast } from "sonner"
-import { format } from "date-fns"
-import { useCartStore } from "@/stores/cart-store"
-import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Star,
+  ShoppingCart,
+  Calendar,
+  User,
+  ChevronLeft,
+  PlusCircle,
+  MinusCircle,
+  Tag,
+  Heart,
+  Share2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { useCartStore } from "@/stores/cart-store";
+import { Badge } from "@/components/ui/badge";
 
-import type { ProductRating } from "@/types"
+import type { ProductRating } from "@/types";
 
-import type { Product } from "@/types"
+import type { Product } from "@/types";
+import Image from "next/image";
 
 export default function ProductDetail() {
-  const params = useParams()
-  const router = useRouter()
-  const [product, setProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [quantity, setQuantity] = useState(1)
-  const { addToCart, cart, loading: cartLoading, fetchCart } = useCartStore()
-  const id = params.id as string
+  const params = useParams();
+  const router = useRouter();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const { addToCart, cart, loading: cartLoading, fetchCart } = useCartStore();
+  const id = params.id as string;
 
   // Check if product is already in cart
-  const existingCartItem = cart?.items.find(item => item.product.id === id)
-  const itemInCartQuantity = existingCartItem?.quantity || 0
-  
+  const existingCartItem = cart?.items.find((item) => item.product.id === id);
+  const itemInCartQuantity = existingCartItem?.quantity || 0;
+
   // Initialize cart data on component mount
   useEffect(() => {
-    fetchCart().catch(console.error)
-  }, [fetchCart])
+    fetchCart().catch(console.error);
+  }, [fetchCart]);
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const token = localStorage.getItem("userToken")
+        const token = localStorage.getItem("userToken");
         if (!token) {
-          router.push("/userlogin")
-          return
+          router.push("/userlogin");
+          return;
         }
 
         const response = await fetch(`/api/users/store/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        })
+        });
 
         if (!response.ok) {
-          const errorData = await response.json()
-          console.error("API Error:", errorData)
-          throw new Error(errorData.message || "Failed to fetch product details")
+          const errorData = await response.json();
+          console.error("API Error:", errorData);
+          throw new Error(
+            errorData.message || "Failed to fetch product details"
+          );
         }
 
-        const data = await response.json()
-        setProduct(data.product)
-        
+        const data = await response.json();
+        setProduct(data.product);
+
         // If the product is already in cart, set initial quantity to 1
         // We don't want to default to existing cart quantity as that could be confusing
         // when adding more of the same product
       } catch (err: any) {
-        console.error("Error fetching product details:", err)
-        setError(err.message || "An error occurred while fetching product details")
+        console.error("Error fetching product details:", err);
+        setError(
+          err.message || "An error occurred while fetching product details"
+        );
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    fetchProduct()
-  }, [id, router])
+    fetchProduct();
+  }, [id, router]);
 
   const handleAddToCart = async () => {
-    if (!product) return
-    
+    if (!product) return;
+
     try {
-      await addToCart(product.id, quantity)
-      toast.success(`Added ${quantity} ${quantity === 1 ? "item" : "items"} to cart!`, {
-        duration: 3000,
-      })
+      await addToCart(product.id, quantity);
+      toast.success(
+        `Added ${quantity} ${quantity === 1 ? "item" : "items"} to cart!`,
+        {
+          duration: 3000,
+        }
+      );
     } catch (err: any) {
-      console.error("Error adding product to cart:", err)
-      toast.error(err.message || "Failed to add product to cart")
+      console.error("Error adding product to cart:", err);
+      toast.error(err.message || "Failed to add product to cart");
     }
-  }
+  };
 
   const incrementQuantity = () => {
     if (product && quantity < product.stock) {
-      setQuantity(quantity + 1)
+      setQuantity(quantity + 1);
     }
-  }
+  };
 
   const decrementQuantity = () => {
     if (quantity > 1) {
-      setQuantity(quantity - 1)
+      setQuantity(quantity - 1);
     }
-  }
+  };
 
   // Function to render star ratings
   const renderStars = (rating: number) => {
@@ -104,30 +123,41 @@ export default function ProductDetail() {
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`h-4 w-4 ${star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+            className={`h-4 w-4 ${
+              star <= rating
+                ? "text-yellow-400 fill-yellow-400"
+                : "text-gray-300"
+            }`}
           />
         ))}
       </div>
-    )
-  }
+    );
+  };
 
   // Function to calculate potential stock warning message
   const getStockMessage = () => {
-    if (!product) return null
-    
-    if (product.stock === 0) {
-      return { type: "error", message: "Out of stock" }
-    } else if (product.stock <= 5) {
-      return { type: "warning", message: `Only ${product.stock} left in stock - order soon!` }
-    } else {
-      return { type: "success", message: `In Stock: ${product.stock} available` }
-    }
-  }
+    if (!product) return null;
 
-  const stockMessage = getStockMessage()
+    if (product.stock === 0) {
+      return { type: "error", message: "Out of stock" };
+    } else if (product.stock <= 5) {
+      return {
+        type: "warning",
+        message: `Only ${product.stock} left in stock - order soon!`,
+      };
+    } else {
+      return {
+        type: "success",
+        message: `In Stock: ${product.stock} available`,
+      };
+    }
+  };
+
+  const stockMessage = getStockMessage();
 
   // Calculate cart item count
-  const cartItemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0
+  const cartItemCount =
+    cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   if (loading) {
     return (
@@ -167,68 +197,70 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg leading-6 font-medium text-red-600">Error loading product details</h3>
+          <h3 className="text-lg leading-6 font-medium text-red-600">
+            Error loading product details
+          </h3>
           <p className="mt-1 text-sm text-gray-500">{error}</p>
-          <Button
-            onClick={() => router.push("/shop")}
-            className="mt-4"
-          >
+          <Button onClick={() => router.push("/shop")} className="mt-4">
             <ChevronLeft className="mr-2 h-4 w-4" />
             Return to Shop
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg leading-6 font-medium text-red-600">Product not found</h3>
-          <p className="mt-1 text-sm text-gray-500">The requested product could not be found.</p>
-          <Button
-            onClick={() => router.push("/shop")}
-            className="mt-4"
-          >
+          <h3 className="text-lg leading-6 font-medium text-red-600">
+            Product not found
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            The requested product could not be found.
+          </p>
+          <Button onClick={() => router.push("/shop")} className="mt-4">
             <ChevronLeft className="mr-2 h-4 w-4" />
             Return to Shop
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="bg-blue-50 rounded-lg overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Product Image */}
           <div className="relative">
             <div className="h-96 md:h-full bg-gray-100 relative overflow-hidden">
-              <img
-                src={product.image || "/placeholder.svg?height=500&width=500"}
+              <Image
+                src={product.image || "/placeholder.svg"}
                 alt={product.name}
-                className="w-full h-full object-contain object-center"
+                fill
+                className="object-contain object-center"
               />
             </div>
-            <Badge 
-              className="absolute top-4 left-4 capitalize" 
+            <Badge
+              className="absolute top-4 left-4 capitalize"
               variant="secondary"
             >
               <Tag className="h-3 w-3 mr-1" /> {product.category}
             </Badge>
             {product.stock === 0 && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                <span className="text-white font-bold text-2xl">Out of Stock</span>
+                <span className="text-white font-bold text-2xl">
+                  Out of Stock
+                </span>
               </div>
             )}
           </div>
@@ -238,33 +270,49 @@ export default function ProductDetail() {
             <div className="space-y-6 flex-grow">
               <div>
                 <div className="flex justify-between items-start">
-                  <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {product.name}
+                  </h1>
                   <div className="flex gap-2">
                     <Button variant="ghost" size="icon">
                       <Share2 className="h-5 w-5 text-gray-500" />
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center mt-2">
                   {renderStars(product.avgRating)}
                   <span className="ml-2 text-gray-600">
-                    {product.avgRating > 0 ? `${product.avgRating.toFixed(1)} stars` : "No ratings yet"}
-                    {product.ratingCount > 0 && ` (${product.ratingCount} reviews)`}
+                    {product.avgRating > 0
+                      ? `${product.avgRating.toFixed(1)} stars`
+                      : "No ratings yet"}
+                    {product.ratingCount > 0 &&
+                      ` (${product.ratingCount} reviews)`}
                   </span>
                 </div>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-3xl font-bold text-green-600 mb-2">${product.price.toFixed(2)}</div>
+                <div className="text-3xl font-bold text-green-600 mb-2">
+                  ${product.price.toFixed(2)}
+                </div>
                 {stockMessage && (
-                  <div className={`text-${stockMessage.type === 'error' ? 'red' : stockMessage.type === 'warning' ? 'amber' : 'green'}-600`}>
+                  <div
+                    className={`text-${
+                      stockMessage.type === "error"
+                        ? "red"
+                        : stockMessage.type === "warning"
+                        ? "amber"
+                        : "green"
+                    }-600`}
+                  >
                     {stockMessage.message}
                   </div>
                 )}
                 {itemInCartQuantity > 0 && (
                   <div className="text-blue-600 mt-1">
-                    You already have {itemInCartQuantity} of this item in your cart
+                    You already have {itemInCartQuantity} of this item in your
+                    cart
                   </div>
                 )}
               </div>
@@ -277,7 +325,10 @@ export default function ProductDetail() {
               {product.stock > 0 && (
                 <div className="flex flex-col space-y-6 mt-auto">
                   <div>
-                    <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="quantity"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Quantity
                     </label>
                     <div className="flex items-center">
@@ -335,7 +386,9 @@ export default function ProductDetail() {
 
           {product.ratings.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <p className="text-gray-500 mb-4">No reviews yet. Be the first to review this product!</p>
+              <p className="text-gray-500 mb-4">
+                No reviews yet. Be the first to review this product!
+              </p>
             </div>
           ) : (
             <div>
@@ -348,11 +401,12 @@ export default function ProductDetail() {
                     </span>
                   </div>
                   <span className="text-gray-500">
-                    Based on {product.ratingCount} {product.ratingCount === 1 ? 'review' : 'reviews'}
+                    Based on {product.ratingCount}{" "}
+                    {product.ratingCount === 1 ? "review" : "reviews"}
                   </span>
                 </div>
               </div>
-              
+
               <div className="divide-y">
                 {product.ratings.map((rating) => (
                   <div key={rating.id} className="py-6">
@@ -360,10 +414,11 @@ export default function ProductDetail() {
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden mr-3 flex items-center justify-center">
                           {rating.user.image ? (
-                            <img
+                            <Image
                               src={rating.user.image}
                               alt={rating.user.name}
-                              className="w-full h-full object-cover"
+                              fill
+                              className="object-cover"
                             />
                           ) : (
                             <User className="h-6 w-6 text-gray-400" />
@@ -371,7 +426,9 @@ export default function ProductDetail() {
                         </div>
                         <div>
                           <p className="font-medium">{rating.user.name}</p>
-                          <div className="flex items-center mt-1">{renderStars(rating.rating)}</div>
+                          <div className="flex items-center mt-1">
+                            {renderStars(rating.rating)}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center text-gray-500 text-sm">
@@ -392,5 +449,5 @@ export default function ProductDetail() {
         </div>
       </div>
     </div>
-  )
+  );
 }

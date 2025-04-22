@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreateMissingPostDialog } from "./_components/create-missing-post-dialog";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/stores/user-store"; 
+import Image from "next/image";
 
 type MissingPost = {
   id: string;
@@ -174,10 +175,11 @@ export default function MissingPetsPage() {
           <div className="flex flex-col lg:flex-row relative">
 
             <div className="w-full lg:w-1/3 h-80 md:h-120 transition-all lg:h-auto relative">
-              <img
+              <Image
                 src={post.images || "/placeholder.svg?height=300&width=300"}
                 alt={post.title}
-                className="w-full h-full object-cover object-[0%_50%] group-hover:scale-105 transition-transform duration-300"
+                fill
+                className="object-cover object-[0%_50%] group-hover:scale-105 transition-transform duration-300"
               />
               {post.status === "FOUND" && (
                 <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
@@ -228,9 +230,11 @@ export default function MissingPetsPage() {
                 <div className="flex items-center">
                   <div className="h-6 w-6 rounded-full bg-gray-200 overflow-hidden mr-2 ">
                     {post.user.image ? (
-                      <img
+                      <Image
                         src={post.user.image || "/placeholder.svg"}
                         alt={post.user.name}
+                        width={24}
+                        height={24}
                         className="h-full w-full object-cover"
                       />
                     ) : (

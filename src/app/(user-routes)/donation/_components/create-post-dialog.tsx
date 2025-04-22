@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useRef } from "react"
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,23 +10,34 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { toast } from "sonner"
-import { Upload, Trash2, Loader2 } from "lucide-react"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { Upload, Trash2, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 type CreatePostDialogProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: () => void
-}
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+};
 
-export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDialogProps) {
+export function CreatePostDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: CreatePostDialogProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -39,118 +50,119 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
     age: "",
     vaccinated: false,
     neutered: false,
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Validate area input to ensure no spaces around special characters
   const validateAreaInput = (input: string): boolean => {
-    if (input.includes('-') || input.includes('_')) {
+    if (input.includes("-") || input.includes("_")) {
       return false;
     }
-    
+
     // Check for spaces around special characters
     const invalidPatterns = [
-      /\d\s+[/]\s*\d/,  
-      /\d\s*[/]\s+\d/,  
-      /\S+\s+[/]\s+\S+/ 
+      /\d\s+[/]\s*\d/,
+      /\d\s*[/]\s+\d/,
+      /\S+\s+[/]\s+\S+/,
     ];
-    
+
     for (const pattern of invalidPatterns) {
       if (pattern.test(input)) {
         return false;
       }
     }
-    
+
     return true;
   };
 
-
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
-    const { name, value } = e.target
-    
-    if (name === 'area') {
+    const { name, value } = e.target;
+
+    if (name === "area") {
       if (!validateAreaInput(value)) {
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
-          area: "Invalid format. Hyphens (-) and underscores (_) are not allowed. Do not use spaces around special characters like /."
-        }))
+          area: "Invalid format. Hyphens (-) and underscores (_) are not allowed. Do not use spaces around special characters like /.",
+        }));
       } else {
-        setErrors(prev => {
-          const newErrors = { ...prev }
-          delete newErrors.area
-          return newErrors
-        })
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.area;
+          return newErrors;
+        });
       }
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSelectChange = (name: string) => (value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSwitchChange = (name: string) => (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }))
-  }
+    setFormData((prev) => ({ ...prev, [name]: checked }));
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("File too large. Please select an image smaller than 5MB.")
-      return
+      toast.error("File too large. Please select an image smaller than 5MB.");
+      return;
     }
 
     // Check file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Invalid file type. Please select an image file.")
-      return
+      toast.error("Invalid file type. Please select an image file.");
+      return;
     }
 
     // Create preview
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = () => {
-      setPreviewImage(reader.result as string)
-    }
-    reader.readAsDataURL(file)
-  }
+      setPreviewImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleUploadClick = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Check for validation errors
     if (Object.keys(errors).length > 0) {
-      toast.error("Please fix all validation errors before submitting")
-      return
+      toast.error("Please fix all validation errors before submitting");
+      return;
     }
 
     if (!previewImage) {
-      toast.error("Please upload an image of the pet")
-      return
+      toast.error("Please upload an image of the pet");
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
 
     try {
-      const token = localStorage.getItem("userToken")
+      const token = localStorage.getItem("userToken");
       if (!token) {
-        toast.error("You must be logged in to create a post")
-        return
+        toast.error("You must be logged in to create a post");
+        return;
       }
 
       const response = await fetch("/api/users/donation", {
@@ -164,14 +176,14 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
           imageBase64: previewImage,
           age: Number.parseInt(formData.age),
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to create post")
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create post");
       }
 
-      toast.success("Post created successfully!")
+      toast.success("Post created successfully!");
 
       // Reset form
       setFormData({
@@ -186,21 +198,21 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
         age: "",
         vaccinated: false,
         neutered: false,
-      })
-      setPreviewImage(null)
+      });
+      setPreviewImage(null);
       if (fileInputRef.current) {
-        fileInputRef.current.value = ""
+        fileInputRef.current.value = "";
       }
 
-      onSuccess()
-      onOpenChange(false)
+      onSuccess();
+      onOpenChange(false);
     } catch (error: any) {
-      console.error("Error creating post:", error)
-      toast.error(error.message || "Failed to create post")
+      console.error("Error creating post:", error);
+      toast.error(error.message || "Failed to create post");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -208,7 +220,8 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
         <DialogHeader>
           <DialogTitle>Create Donation Post</DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a new pet donation post. All fields are required.
+            Fill out the form below to create a new pet donation post. All
+            fields are required.
           </DialogDescription>
         </DialogHeader>
 
@@ -216,7 +229,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-4 md:col-span-1">
               <div>
-                <Label className="mb-2" htmlFor="title">Title</Label>
+                <Label className="mb-2" htmlFor="title">
+                  Title
+                </Label>
                 <Input
                   id="title"
                   name="title"
@@ -228,7 +243,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
               </div>
 
               <div>
-                <Label className="mb-2" htmlFor="description">Description</Label>
+                <Label className="mb-2" htmlFor="description">
+                  Description
+                </Label>
                 <Textarea
                   id="description"
                   name="description"
@@ -241,7 +258,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
               </div>
 
               <div>
-                <Label className="mb-2" htmlFor="country">Country</Label>
+                <Label className="mb-2" htmlFor="country">
+                  Country
+                </Label>
                 <Input
                   id="country"
                   name="country"
@@ -254,7 +273,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="mb-2" htmlFor="city">City</Label>
+                  <Label className="mb-2" htmlFor="city">
+                    City
+                  </Label>
                   <Input
                     id="city"
                     name="city"
@@ -265,7 +286,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                   />
                 </div>
                 <div>
-                  <Label className="mb-2" htmlFor="area">Area</Label>
+                  <Label className="mb-2" htmlFor="area">
+                    Area
+                  </Label>
                   <div className="space-y-1">
                     <Input
                       id="area"
@@ -290,10 +313,12 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mt-1">
                   {previewImage ? (
                     <div className="relative">
-                      <img
+                      <Image
                         src={previewImage || "/placeholder.svg"}
                         alt="Preview"
-                        className="w-full h-40 object-cover rounded-md"
+                        width={400} 
+                        height={160} 
+                        className="object-cover  rounded-md"
                       />
                       <button
                         type="button"
@@ -309,7 +334,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                       onClick={handleUploadClick}
                     >
                       <Upload className="h-10 w-10 text-gray-400" />
-                      <p className="mt-2 text-sm text-gray-500">Click to upload an image</p>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Click to upload an image
+                      </p>
                     </div>
                   )}
                   <input
@@ -324,7 +351,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="mb-2" htmlFor="species">Species</Label>
+                  <Label className="mb-2" htmlFor="species">
+                    Species
+                  </Label>
                   <Input
                     id="species"
                     name="species"
@@ -335,7 +364,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                   />
                 </div>
                 <div>
-                  <Label className="mb-2" htmlFor="breed">Breed</Label>
+                  <Label className="mb-2" htmlFor="breed">
+                    Breed
+                  </Label>
                   <Input
                     id="breed"
                     name="breed"
@@ -349,8 +380,13 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="mb-2" htmlFor="gender">Gender</Label>
-                  <Select value={formData.gender} onValueChange={handleSelectChange("gender")}>
+                  <Label className="mb-2" htmlFor="gender">
+                    Gender
+                  </Label>
+                  <Select
+                    value={formData.gender}
+                    onValueChange={handleSelectChange("gender")}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
@@ -361,7 +397,9 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                   </Select>
                 </div>
                 <div>
-                  <Label className="mb-2" htmlFor="age">Age (years)</Label>
+                  <Label className="mb-2" htmlFor="age">
+                    Age (years)
+                  </Label>
                   <Input
                     id="age"
                     name="age"
@@ -390,10 +428,10 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
                   <Label htmlFor="neutered" className="cursor-pointer mb-2">
                     Neutered/Spayed
                   </Label>
-                  <Switch 
-                    id="neutered" 
-                    checked={formData.neutered} 
-                    onCheckedChange={handleSwitchChange("neutered")} 
+                  <Switch
+                    id="neutered"
+                    checked={formData.neutered}
+                    onCheckedChange={handleSwitchChange("neutered")}
                   />
                 </div>
               </div>
@@ -401,7 +439,12 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={submitting}>
@@ -418,5 +461,5 @@ export function CreatePostDialog({ open, onOpenChange, onSuccess }: CreatePostDi
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

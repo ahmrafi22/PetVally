@@ -36,6 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Image from "next/image";
 
 type MissingPost = {
   id: string;
@@ -401,9 +402,10 @@ export default function MissingPetDetailPage() {
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="flex flex-col lg:flex-row transition-all">
           <div className="lg:w-1/2 relative">
-            <img
+            <Image
               src={post.images || "/placeholder.svg"}
               alt={post.title}
+              fill
               className="w-full h-full object-cover"
             />
             {isFound && (
@@ -418,14 +420,14 @@ export default function MissingPetDetailPage() {
                 {post.title}
               </h1>
               <Badge
-                className={`bg-${statusColor}-100 text-${statusColor}-800 w-1/3 h-10 text-xl`  }
+                className={`bg-${statusColor}-100 text-${statusColor}-800 w-1/3 h-10 text-xl`}
               >
                 {isFound ? "Found" : "Missing"}
               </Badge>
             </div>
 
             <div className="flex flex-wrap items-center mt-2 text-gray-600 text-sm sm:text-base">
-            <Cat className="inline w-4 h-4 mb-1 mr-1" />
+              <Cat className="inline w-4 h-4 mb-1 mr-1" />
               <span className="mr-2">{post.species}</span>•
               <span className="mx-2">{post.breed}</span>•
               <span className="ml-2">
@@ -435,7 +437,7 @@ export default function MissingPetDetailPage() {
 
             <div className="flex items-center mt-1 text-gray-600 text-sm sm:text-base">
               <span>
-              <MapPin className="inline w-4 h-4 mb-1 mr-1" />
+                <MapPin className="inline w-4 h-4 mb-1 mr-1" />
                 {capitalizeFirstLetter(post.area)} -{" "}
                 {capitalizeFirstLetter(post.city)} -{" "}
                 {capitalizeFirstLetter(post.country)}
@@ -445,7 +447,9 @@ export default function MissingPetDetailPage() {
             <div className="flex items-center mt-4">
               <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2">
                 {post.user.image ? (
-                  <img
+                  <Image
+                    width={32}
+                    height={32}
                     src={post.user.image || "/placeholder.svg"}
                     alt={post.user.name}
                     className="h-full w-full object-cover"
@@ -598,7 +602,9 @@ export default function MissingPetDetailPage() {
                     <div className="flex items-center">
                       <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-2">
                         {comment.user.image ? (
-                          <img
+                          <Image
+                            width={32}
+                            height={32}
                             src={comment.user.image || "/placeholder.svg"}
                             alt={comment.user.name}
                             className="h-full w-full object-cover"
@@ -645,7 +651,7 @@ export default function MissingPetDetailPage() {
           onOpenChange={setUpdateDialogOpen}
           post={{
             ...post,
-            status: post.status as "FOUND" | "NOT_FOUND", 
+            status: post.status as "FOUND" | "NOT_FOUND",
           }}
           onSuccess={handleUpdateSuccess}
         />

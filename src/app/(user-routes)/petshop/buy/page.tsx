@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import type { Pet, PaymentFormData } from "@/types";
 import { useUserStore } from "@/stores/user-store";
+import Image from "next/image";
 
 export default function BuyPet() {
   const router = useRouter();
@@ -29,7 +30,11 @@ export default function BuyPet() {
   const petId = searchParams.get("petId");
 
   // Get user data from Zustand store
-  const { userData, isLoading: userDataLoading, fetchUserData } = useUserStore();
+  const {
+    userData,
+    isLoading: userDataLoading,
+    fetchUserData,
+  } = useUserStore();
 
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -273,11 +278,12 @@ export default function BuyPet() {
               </h2>
 
               <div className="flex items-center mb-4">
-                <div className="w-56 h-56 bg-gray-200 rounded-2xl overflow-hidden mr-4 border-2 ">
-                  <img
-                    src={pet?.images || "/placeholder.svg?height=128&width=128"}
-                    alt={pet?.name}
-                    className="w-full h-full object-cover"
+                <div className="relative w-56 h-56 bg-gray-200 rounded-2xl overflow-hidden mr-4 border-2">
+                  <Image
+                    src={pet?.images || "/placeholder.svg"}
+                    alt={pet?.name || "Pet image"}
+                    fill
+                    className="object-cover"
                   />
                 </div>
                 <div>
@@ -533,7 +539,8 @@ export default function BuyPet() {
                 <span>
                   Congratulations! {pet?.name} will be delivered to your
                   location very soon. You will get a call from our
-                  representative very soon. Thank you for choosing to adopt and provide a loving home! 
+                  representative very soon. Thank you for choosing to adopt and
+                  provide a loving home!
                 </span>
               ) : (
                 <span>{error}</span>
