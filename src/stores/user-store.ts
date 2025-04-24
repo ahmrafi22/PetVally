@@ -16,9 +16,9 @@ interface UserState {
     name: string;
     email: string;
     image: string | null;
-    city: string;
-    area: string;
-    country: string;
+    city: string | null;
+    area: string | null;
+    country: string | null;
     age: number | null;
     createdAt: string;
     experienceLevel: number;
@@ -145,36 +145,34 @@ export const useUserStore = create<UserState>()(
         try {
           set({ isLoading: true, error: null });
           
-          const response = await fetch(`/api/users/update`, {
+          const response = await fetch(`/api/users/update-profile`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ userId, ...updatedUser }),
+            body: JSON.stringify({ id: userId, ...updatedUser }),
           });
           
           if (response.ok) {
             const data = await response.json();
+            // Update the store with the complete user data from response
             set(state => ({
               userData: {
                 ...state.userData,
                 ...data.user,
               },
               isLoading: false,
+              error: null
             }));
+            return data.user;
           } else {
-            set({ 
-              error: 'Failed to update user profile',
-              isLoading: false 
-            });
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update user profile');
           }
-        } catch (error) {
-          console.error("Error updating user profile:", error);
-          set({ 
-            error: 'Error updating user profile',
-            isLoading: false 
-          });
+        } catch (error: any) {
+          set({ error: error.message, isLoading: false });
+          throw error;
         }
       },
       
@@ -187,36 +185,34 @@ export const useUserStore = create<UserState>()(
         try {
           set({ isLoading: true, error: null });
           
-          const response = await fetch(`/api/users/preferences`, {
+          const response = await fetch(`/api/users/update-preferences`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ userId, ...preferences }),
+            body: JSON.stringify({ id: userId, ...preferences }),
           });
           
           if (response.ok) {
             const data = await response.json();
+            // Update the store with the complete user data from response
             set(state => ({
               userData: {
                 ...state.userData,
-                ...preferences,
+                ...data.user,
               },
               isLoading: false,
+              error: null
             }));
+            return data.user;
           } else {
-            set({ 
-              error: 'Failed to update preferences',
-              isLoading: false 
-            });
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update preferences');
           }
-        } catch (error) {
-          console.error("Error updating preferences:", error);
-          set({ 
-            error: 'Error updating preferences',
-            isLoading: false 
-          });
+        } catch (error: any) {
+          set({ error: error.message, isLoading: false });
+          throw error;
         }
       },
       
@@ -245,10 +241,12 @@ export const useUserStore = create<UserState>()(
                 image: imageUrl,
               },
               isLoading: false,
+              error: null // Explicitly set error to null on success
             }));
           } else {
+            const errorData = await response.json().catch(() => ({ message: 'Failed to update profile image' }));
             set({ 
-              error: 'Failed to update profile image',
+              error: errorData.message || 'Failed to update profile image',
               isLoading: false 
             });
           }

@@ -459,12 +459,7 @@ export default function MissingPetDetailPage() {
                 )}
               </div>
               <div>
-                <Link
-                  href={`/profile/${post.user.id}`}
-                  className="hover:underline"
-                >
-                  <p className="font-medium">{post.user.name}</p>
-                </Link>
+                <p className="font-medium">{post.user.name}</p>
                 <p className="text-xs text-gray-500">
                   Posted on {formatDate(post.createdAt)}
                 </p>

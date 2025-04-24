@@ -2,35 +2,44 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image"; 
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { 
-  Calendar, Camera, Edit, Settings, ShoppingBag, 
-  MessageSquare, Star, Clock, PawPrint, MapPin, Heart, 
-  Award
+import {
+  Calendar,
+  Camera,
+  Edit,
+  Settings,
+  ShoppingBag,
+  MessageSquare,
+  Star,
+  Clock,
+  PawPrint,
+  MapPin,
+  Heart,
+  Award,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProfileUpdateDialog from "../../_components/ProfileUpdateDialog";
 import PreferencesUpdateDialog from "../../_components/PreferencesUpdateDialog";
 import ImageUploadDialog from "../../_components/image-upload-dialog";
-import type { User } from "@/types";
+import type { User, UserPreferences } from "@/types";
 import ExploreButton from "../_components/button";
 import { useUserStore } from "@/stores/user-store";
-import { toast } from "sonner"; // Import toast from sonner instead
+import { toast } from "sonner";
 
 export default function UserProfile() {
   const params = useParams();
   const id = params.id as string;
 
   // Use the Zustand store instead of local state
-  const { 
-    userData, 
-    isLoading, 
-    error, 
-    fetchUserData, 
-    updateUserProfile, 
-    updateUserPreferences, 
-    updateUserImage 
+  const {
+    userData,
+    isLoading,
+    error,
+    fetchUserData,
+    updateUserProfile,
+    updateUserPreferences,
+    updateUserImage,
   } = useUserStore();
 
   // Dialog states
@@ -45,24 +54,52 @@ export default function UserProfile() {
     }
   }, [id, fetchUserData]);
 
-  const handleUserUpdate = (updatedUser: User) => {
-    updateUserProfile(updatedUser);
-  };
+  // Removed duplicate handleUserUpdate function
 
   const handleImageUpdate = (updatedUser: User) => {
     // Don't make a second API call, just update the state
     if (updatedUser.image) {
       // Update the local state directly
-      useUserStore.setState(state => ({
+      useUserStore.setState((state) => ({
         userData: {
           ...state.userData,
-          image: updatedUser.image ?? null 
-        }
+          image: updatedUser.image ?? null,
+        },
       }));
-      
+
       toast.success("Profile image updated successfully", {
         description: "Your new profile picture has been saved.",
         duration: 3000,
+      });
+    }
+  };
+
+  const handleUserUpdate = async (updatedUser: User) => {
+    try {
+      await updateUserProfile(updatedUser);
+      setProfileDialogOpen(false);
+      toast.success("Profile updated successfully", {
+        description: "Your profile information has been saved.",
+      });
+    } catch (err: any) {
+      console.error("Error updating profile:", err);
+      toast.error("Failed to update profile", {
+        description: err.message || "Please try again later.",
+      });
+    }
+  };
+
+  const handlePreferencesUpdate = async (preferences: UserPreferences) => {
+    try {
+      await updateUserPreferences(preferences);
+      setPreferencesDialogOpen(false);
+      toast.success("Preferences updated successfully", {
+        description: "Your preferences have been saved.",
+      });
+    } catch (err: any) {
+      console.error("Error updating preferences:", err);
+      toast.error("Failed to update preferences", {
+        description: err.message || "Please try again later.",
       });
     }
   };
@@ -78,7 +115,7 @@ export default function UserProfile() {
           Error loading profile
         </h3>
         <p className="mt-1 text-sm text-gray-500">{error}</p>
-        <Button 
+        <Button
           onClick={() => fetchUserData()}
           className="mt-4 bg-red-50 text-red-600 hover:bg-red-100"
           size="sm"
@@ -155,16 +192,21 @@ export default function UserProfile() {
               </div>
 
               <div className="text-center md:text-left">
-                <h1 className="text-3xl font-bold text-purple-800">{userData.name}</h1>
+                <h1 className="text-3xl font-bold text-purple-800">
+                  {userData.name}
+                </h1>
                 <p className="text-gray-600">{userData.email}</p>
                 <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-gray-600">
                   <MapPin className="w-4 h-4 text-pink-500" />
                   <span>
-                    {userData.city ? userData.city + ", " : ""}{userData.country || "Location not specified"}
+                    {userData.city ? userData.city + ", " : ""}
+                    {userData.country || "Location not specified"}
                   </span>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
-                  <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">Pet Owner</span>
+                  <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                    Pet Owner
+                  </span>
                   <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">
                     {getExperienceLevel(userData.experienceLevel)} Pet Parent
                   </span>
@@ -221,31 +263,39 @@ export default function UserProfile() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Experience Level */}
                   <div className="bg-purple-50 p-3 rounded-lg">
-                    <div className="text-purple-600 text-sm font-medium">Experience</div>
+                    <div className="text-purple-600 text-sm font-medium">
+                      Experience
+                    </div>
                     <div className="mt-1 text-xl font-bold text-purple-800">
                       {getExperienceLevel(userData.experienceLevel)}
                     </div>
                   </div>
-                  
+
                   {/* Availability */}
                   <div className="bg-pink-50 p-3 rounded-lg">
-                    <div className="text-pink-600 text-sm font-medium">Available</div>
+                    <div className="text-pink-600 text-sm font-medium">
+                      Available
+                    </div>
                     <div className="mt-1 text-xl font-bold text-pink-800">
                       {userData.dailyAvailability} hrs
                     </div>
                   </div>
-                  
+
                   {/* Pet Count */}
                   <div className="bg-blue-50 p-3 rounded-lg">
-                    <div className="text-blue-600 text-sm font-medium">Pets</div>
+                    <div className="text-blue-600 text-sm font-medium">
+                      Pets
+                    </div>
                     <div className="mt-1 text-xl font-bold text-blue-800">
                       {userData.petOrders?.length || 0}
                     </div>
                   </div>
-                  
+
                   {/* Age */}
                   <div className="bg-amber-50 p-3 rounded-lg">
-                    <div className="text-amber-600 text-sm font-medium">Age</div>
+                    <div className="text-amber-600 text-sm font-medium">
+                      Age
+                    </div>
                     <div className="mt-1 text-xl font-bold text-amber-800">
                       {userData.age || "N/A"}
                     </div>
@@ -262,24 +312,36 @@ export default function UserProfile() {
 
                 <div className="space-y-4">
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">Daily Availability</div>
+                    <div className="text-sm text-gray-500 mb-1">
+                      Daily Availability
+                    </div>
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((i) => (
                         <Clock
                           key={i}
-                          className={`w-5 h-5 ${i <= userData.dailyAvailability ? "text-pink-500" : "text-gray-300"}`}
+                          className={`w-5 h-5 ${
+                            i <= userData.dailyAvailability
+                              ? "text-pink-500"
+                              : "text-gray-300"
+                          }`}
                         />
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">Experience Level</div>
+                    <div className="text-sm text-gray-500 mb-1">
+                      Experience Level
+                    </div>
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((i) => (
                         <Award
                           key={i}
-                          className={`w-5 h-5 ${i <= userData.experienceLevel ? "text-pink-500" : "text-gray-300"}`}
+                          className={`w-5 h-5 ${
+                            i <= userData.experienceLevel
+                              ? "text-pink-500"
+                              : "text-gray-300"
+                          }`}
                         />
                       ))}
                     </div>
@@ -288,21 +350,29 @@ export default function UserProfile() {
                   <div className="pt-2">
                     <div className="flex items-center gap-2 mb-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${userData.hasOutdoorSpace ? "bg-green-500" : "bg-gray-300"}`}
+                        className={`w-3 h-3 rounded-full ${
+                          userData.hasOutdoorSpace
+                            ? "bg-green-500"
+                            : "bg-gray-300"
+                        }`}
                       ></div>
                       <span className="text-sm">Has outdoor space</span>
                     </div>
 
                     <div className="flex items-center gap-2 mb-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${userData.hasChildren ? "bg-green-500" : "bg-gray-300"}`}
+                        className={`w-3 h-3 rounded-full ${
+                          userData.hasChildren ? "bg-green-500" : "bg-gray-300"
+                        }`}
                       ></div>
                       <span className="text-sm">Has children</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${userData.hasAllergies ? "bg-red-500" : "bg-gray-300"}`}
+                        className={`w-3 h-3 rounded-full ${
+                          userData.hasAllergies ? "bg-red-500" : "bg-gray-300"
+                        }`}
                       ></div>
                       <span className="text-sm">Has pet allergies</span>
                     </div>
@@ -323,20 +393,32 @@ export default function UserProfile() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {userData.country && (
                       <div className="flex flex-col p-3 bg-purple-50 rounded-lg">
-                        <p className="text-sm font-medium text-purple-500">Country</p>
-                        <p className="mt-1 font-medium text-purple-800">{userData.country}</p>
+                        <p className="text-sm font-medium text-purple-500">
+                          Country
+                        </p>
+                        <p className="mt-1 font-medium text-purple-800">
+                          {userData.country}
+                        </p>
                       </div>
                     )}
                     {userData.city && (
                       <div className="flex flex-col p-3 bg-pink-50 rounded-lg">
-                        <p className="text-sm font-medium text-pink-500">City</p>
-                        <p className="mt-1 font-medium text-pink-800">{userData.city}</p>
+                        <p className="text-sm font-medium text-pink-500">
+                          City
+                        </p>
+                        <p className="mt-1 font-medium text-pink-800">
+                          {userData.city}
+                        </p>
                       </div>
                     )}
                     {userData.area && (
                       <div className="flex flex-col p-3 bg-blue-50 rounded-lg">
-                        <p className="text-sm font-medium text-blue-500">Area</p>
-                        <p className="mt-1 font-medium text-blue-800">{userData.area}</p>
+                        <p className="text-sm font-medium text-blue-500">
+                          Area
+                        </p>
+                        <p className="mt-1 font-medium text-blue-800">
+                          {userData.area}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -355,7 +437,9 @@ export default function UserProfile() {
                     {userData.petOrders.map((order) => (
                       <div
                         key={order.id}
-                        onClick={() => (window.location.href = `/petshop/${order.pet?.id}`)}
+                        onClick={() =>
+                          (window.location.href = `/petshop/${order.pet?.id}`)
+                        }
                         className="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg hover:shadow-md cursor-pointer transition-all duration-200"
                       >
                         <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden">
@@ -372,12 +456,15 @@ export default function UserProfile() {
                           )}
                         </div>
                         <div>
-                          <h3 className="font-medium text-purple-800">{order.pet?.name}</h3>
+                          <h3 className="font-medium text-purple-800">
+                            {order.pet?.name}
+                          </h3>
                           <p className="text-sm text-gray-600">
                             {order.pet?.breed}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Age: {order.pet?.age} {order.pet?.age === 1 ? "year" : "years"}
+                            Age: {order.pet?.age}{" "}
+                            {order.pet?.age === 1 ? "year" : "years"}
                           </p>
                         </div>
                       </div>
@@ -417,7 +504,7 @@ export default function UserProfile() {
         isOpen={preferencesDialogOpen}
         onClose={() => setPreferencesDialogOpen(false)}
         user={userData as User}
-        onUpdate={handleUserUpdate}
+        onUpdate={handlePreferencesUpdate}
       />
 
       <ImageUploadDialog
@@ -525,7 +612,10 @@ function ProfileSkeleton() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[...Array(2)].map((_, index) => (
-                  <div key={index} className="flex items-center gap-4 p-4 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center gap-4 p-4 rounded-lg"
+                  >
                     <Skeleton className="h-16 w-16 rounded-full" />
                     <div className="space-y-1">
                       <Skeleton className="h-5 w-20" />
