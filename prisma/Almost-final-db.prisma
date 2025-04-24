@@ -470,7 +470,7 @@ model Review {
 model VetDoctor {
   id        String @id @default(uuid())  // Unique vet identifier
   name      String                       // Vet's full name
-  specialty String                       // Medical specialty (e.g. "Surgery")
+  specialty String[]                       // Medical specialty (e.g. "Surgery")
   country   String                       // Clinic address
   city      String                       // City for location filtering
   area      String                       // Neighborhood for precise matching

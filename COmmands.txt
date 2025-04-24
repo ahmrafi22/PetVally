@@ -40,5 +40,85 @@ npx shadcn@latest add select
 npx shadcn@latest add input
 npx shadcn@latest add textarea
 
-TO do:
-Ui change 
+
+Vet docs-
+____________________________________________________________
+
+tsx -> typescript + xml -> typescript + react code 
+ts -> typescript
+[id] -> a folder , id will be different for each thing so this is dynamic thats why wraped with third bracket
+
+(user-routes)/vetdocs/page.tsx ->
+on this page all the vet doctors deatails will be shown , if 
+user's current loaction and doctors loaction match show thoese doctors at top 
+get user current loaction from src/stores/user-store it is a zustand global store 
+so that we dont have to hit the userdata api eveytime any user data is needed.
+
+check out missingposts/page.tsx or dontaion/page.tsx to see how user data and doctors location data is matched also check the apis there.
+
+in this page every doctors details will be shown with a button appppointment 
+clicking this button will open a shadCN dialog with a form for appointment detials that will
+use the appointment model from primsa database . from will have date time reason. 
+
+____________________________________________________________________
+
+controllers/vetdoc-data.ts ->
+create all the vetdoc related database functions here like 
+getAllVet() -> this type fucntion will get all the vet doc details and send to api 
+makeAppointment(id) this function will take the id of doctor and create an pointment with current user ,
+check any controllers file all same type
+
+_________
+
+app/api/vetdocs/route.ts ->
+here  write the api for showing docs in this page (user-routes)/vetdocs/page.tsx 
+also handle the appointment taking via this api , if needed app/api/vetdocs/[id]route.ts in this file handle the appointments.
+
+_________________
+
+(user-rotutes)/myappointments/page.tsx ->
+Show all the current loggedin user's all appointments here , nothing else needed here.
+This will work like  (user-rotutes)/mymeetings
+
+
+-------------------------------------------
+
+an example of calling api 
+
+    async function fetchPets() {                                     -> this function is for view only to get all recommendations pets 
+      try {
+        const token = localStorage.getItem("userToken");            -> localStorage.getItem() this fucntion gets data from local storage of brower, 
+                                                                        userId and userToken is saved to local storage during login
+
+        if (!token) {
+          router.push("/userlogin");                                 -> token is the verfiaction of user , so if token is missing router send to login page
+          return;
+        }
+
+        // Fetch pet recommendations + all pets
+        const recommendationsResponse = await fetch(                ->using fetch calling the api to get data 
+          "api/users/petShop/recommendations",
+          {
+            headers: { 
+              Authorization: `Bearer ${token}`,                     -> its a convention to use Bearer , in the api it checks the authentication header for validation user login 
+            },
+          }
+        );
+
+        if (!recommendationsResponse.ok) {
+          const errorData = await recommendationsResponse.json();
+          console.error("API Error (Recommendations):", errorData);
+          throw new Error(
+            errorData.message || "Failed to fetch pet recommendations"                 ->  if anything wrong in api it sends error 
+          );
+        }
+
+        const recommendationsData = await recommendationsResponse.json();
+        console.log("Pet recommendations:", recommendationsData);
+
+        setRecommendedPets(recommendationsData.recommendations.recommendedPets);            -> usting this function all recommendations pets are stored in a state then shown using .map() functiom
+        setAllPets(recommendationsData.recommendations.allPets);                            ->     We also get all the pets from this api so it sets the state for that too
+        setFilteredPets(recommendationsData.recommendations.allPets);                        -> this is for search
+        setLoading(false);                                                                   -> stops the loading skelton , then shows the content 
+      } catch (err: any) {
+        console.error("Error fetching pets:", err); }}

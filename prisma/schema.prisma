@@ -46,6 +46,7 @@ model User {
   adoptionForms AdoptionForm[]  // Adoption applications submitted by user
   upvotes       Upvote[]        // Posts user has upvoted
   comments      Comment[]       // Comments user has posted
+  appointments  Appointment[]   // Vet appointments booked by user
 }
 
 model Caregiver {
@@ -375,4 +376,53 @@ model MissingPost {
   @@index([userId])
   @@index([city])
   @@index([area])
+}
+
+
+// =============================================
+// VETERINARY SERVICES (User-Only)
+// =============================================
+
+model VetDoctor {
+  id        String @id @default(uuid())  // Unique vet identifier
+  name      String                       // Vet's full name
+  specialty String[]                       // Medical specialty (e.g. "Surgery")
+  country   String                       // Clinic address
+  city      String                       // City for location filtering
+  area      String                       // Neighborhood for precise matching
+  contact   String                       // Phone/email for appointments
+  image     String                       // Profile picture URL
+
+  // ===== Relationships =====
+  appointments Appointment[]             // Scheduled appointments
+
+  createdAt DateTime @default(now())    // When vet was added to directory
+
+  // Purpose: Manage veterinary professional directory
+  // Relations: Connects vets to appointments
+  // Business Rules:
+  // - Only admins can add/edit vets
+  // - Vets sorted by proximity to user
+}
+
+model Appointment {
+  id   String @id @default(uuid())  // Unique appointment identifier
+  date DateTime                     // Appointment date
+  time String                       // Time slot (e.g. "14:30")
+  reason String                     // Reason for visit (e.g. "Checkup", "Vaccination")
+
+  // ===== Relationships =====
+  user User @relation(fields: [userId], references: [id])  // Booking user
+  userId String                       // Reference to booking user
+  vet   VetDoctor @relation(fields: [vetId], references: [id])  // Selected vet
+  vetId String                       // Reference to selected vet
+
+  createdAt DateTime @default(now()) // When appointment was booked
+  @@index([userId]) //optimize 
+
+  // Purpose: Schedule veterinary visits
+  // Relations: Links users to vet bookings
+  // Business Rules:
+  // - Appointments can be cancelled up to 24h before
+  // - Users get reminders 1 day before
 }
