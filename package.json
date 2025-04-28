@@ -15,6 +15,7 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@gsap/react": "^2.1.2",
     "@lottiefiles/dotlottie-react": "^0.13.3",
     "@prisma/client": "^6.5.0",
