@@ -15,6 +15,7 @@ import {
   ShoppingCart,
   HeartHandshake,
   OctagonAlert,
+  BotMessageSquare,
 } from "lucide-react";
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react";
@@ -241,6 +242,7 @@ export default function UserNavigation() {
     },
     { name: "Pet Donations", icon: <HeartHandshake size={25} />, href: "/donation" },
     { name: "Missing Pets", icon: <OctagonAlert size={25} />, href: "/missingposts" },
+    { name: "Vetchat bot", icon: <BotMessageSquare size={25} />, href: "/vetchat" },
     {
       name: "Notifications",
       icon: <Bell size={25} />,
