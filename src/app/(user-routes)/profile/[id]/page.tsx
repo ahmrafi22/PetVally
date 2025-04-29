@@ -484,7 +484,7 @@ export default function UserProfile() {
                 <div className="flex flex-wrap gap-4 justify-between">
                   <ExploreButton text="Go to orders" href="/myorders" />
                   <ExploreButton text="Go to Meetings" href="/mymeetings" />
-                  <ExploreButton text="Go to ratings" href="/myoratings" />
+                  <ExploreButton text="Go to appoitnemts" href="/vetmeetings" />
                 </div>
               </div>
             </div>

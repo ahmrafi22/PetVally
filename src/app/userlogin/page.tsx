@@ -38,7 +38,6 @@ export default function UserLogin() {
           // Token is valid, redirect to petshop
           router.push("/petshop");
         } else {
-          // Token is invalid, clear localStorage and show login
           localStorage.removeItem("userToken");
           localStorage.removeItem("userId");
           setCheckingAuth(false);

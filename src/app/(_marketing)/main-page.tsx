@@ -1,7 +1,7 @@
 import PetVallyLogo from "@/components/_shared/logo";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useRef } from "react";
-import gsap from "gsap"
+import gsap from 'gsap';
 import { useGSAP } from "@gsap/react";
 import GlassButton from "./glass-button";
 
