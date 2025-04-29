@@ -15,14 +15,43 @@ export default function UserLogin() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
 
-
   useEffect(() => {
-    const userToken = localStorage.getItem("userToken");
-    if (userToken) {
-      router.push("/petshop");
-    } else {
-      setCheckingAuth(false);
-    }
+    // Function to verify token validity
+    const checkTokenValidity = async () => {
+      const userToken = localStorage.getItem("userToken");
+      
+      if (!userToken) {
+        setCheckingAuth(false);
+        return;
+      }
+      
+      try {
+        // Option 1: Make a request to validate the token
+        const response = await fetch("/api/users/verify-token", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${userToken}`
+          }
+        });
+        
+        if (response.ok) {
+          // Token is valid, redirect to petshop
+          router.push("/petshop");
+        } else {
+          // Token is invalid, clear localStorage and show login
+          localStorage.removeItem("userToken");
+          localStorage.removeItem("userId");
+          setCheckingAuth(false);
+        }
+      } catch (error) {
+        // Error checking token, clear localStorage and show login
+        localStorage.removeItem("userToken");
+        localStorage.removeItem("userId");
+        setCheckingAuth(false);
+      }
+    };
+    
+    checkTokenValidity();
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +72,6 @@ export default function UserLogin() {
         throw new Error(data.message || "Login failed");
       }
 
-
       localStorage.setItem("userToken", data.token);
       localStorage.setItem("userId", data.user.id);
 
@@ -56,7 +84,6 @@ export default function UserLogin() {
       setLoading(false);
     }
   };
-
 
   if (checkingAuth) {
     return (
@@ -74,7 +101,6 @@ export default function UserLogin() {
         </div>
       </header>
 
-
       <div className="flex-grow flex items-center justify-center">
         <div className="w-full lg:h-[70vh] max-w-7xl mx-auto flex flex-col md:flex-row bg-white/25 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 overflow-hidden">
 
@@ -86,7 +112,6 @@ export default function UserLogin() {
               className="w-full h-64 lg:h-130 lg:w-130"
             />
           </div>
-
 
           <div className="w-full md:w-1/2 p-8 flex items-center justify-center">
             <div className="max-w-md mx-auto space-y-6">
