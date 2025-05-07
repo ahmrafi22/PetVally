@@ -132,18 +132,6 @@
   }
 }
 
-/* Glass button */
-@property --angle-1 {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: -75deg;
-}
-
-@property --angle-2 {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: -45deg;
-}
 
 @layer utilities {
   @keyframes gradient {
@@ -162,4 +150,23 @@
     animation: gradient 4s linear infinite;
     background-size: 200% 200%;
   }
+}
+
+
+/* Caregiver button stlye */
+@keyframes ripple {
+  0% { width: 0; height: 0; opacity: 0.5; }
+  100% { width: 400px; height: 400px; opacity: 0; }
+}
+
+.animate-ripple {
+  animation: ripple 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.perspective-800 {
+  perspective: 800px;
+}
+
+.bg-radial-gradient {
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.3) 10%, transparent 10.01%);
 }

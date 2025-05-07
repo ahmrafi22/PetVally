@@ -32,7 +32,7 @@ export default function LoadingScreen() {
   return (
     <>
 
-      <header className="fixed top-0 left-0 right-0 z-50">
+      <header className="fixed top-0 left-0 right-0 z-1100">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-center">
           <PetVallyLogo />
         </div>
@@ -40,7 +40,7 @@ export default function LoadingScreen() {
 
 
       <div
-        className={`fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-bl  from-red-200 to-blue-200 transition-transform duration-500 ease-in-out z-40 ${
+        className={`fixed inset-0 z-1000 flex flex-col items-center justify-center bg-gradient-to-bl  from-red-200 to-blue-200 transition-transform duration-500 ease-in-out  ${
           loadingComplete ? "translate-y-[-100%]" : "translate-y-0"
         }`}
       >
