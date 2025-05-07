@@ -4,6 +4,7 @@ import Lenis from "lenis";
 import CareJoinButton from "./care-join-button";
 import { Unbounded } from "next/font/google";
 import { cn } from "@/lib/utils";
+import TxtEffct from "./text-effectt";
 
 const text = Unbounded({
   weight: "500",
@@ -254,17 +255,18 @@ export default function SecondPage() {
     <div className="">
       <section
         ref={containerRef}
-        className=" w-full  md:h-[90vh] h-[40vh]  flex flex-col justify-center items-center relative"
+        className=" w-full  md:h-[90vh] lg:h-[85vh] h-[40vh]  flex flex-col justify-center items-center relative"
       >
         {/* Base gradient background - purple to indigo gradient */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-pink-200 to-orange-200"></div>
         
         {/* Shadow gradient overlay - white at top fading to transparent */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white via-[rgba(255,255,255,0.2)] via-[35%] to-transparent"></div>
-
+      <TxtEffct animateOnScroll={true} delay={0.2}>
         <h1 className={cn("text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 px-4  z-99 max-w-5xl relative text-white mix-blend-difference", text.className)}>
           Our care givers help Thousands of pet owners everyday
         </h1>
+        </TxtEffct>
 
         <div className="z-99 relative">
           <p className="uppercase text-center font-mono font-semibold select-none text-blue-400  mb-4">

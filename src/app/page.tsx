@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <ReactLenis root options={{ smoothWheel: !isLoading }}>
-      <div className="relative z-10 min-h-[100vh] bg-white">
+      <div className="min-h-[100vh] bg-white">
         {isLoading && <LoadingScreen />}
         <MainPage />
         <SecondPage />
