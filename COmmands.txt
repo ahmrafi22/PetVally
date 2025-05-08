@@ -122,3 +122,7 @@ an example of calling api
         setLoading(false);                                                                   -> stops the loading skelton , then shows the content 
       } catch (err: any) {
         console.error("Error fetching pets:", err); }}
+
+
+//
+// FIx mobile layout and  add the background things 

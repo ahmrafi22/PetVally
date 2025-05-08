@@ -38,7 +38,8 @@ const Footer = () => {
 
     ScrollTrigger.create({
       trigger: headingRef.current,
-      start: "top 80%",
+      start: "top 88%",
+      // markers:true,
       onEnter: () => {
         gsap.to(split.chars, {
           opacity: 1,
@@ -111,7 +112,7 @@ const Footer = () => {
 
   return (
     <footer className="w-full h-[55vh] bg-white flex justify-center items-center">
-      <div className="relative overflow-hidden w-full h-full flex justify-end px-12 text-right items-start py-12 text-[#ff5941]">
+      <div className="relative  w-full h-full flex justify-end px-12 text-right items-start py-12 text-[#ff5941]">
         <div className="flex flex-row space-x-12 sm:space-x-16 md:space-x-24 text-sm sm:text-lg md:text-xl">
           <ul className="space-y-2">
             {leftLinks.map((link, index) => (

@@ -255,7 +255,7 @@ export default function SecondPage() {
     <div className="">
       <section
         ref={containerRef}
-        className=" w-full  md:h-[90vh] lg:h-[85vh] h-[40vh]  flex flex-col justify-center items-center relative"
+        className=" w-full  md:h-[90vh] lg:h-[85vh] h-[55vh]  flex flex-col justify-center items-center relative"
       >
         {/* Base gradient background - purple to indigo gradient */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-pink-200 to-orange-200"></div>
