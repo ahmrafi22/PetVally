@@ -44,7 +44,7 @@ export default function LoadingScreen() {
           loadingComplete ? "translate-y-[-100%]" : "translate-y-0"
         }`}
       >
-        <div className="flex flex-col items-center justify-center gap-8 w-full max-w-md">
+        <div className="flex flex-col  items-center justify-center gap-8 w-full max-w-md">
           <div className="w-[200px] h-[200px]">
             <DotLottieReact
               src="lottie/spincat.lottie"
@@ -53,10 +53,10 @@ export default function LoadingScreen() {
             />
           </div>
 
-          <div className="w-full max-w-md bg-gray-200 h-[3.5px] mt-4">
+          <div className="w-1/3 md:w-full  max-w-md bg-gray-200 h-[3.5px] mt-4">
             <div
-              className="bg-green-400 h-[3.5px] rounded-sm transition-all duration-100 ease-linear"
-              style={{ width: `${progress + 4}%` }}
+              className="bg-green-400 h-[3.5px]  rounded-sm transition-all duration-100 ease-linear"
+              style={{ width: `${progress}%` }}
             ></div>
           </div>
         </div>

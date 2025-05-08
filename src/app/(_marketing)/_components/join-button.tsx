@@ -19,7 +19,7 @@ const JoinButton = ({ href = "/", text = "Click Me" }) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-6 sm:gap-8">
 
       {/* Button */}
       <button
@@ -27,25 +27,25 @@ const JoinButton = ({ href = "/", text = "Click Me" }) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={cn(
-          "relative cursor-pointer flex items-center gap-4 px-9 py-4 text-base font-semibold text-black rounded-full border-4 border-transparent bg-transparent shadow-[0_0_0_2px_#ec4899] hover:shadow-[0_0_0_12px_transparent] hover:text-gray-800 transition-all duration-700 ease-in-out overflow-hidden"
+          "relative cursor-pointer flex items-center gap-3 sm:gap-4 px-6 sm:px-9 py-3 sm:py-4 text-sm sm:text-base font-semibold text-black rounded-full border-4 border-transparent bg-transparent shadow-[0_0_0_2px_#ec4899] hover:shadow-[0_0_0_12px_transparent] hover:text-gray-800 transition-all duration-700 ease-in-out overflow-hidden"
         )}
       >
         <ArrowRight strokeWidth={3}
-          className={`absolute z-10 w-6 h-6 font-bold   transition-all duration-700 ease-in-out ${
-            isHovered ? 'right-0 opacity-0 translate-x-8' : 'right-4 opacity-100'
+          className={`absolute z-10 w-5 h-5 sm:w-6 sm:h-6 font-bold transition-all duration-700 ease-in-out ${
+            isHovered ? 'right-0 opacity-0 translate-x-8' : 'right-3 sm:right-4 opacity-100'
           }`}
         />
 
         <PawPrint
-          className={`absolute z-10 w-6 h-6 fill-black transition-all duration-700 ease-in-out ${
-            isHovered ? 'left-4 opacity-100' : 'left-0 -translate-x-8 opacity-0'
+          className={`absolute z-10 w-5 h-5 sm:w-6 sm:h-6 fill-black transition-all duration-700 ease-in-out ${
+            isHovered ? 'left-3 sm:left-4 opacity-100' : 'left-0 -translate-x-8 opacity-0'
           }`}
         />
 
         <span
           className={cn(
             `relative z-10 transition-all font-bold duration-700 ease-in-out ${
-              isHovered ? 'translate-x-3' : '-translate-x-3'
+              isHovered ? 'translate-x-2 sm:translate-x-3' : '-translate-x-2 sm:-translate-x-3'
             }`,
             unboundedFont.className
           )}
@@ -55,7 +55,7 @@ const JoinButton = ({ href = "/", text = "Click Me" }) => {
 
         <div
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-pink-500 to bg-lime-100 rounded-full transition-all duration-700 ease-in-out ${
-            isHovered ? 'w-64 h-64 opacity-100' : 'w-5 h-5 opacity-0'
+            isHovered ? 'w-56 sm:w-64 h-56 sm:h-64 opacity-100' : 'w-4 sm:w-5 h-4 sm:h-5 opacity-0'
           }`}
         ></div>
       </button>

@@ -20,7 +20,7 @@ import {
   Bot,
 } from "lucide-react";
 import { Public_Sans } from "next/font/google";
-import TxtEffct from "./text-effectt";
+import TxtEffct from "./_components/text-effectt";
 
 const text = Public_Sans({
   weight: "400",
@@ -58,7 +58,7 @@ export default function ThirdPage() {
           <WobbleCard containerClassName="md:col-span-2 bg-pink-400">
             <TxtEffct animateOnScroll={true} delay={0.2}>
               <div className="flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-2 md:mb-0">
+                <div className="flex items-center gap-3 mb-2 md:mb-4">
                   <ShoppingBag className="h-5 w-5 md:h-6 md:w-6 text-gray-800" />
                   <h2 className="text-lg md:text-2xl font-bold text-gray-800">
                     Shopping & Pet Adoption
@@ -76,9 +76,9 @@ export default function ThirdPage() {
                       Browse and purchase pet food, medicine, toys, and even
                       adopt new pets.
                     </p>
-                    <div className="relative hidden md:block flex-grow min-h-[130px] rounded-lg overflow-hidden">
+                    <div className="relative  md:block flex-grow min-h-[130px] rounded-lg overflow-hidden">
                       <DotLottieReact
-                        src="https://lottie.host/4fdbced0-ec0d-4836-bc91-5756c8fa9072/B6YVJMEtIe.lottie"
+                        src="/lottie/all.lottie"
                         loop
                         autoplay
                       />
@@ -131,14 +131,14 @@ export default function ThirdPage() {
           <WobbleCard containerClassName="bg-blue-400">
             <TxtEffct animateOnScroll={true} delay={0.4}>
               <div className="flex flex-col h-full">
-                <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
                   <Gift className="h-5 w-5 md:h-6 md:w-6 text-gray-800" />
                   <h2 className="text-lg md:text-xl font-bold text-gray-800">
                     Pet Donations & Missing Pets
                   </h2>
                 </div>
-                <div className="relative hidden md:block flex-grow mb-3 rounded-lg overflow-hidden h-[140px]">
-                  <DotLottieReact src="/lottie/dog1.lottie" loop autoplay />
+                <div className="relative  md:block flex-grow mb-3 rounded-lg overflow-hidden h-[140px]">
+                  <DotLottieReact src="/lottie/missing.lottie" loop autoplay className="scale-140 -translate-y-1" />
                 </div>
                 <div className="space-y-2 md:space-y-3">
                   <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 md:p-3">
@@ -153,7 +153,7 @@ export default function ThirdPage() {
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-gray-800" />
                       <p className="text-gray-700 text-xs md:text-sm">
-                        Report and find missing pets based on location
+                        Report and find missing pets nearby
                       </p>
                     </div>
                   </div>
@@ -166,9 +166,9 @@ export default function ThirdPage() {
           <WobbleCard containerClassName="bg-teal-500">
             <TxtEffct animateOnScroll={true} delay={0.4}>
               <div className="flex flex-col h-full">
-                <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
-                  <Stethoscope className="h-5 w-5 md:h-6 md:w-6 text-gray-800" />
-                  <h2 className="text-lg md:text-xl font-bold text-gray-800">
+                <div className="flex items-center gap-2 md:gap-3 mb-2 mt-2 md:mb-7 ">
+                  <Stethoscope className="h-5 w-5 md:h-6 md:w-6 text-gray-800 " />
+                  <h2 className="text-lg md:text-xl font-bold text-gray-800 ">
                     Veterinary Services
                   </h2>
                 </div>
@@ -192,8 +192,8 @@ export default function ThirdPage() {
                     </p>
                   </div>
                 </div>
-                <div className="relative hidden md:block flex-grow rounded-lg overflow-hidden min-h-[100px]">
-                  <DotLottieReact src="/lottie/cat1.lottie" loop autoplay />
+                <div className="relative md:block flex-grow rounded-lg overflow-hidden min-h-[120px]">
+                  <DotLottieReact src="/lottie/doc.lottie" loop autoplay className="scale-115" />
                 </div>
               </div>
             </TxtEffct>
@@ -203,9 +203,9 @@ export default function ThirdPage() {
           <WobbleCard containerClassName="md:col-span-2 bg-purple-400">
             <TxtEffct animateOnScroll={true} delay={0.5}>
               <div className="flex flex-col h-full py-2 md:py-3">
-                <div className="flex items-center gap-2 md:gap-3 mb-2">
-                  <Calendar className="h-5 w-5 md:h-6 md:w-6 text-gray-800" />
-                  <h2 className="text-lg md:text-2xl font-bold text-gray-800">
+                <div className="flex items-center gap-2 md:gap-3 mb-6">
+                  <Calendar className="h-5 w-5 md:h-6 md:w-6 text-gray-800 " />
+                  <h2 className="text-lg md:text-2xl font-bold text-gray-800 ">
                     Pet Care Jobs & Companion Services
                   </h2>
                 </div>
@@ -217,12 +217,12 @@ export default function ThirdPage() {
                         Job Listings
                       </h3>
                     </div>
-                    <p className="text-gray-700 text-xs md:text-sm mb-2">
+                    <p className="text-gray-700 text-xs md:text-sm ">
                       Post jobs for pet boarding, sitting, and walking with
                       pricing details.
                     </p>
-                    <div className="relative hidden md:block flex-grow min-h-[90px] rounded-lg overflow-hidden">
-                      <DotLottieReact src="/lottie/dog1.lottie" loop autoplay />
+                    <div className="relative md:block flex-grow min-h-[90px] rounded-lg overflow-hidden">
+                      <DotLottieReact src="/lottie/job.lottie" loop autoplay />
                     </div>
                   </div>
                   <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 md:p-3 flex flex-col">
@@ -236,8 +236,8 @@ export default function ThirdPage() {
                       Registered caregivers can apply for jobs and earn money
                       from completed tasks.
                     </p>
-                    <div className="relative hidden md:block flex-grow min-h-[90px] rounded-lg overflow-hidden">
-                      <DotLottieReact src="/lottie/cat1.lottie" loop autoplay />
+                    <div className="relative  md:block flex-grow min-h-[90px] rounded-lg overflow-hidden">
+                      <DotLottieReact src="/lottie/lovepaw.lottie" loop autoplay />
                     </div>
                   </div>
                   <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 md:p-3 flex flex-col">
@@ -251,8 +251,8 @@ export default function ThirdPage() {
                       Pet companions can view their assigned tasks with dates,
                       times, and pet details.
                     </p>
-                    <div className="relative hidden md:block flex-grow min-h-[90px] rounded-lg overflow-hidden">
-                      <DotLottieReact src="/lottie/dog1.lottie" loop autoplay />
+                    <div className="relative  md:block flex-grow min-h-[90px] rounded-lg ">
+                      <DotLottieReact src="/lottie/cal.lottie" loop autoplay className="scale-110" />
                     </div>
                   </div>
                 </div>

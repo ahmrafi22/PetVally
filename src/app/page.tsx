@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import LoadingScreen from "./(_marketing)/loading";
+import LoadingScreen from "./(_marketing)/_components/loading";
 import MainPage from "./(_marketing)/main-page";
 import SecondPage from "./(_marketing)/second-page";
 import ThirdPage from "./(_marketing)/third-page";

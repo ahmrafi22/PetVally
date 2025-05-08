@@ -3,7 +3,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useRef } from "react";
 import gsap from 'gsap';
 import { useGSAP } from "@gsap/react";
-import JoinButton from "./join-button";
+import JoinButton from "./_components/join-button";
 import { Lobster } from "next/font/google";
 import { cn } from "@/lib/utils";
 

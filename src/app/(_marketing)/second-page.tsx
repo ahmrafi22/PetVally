@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useRef, useCallback, useMemo } from "react";
 import Lenis from "lenis";
-import CareJoinButton from "./care-join-button";
+import CareJoinButton from "./_components/care-join-button";
 import { Unbounded } from "next/font/google";
 import { cn } from "@/lib/utils";
-import TxtEffct from "./text-effectt";
+import TxtEffct from "./_components/text-effectt";
 
 const text = Unbounded({
   weight: "500",
