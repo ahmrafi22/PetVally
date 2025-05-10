@@ -1,141 +1,121 @@
 import { prisma } from "@/lib/prisma"
-import { Decimal } from "@prisma/client/runtime/library"
+import { Prisma } from "@prisma/client"
 
-// Get all job posts
-export async function getAllJobPosts() {
+// Create a new job post
+export async function createJobPost(data: any) {
   try {
-    const jobPosts = await prisma.jobPost.findMany({
+    // Convert string values to appropriate types
+    const priceRangeLow = Number.parseFloat(data.priceRangeLow)
+    const priceRangeHigh = Number.parseFloat(data.priceRangeHigh)
+    const startDate = new Date(data.startDate)
+    const endDate = new Date(data.endDate)
+
+    // Create job post
+    const jobPost = await prisma.jobPost.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        tags: data.tags,
+        country: data.country,
+        city: data.city,
+        area: data.area,
+        priceRangeLow: new Prisma.Decimal(priceRangeLow),
+        priceRangeHigh: new Prisma.Decimal(priceRangeHigh),
+        startDate,
+        endDate,
+        userId: data.userId,
+      },
       include: {
         user: {
           select: {
             id: true,
             name: true,
-            image: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    return jobPost
+  } catch (error) {
+    console.error("Error creating job post:", error)
+    throw error
+  }
+}
+
+// Get all job posts
+export async function getAllJobPosts() {
+  try {
+    const jobPosts = await prisma.jobPost.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
         applications: {
           select: {
             id: true,
+            createdAt: true,
           },
         },
         selectedCaregiver: {
           select: {
             id: true,
             name: true,
-            image: true,
+            email: true,
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
     })
 
-    // Convert Decimal to number for JSON serialization
-    return jobPosts.map((post) => ({
-      ...post,
-      priceRangeLow: post.priceRangeLow ? Number(post.priceRangeLow) : 0,
-      priceRangeHigh: post.priceRangeHigh ? Number(post.priceRangeHigh) : 0,
-      applicationCount: post.applications.length,
-    }))
+    return jobPosts
   } catch (error) {
     console.error("Error getting all job posts:", error)
     throw error
   }
 }
 
-// Get job posts by location
-export async function getJobPostsByLocation(city: string, area: string) {
-  try {
-    const jobPosts = await prisma.jobPost.findMany({
-      where: {
-        city,
-        area,
-        status: "OPEN", // Only show open jobs
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-        applications: {
-          select: {
-            id: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    })
-
-    // Convert Decimal to number for JSON serialization
-    return jobPosts.map((post) => ({
-      ...post,
-      priceRangeLow: post.priceRangeLow ? Number(post.priceRangeLow) : 0,
-      priceRangeHigh: post.priceRangeHigh ? Number(post.priceRangeHigh) : 0,
-      applicationCount: post.applications.length,
-    }))
-  } catch (error) {
-    console.error("Error getting job posts by location:", error)
-    throw error
-  }
-}
-
-// Get job posts by user
+// Get job posts by user ID
 export async function getJobPostsByUser(userId: string) {
   try {
     const jobPosts = await prisma.jobPost.findMany({
       where: {
         userId,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
       include: {
-        applications: {
-          include: {
-            caregiver: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-                hourlyRate: true,
-              },
-            },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
-          orderBy: {
-            createdAt: "asc", // First applied first
+        },
+        applications: {
+          select: {
+            id: true,
+            createdAt: true,
           },
         },
         selectedCaregiver: {
           select: {
             id: true,
             name: true,
-            image: true,
             email: true,
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
     })
 
-    // Convert Decimal to number for JSON serialization
-    return jobPosts.map((post) => ({
-      ...post,
-      priceRangeLow: post.priceRangeLow ? Number(post.priceRangeLow) : 0,
-      priceRangeHigh: post.priceRangeHigh ? Number(post.priceRangeHigh) : 0,
-      applications: post.applications.map((app) => ({
-        ...app,
-        requestedAmount: app.requestedAmount ? Number(app.requestedAmount) : 0,
-        caregiver: {
-          ...app.caregiver,
-          hourlyRate: app.caregiver.hourlyRate ? Number(app.caregiver.hourlyRate) : 0,
-        },
-      })),
-    }))
+    return jobPosts
   } catch (error) {
     console.error("Error getting job posts by user:", error)
     throw error
@@ -154,7 +134,7 @@ export async function getJobPostById(id: string) {
           select: {
             id: true,
             name: true,
-            image: true,
+            email: true,
           },
         },
         applications: {
@@ -163,122 +143,31 @@ export async function getJobPostById(id: string) {
               select: {
                 id: true,
                 name: true,
+                email: true,
+                city: true,
+                area: true,
                 image: true,
-                hourlyRate: true,
-                reviews: {
-                  select: {
-                    rating: true,
-                  },
-                },
               },
             },
           },
           orderBy: {
-            createdAt: "asc", // First applied first
+            createdAt: "asc",
           },
         },
         selectedCaregiver: {
           select: {
             id: true,
             name: true,
-            image: true,
             email: true,
-            reviews: {
-              select: {
-                rating: true,
-                comment: true,
-                user: {
-                  select: {
-                    name: true,
-                    image: true,
-                  },
-                },
-                createdAt: true,
-              },
-              orderBy: {
-                createdAt: "desc",
-              },
-            },
+            image: true,
           },
         },
       },
     })
 
-    if (!jobPost) return null
-
-    // Calculate average rating for each caregiver
-    const applications = jobPost.applications.map((app) => {
-      const reviews = app.caregiver.reviews || []
-      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
-      const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0
-
-      return {
-        ...app,
-        requestedAmount: app.requestedAmount ? Number(app.requestedAmount) : 0,
-        caregiver: {
-          ...app.caregiver,
-          hourlyRate: app.caregiver.hourlyRate ? Number(app.caregiver.hourlyRate) : 0,
-          averageRating,
-        },
-      }
-    })
-
-    // Calculate average rating for selected caregiver if exists
-    let selectedCaregiver = null
-    if (jobPost.selectedCaregiver) {
-      const reviews = jobPost.selectedCaregiver.reviews || []
-      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
-      const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0
-
-      selectedCaregiver = {
-        ...jobPost.selectedCaregiver,
-        averageRating,
-        reviews: jobPost.selectedCaregiver.reviews.map((review) => ({
-          ...review,
-          createdAt: review.createdAt.toISOString(),
-        })),
-      }
-    }
-
-    // Convert Decimal to number for JSON serialization
-    return {
-      ...jobPost,
-      priceRangeLow: jobPost.priceRangeLow ? Number(jobPost.priceRangeLow) : 0,
-      priceRangeHigh: jobPost.priceRangeHigh ? Number(jobPost.priceRangeHigh) : 0,
-      startDate: jobPost.startDate.toISOString(),
-      endDate: jobPost.endDate.toISOString(),
-      createdAt: jobPost.createdAt.toISOString(),
-      applications,
-      selectedCaregiver,
-    }
-  } catch (error) {
-    console.error("Error getting job post by ID:", error)
-    throw error
-  }
-}
-
-// Create job post
-export async function createJobPost(data: any) {
-  try {
-    const jobPost = await prisma.jobPost.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        tags: data.tags,
-        country: data.country,
-        city: data.city,
-        area: data.area,
-        priceRangeLow: new Decimal(data.priceRangeLow),
-        priceRangeHigh: new Decimal(data.priceRangeHigh),
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
-        userId: data.userId,
-      },
-    })
-
     return jobPost
   } catch (error) {
-    console.error("Error creating job post:", error)
+    console.error("Error getting job post by ID:", error)
     throw error
   }
 }
@@ -305,7 +194,6 @@ export async function updateJobPostStatus(id: string, status: string) {
 // Select caregiver for job
 export async function selectCaregiverForJob(jobId: string, caregiverId: string) {
   try {
-    // Update job post with selected caregiver
     const jobPost = await prisma.jobPost.update({
       where: {
         id: jobId,
@@ -313,33 +201,6 @@ export async function selectCaregiverForJob(jobId: string, caregiverId: string) 
       data: {
         selectedCaregiverId: caregiverId,
         status: "ONGOING",
-      },
-      include: {
-        selectedCaregiver: true,
-      },
-    })
-
-    // Update the application status
-    await prisma.jobApplication.updateMany({
-      where: {
-        jobPostId: jobId,
-        caregiverId,
-      },
-      data: {
-        status: "ACCEPTED",
-      },
-    })
-
-    // Reject all other applications
-    await prisma.jobApplication.updateMany({
-      where: {
-        jobPostId: jobId,
-        caregiverId: {
-          not: caregiverId,
-        },
-      },
-      data: {
-        status: "REJECTED",
       },
     })
 
@@ -350,46 +211,10 @@ export async function selectCaregiverForJob(jobId: string, caregiverId: string) 
   }
 }
 
-// End job and add payment to caregiver
+// End job
 export async function endJob(jobId: string) {
   try {
-    // Get the job post with selected caregiver
-    const jobPost = await prisma.jobPost.findUnique({
-      where: {
-        id: jobId,
-      },
-      include: {
-        selectedCaregiver: true,
-        applications: {
-          where: {
-            status: "ACCEPTED",
-          },
-        },
-      },
-    })
-
-    if (!jobPost || !jobPost.selectedCaregiver || jobPost.applications.length === 0) {
-      throw new Error("Job post not found or no caregiver selected")
-    }
-
-    // Get the accepted application to find the requested amount
-    const acceptedApplication = jobPost.applications[0]
-    const paymentAmount = acceptedApplication.requestedAmount
-
-    // Update caregiver's total earnings
-    await prisma.caregiver.update({
-      where: {
-        id: jobPost.selectedCaregiverId!,
-      },
-      data: {
-        totalEarnings: {
-          increment: paymentAmount,
-        },
-      },
-    })
-
-    // Update job post status
-    const updatedJobPost = await prisma.jobPost.update({
+    const jobPost = await prisma.jobPost.update({
       where: {
         id: jobId,
       },
@@ -398,7 +223,7 @@ export async function endJob(jobId: string) {
       },
     })
 
-    return updatedJobPost
+    return jobPost
   } catch (error) {
     console.error("Error ending job:", error)
     throw error
@@ -429,10 +254,10 @@ export async function deleteJobPost(id: string) {
   }
 }
 
-// Get job posts for caregiver
+// Get job posts for caregiver (matching city and area)
 export async function getJobPostsForCaregiver(caregiverId: string) {
   try {
-    // Get caregiver's location
+    // Get caregiver details
     const caregiver = await prisma.caregiver.findUnique({
       where: {
         id: caregiverId,
@@ -447,98 +272,63 @@ export async function getJobPostsForCaregiver(caregiverId: string) {
       throw new Error("Caregiver not found")
     }
 
-    // Get applications by this caregiver
-    const applications = await prisma.jobApplication.findMany({
-      where: {
-        caregiverId,
-      },
-      select: {
-        jobPostId: true,
-      },
-    })
-
-    const appliedJobIds = applications.map((app) => app.jobPostId)
-
-    // Get local jobs (same city and area) that are open and not applied to
-    const localJobs = await prisma.jobPost.findMany({
+    // Get matching job posts
+    const matchingJobs = await prisma.jobPost.findMany({
       where: {
         city: caregiver.city || "",
         area: caregiver.area || "",
         status: "OPEN",
-        id: {
-          notIn: appliedJobIds,
-        },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
       include: {
         user: {
           select: {
             id: true,
             name: true,
-            image: true,
           },
         },
         applications: {
-          select: {
-            id: true,
+          where: {
+            caregiverId,
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
     })
 
-    // Get all other open jobs not applied to
+    // Get all other open jobs
     const otherJobs = await prisma.jobPost.findMany({
       where: {
         status: "OPEN",
-        id: {
-          notIn: appliedJobIds,
+        NOT: {
+          AND: [
+            caregiver.city ? { city: caregiver.city } : undefined,
+            caregiver.area ? { area: caregiver.area } : undefined,
+          ].filter(Boolean) as Prisma.JobPostWhereInput[],
         },
-        OR: [
-          {
-            city: {
-              not: caregiver.city || "",
-            },
-          },
-          {
-            area: {
-              not: caregiver.area|| "",
-            },
-          },
-        ],
+      },
+      orderBy: {
+        createdAt: "desc",
       },
       include: {
         user: {
           select: {
             id: true,
             name: true,
-            image: true,
           },
         },
         applications: {
-          select: {
-            id: true,
+          where: {
+            caregiverId,
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
     })
 
-    // Convert Decimal to number for JSON serialization
-    const formatJobs = (jobs: any[]) =>
-      jobs.map((job) => ({
-        ...job,
-        priceRangeLow: job.priceRangeLow ? Number(job.priceRangeLow) : 0,
-        priceRangeHigh: job.priceRangeHigh ? Number(job.priceRangeHigh) : 0,
-        applicationCount: job.applications.length,
-      }))
-
     return {
-      localJobs: formatJobs(localJobs),
-      otherJobs: formatJobs(otherJobs),
+      matchingJobs,
+      otherJobs,
     }
   } catch (error) {
     console.error("Error getting job posts for caregiver:", error)
@@ -546,7 +336,7 @@ export async function getJobPostsForCaregiver(caregiverId: string) {
   }
 }
 
-// Get caregiver's applied jobs
+// Get caregiver applied jobs
 export async function getCaregiverAppliedJobs(caregiverId: string) {
   try {
     const applications = await prisma.jobApplication.findMany({
@@ -560,7 +350,12 @@ export async function getCaregiverAppliedJobs(caregiverId: string) {
               select: {
                 id: true,
                 name: true,
-                image: true,
+              },
+            },
+            selectedCaregiver: {
+              select: {
+                id: true,
+                name: true,
               },
             },
           },
@@ -571,18 +366,9 @@ export async function getCaregiverAppliedJobs(caregiverId: string) {
       },
     })
 
-    // Convert Decimal to number for JSON serialization
-    return applications.map((app) => ({
-      ...app,
-      requestedAmount: app.requestedAmount ? Number(app.requestedAmount) : 0,
-      jobPost: {
-        ...app.jobPost,
-        priceRangeLow: app.jobPost.priceRangeLow ? Number(app.jobPost.priceRangeLow) : 0,
-        priceRangeHigh: app.jobPost.priceRangeHigh ? Number(app.jobPost.priceRangeHigh) : 0,
-      },
-    }))
+    return applications
   } catch (error) {
-    console.error("Error getting caregiver's applied jobs:", error)
+    console.error("Error getting caregiver applied jobs:", error)
     throw error
   }
 }

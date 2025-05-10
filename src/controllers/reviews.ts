@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma"
-import { createNotification } from "./notifications"
 
-// Create review
+// Create a new review
 export async function createReview(data: any) {
   try {
     // Check if user has already reviewed this caregiver
@@ -13,10 +12,21 @@ export async function createReview(data: any) {
     })
 
     if (existingReview) {
-      throw new Error("You have already reviewed this caregiver")
+      // Update existing review
+      const review = await prisma.review.update({
+        where: {
+          id: existingReview.id,
+        },
+        data: {
+          rating: data.rating,
+          comment: data.comment,
+        },
+      })
+
+      return review
     }
 
-    // Create the review
+    // Create new review
     const review = await prisma.review.create({
       data: {
         rating: data.rating,
@@ -24,18 +34,7 @@ export async function createReview(data: any) {
         userId: data.userId,
         caregiverId: data.caregiverId,
       },
-      include: {
-        user: true,
-        caregiver: true,
-      },
     })
-
-    // Create notification for caregiver
-    await createNotification(
-      data.caregiverId,
-      "NEW_REVIEW",
-      `${review.user.name} has left you a ${data.rating}-star review`,
-    )
 
     return review
   } catch (error) {
@@ -72,8 +71,8 @@ export async function getReviewsByCaregiverId(caregiverId: string) {
   }
 }
 
-// Get average rating for caregiver
-export async function getAverageRatingForCaregiver(caregiverId: string) {
+// Get average rating by caregiver ID
+export async function getAverageRatingByCaregiverId(caregiverId: string) {
   try {
     const reviews = await prisma.review.findMany({
       where: {
@@ -89,9 +88,11 @@ export async function getAverageRatingForCaregiver(caregiverId: string) {
     }
 
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
-    return totalRating / reviews.length
+    const averageRating = totalRating / reviews.length
+
+    return averageRating
   } catch (error) {
-    console.error("Error getting average rating for caregiver:", error)
+    console.error("Error getting average rating by caregiver ID:", error)
     throw error
   }
 }

@@ -1,11 +1,14 @@
 import { prisma } from "@/lib/prisma"
-import { Decimal } from "@prisma/client/runtime/library"
+import { Prisma } from "@prisma/client"
 import { createNotification } from "./notifications"
 
-// Create job application
+// Create a new job application
 export async function createJobApplication(data: any) {
   try {
-    // Check if caregiver has already applied to this job
+    // Convert string values to appropriate types
+    const requestedAmount = Number.parseFloat(data.requestedAmount)
+
+    // Check if caregiver has already applied for this job
     const existingApplication = await prisma.jobApplication.findFirst({
       where: {
         caregiverId: data.caregiverId,
@@ -14,31 +17,40 @@ export async function createJobApplication(data: any) {
     })
 
     if (existingApplication) {
-      throw new Error("You have already applied to this job")
+      throw new Error("You have already applied for this job")
     }
 
-    // Create the application
+    // Create job application
     const application = await prisma.jobApplication.create({
       data: {
         proposal: data.proposal,
-        requestedAmount: new Decimal(data.requestedAmount),
+        requestedAmount: new Prisma.Decimal(requestedAmount),
         caregiverId: data.caregiverId,
         jobPostId: data.jobPostId,
       },
       include: {
-        jobPost: {
-          include: {
-            user: true,
+        caregiver: {
+          select: {
+            id: true,
+            name: true,
           },
         },
-        caregiver: true,
+        jobPost: {
+          include: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
       },
     })
 
-    // Create notification for job poster
+    // Notify job poster
     await createNotification(
-      application.jobPost.userId,
-      "JOB_APPLICATION",
+      application.jobPost.user.id,
+      "NEW_APPLICATION",
       `${application.caregiver.name} has applied for your job: ${application.jobPost.title}`,
     )
 
@@ -50,7 +62,7 @@ export async function createJobApplication(data: any) {
 }
 
 // Get job applications by job post ID
-export async function getJobApplicationsByJobId(jobPostId: string) {
+export async function getJobApplicationsByJobPostId(jobPostId: string) {
   try {
     const applications = await prisma.jobApplication.findMany({
       where: {
@@ -61,75 +73,50 @@ export async function getJobApplicationsByJobId(jobPostId: string) {
           select: {
             id: true,
             name: true,
+            email: true,
             image: true,
-            hourlyRate: true,
-            reviews: {
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    })
+
+    return applications
+  } catch (error) {
+    console.error("Error getting job applications by job post ID:", error)
+    throw error
+  }
+}
+
+// Get job applications by caregiver ID
+export async function getJobApplicationsByCaregiverId(caregiverId: string) {
+  try {
+    const applications = await prisma.jobApplication.findMany({
+      where: {
+        caregiverId,
+      },
+      include: {
+        jobPost: {
+          include: {
+            user: {
               select: {
-                rating: true,
+                id: true,
+                name: true,
               },
             },
           },
         },
       },
       orderBy: {
-        createdAt: "asc", // First applied first
+        createdAt: "desc",
       },
     })
 
-    // Calculate average rating for each caregiver
-    return applications.map((app) => {
-      const reviews = app.caregiver.reviews || []
-      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
-      const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0
-
-      return {
-        ...app,
-        requestedAmount: app.requestedAmount ? Number(app.requestedAmount) : 0,
-        caregiver: {
-          ...app.caregiver,
-          hourlyRate: app.caregiver.hourlyRate ? Number(app.caregiver.hourlyRate) : 0,
-          averageRating,
-        },
-      }
-    })
+    return applications
   } catch (error) {
-    console.error("Error getting job applications by job ID:", error)
-    throw error
-  }
-}
-
-// Get job application by ID
-export async function getJobApplicationById(id: string) {
-  try {
-    const application = await prisma.jobApplication.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        caregiver: true,
-        jobPost: true,
-      },
-    })
-
-    if (!application) return null
-
-    // Convert Decimal to number for JSON serialization
-    return {
-      ...application,
-      requestedAmount: application.requestedAmount ? Number(application.requestedAmount) : 0,
-      caregiver: {
-        ...application.caregiver,
-        hourlyRate: application.caregiver.hourlyRate ? Number(application.caregiver.hourlyRate) : 0,
-        totalEarnings: application.caregiver.totalEarnings ? Number(application.caregiver.totalEarnings) : 0,
-      },
-      jobPost: {
-        ...application.jobPost,
-        priceRangeLow: application.jobPost.priceRangeLow ? Number(application.jobPost.priceRangeLow) : 0,
-        priceRangeHigh: application.jobPost.priceRangeHigh ? Number(application.jobPost.priceRangeHigh) : 0,
-      },
-    }
-  } catch (error) {
-    console.error("Error getting job application by ID:", error)
+    console.error("Error getting job applications by caregiver ID:", error)
     throw error
   }
 }
