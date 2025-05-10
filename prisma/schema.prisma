@@ -47,6 +47,8 @@ model User {
   upvotes       Upvote[]        // Posts user has upvoted
   comments      Comment[]       // Comments user has posted
   appointments  Appointment[]   // Vet appointments booked by user
+  jobPosts      JobPost[]       // Jobs posted by user
+  reviews       Review[]        // Reviews given to caregivers
 }
 
 model Caregiver {
@@ -64,7 +66,12 @@ model Caregiver {
   totalEarnings Decimal  @default(0) @db.Decimal(10, 2)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  // ===== Job Portal Relationships =====
+  applications  JobApplication[]  // All job applications submitted
+  selectedJobs  JobPost[] @relation("SelectedJobs") // Jobs where caregiver was hired
+  reviews       Review[]          // Performance reviews received
 }
+
 
 model Admin {
   id       String @id @default(uuid())  // Unique admin identifier
@@ -425,4 +432,71 @@ model Appointment {
   // Business Rules:
   // - Appointments can be cancelled up to 24h before
   // - Users get reminders 1 day before
+}
+
+
+
+// Add new models for the job portal
+model JobPost {
+  id              String   @id @default(uuid())  // Unique job identifier
+  title           String                         // Job title (e.g. "Dog Walker Needed")
+  description     String                         // Detailed job description
+  tags            String[]                       // Service tags (e.g. ["walking","daily"])
+  country         String                         // Job country
+  city            String                         // City for location filtering
+  area            String                         // Neighborhood for precise matching
+  priceRangeLow   Decimal  @db.Decimal(10, 2)    // Minimum budget for job
+  priceRangeHigh  Decimal  @db.Decimal(10, 2)    // Maximum budget for job
+  startDate       DateTime                       // When service should begin
+  endDate         DateTime                       // When service should end
+  status          String   @default("OPEN")      // Current status ("OPEN"/"CLOSED"/"ONGOING")
+
+  // ===== Relationships =====
+  user                User      @relation(fields: [userId], references: [id])  // Job poster
+  userId              String                       // Reference to job poster
+  applications        JobApplication[]             // Applications received
+  selectedCaregiver   Caregiver? @relation("SelectedJobs", fields: [selectedCaregiverId], references: [id])  // Hired caregiver
+  selectedCaregiverId String?                      // Reference to hired caregiver
+
+  createdAt DateTime @default(now())               // When job was posted
+  
+  @@index([userId])
+  @@index([city, area])
+  @@index([status])
+}
+
+model JobApplication {
+  id              String   @id @default(uuid())    // Unique application identifier
+  proposal        String                           // Why caregiver is suitable
+  requestedAmount Decimal  @db.Decimal(10, 2)      // Caregiver's proposed rate
+  status          String   @default("PENDING")     // Current status ("PENDING"/"ACCEPTED"/"REJECTED")
+
+  // ===== Relationships =====
+  caregiver       Caregiver @relation(fields: [caregiverId], references: [id])  // Applicant
+  caregiverId     String                           // Reference to applicant
+  jobPost         JobPost   @relation(fields: [jobPostId], references: [id])    // Target job
+  jobPostId       String                           // Reference to target job
+
+  createdAt       DateTime  @default(now())        // When application was submitted
+  
+  @@index([caregiverId])
+  @@index([jobPostId])
+  @@unique([caregiverId, jobPostId])               // One application per caregiver per job
+}
+
+model Review {
+  id          String    @id @default(uuid())       // Unique review identifier
+  rating      Int                                  // 1-5 star rating (required)
+  comment     String?                              // Optional detailed feedback
+
+  // ===== Relationships =====
+  user        User      @relation(fields: [userId], references: [id])  // User who left the review
+  userId      String                               // Reference to reviewing user
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id])  // Reviewed caregiver
+  caregiverId String                               // Reference to reviewed caregiver
+
+  createdAt   DateTime  @default(now())            // When review was submitted
+  
+  @@unique([userId, caregiverId])                  // One review per user per caregiver
+  @@index([caregiverId])
 }
