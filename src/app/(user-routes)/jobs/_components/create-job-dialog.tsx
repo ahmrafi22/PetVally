@@ -8,11 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, X } from "lucide-react"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
+import { X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 interface CreateJobDialogProps {
@@ -31,8 +27,8 @@ export function CreateJobDialog({ open, onOpenChange, onSubmit }: CreateJobDialo
     area: "",
     priceRangeLow: "",
     priceRangeHigh: "",
-    startDate: new Date(),
-    endDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+    startDate: new Date().toISOString().split('T')[0], 
+    endDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0],
     currentTag: "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -40,19 +36,9 @@ export function CreateJobDialog({ open, onOpenChange, onSubmit }: CreateJobDialo
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-    // Clear error when field is edited
+   
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }))
-    }
-  }
-
-  const handleDateChange = (date: Date | undefined, field: "startDate" | "endDate") => {
-    if (date) {
-      setFormData((prev) => ({ ...prev, [field]: date }))
-      // Clear error when field is edited
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: "" }))
-      }
     }
   }
 
@@ -95,7 +81,13 @@ export function CreateJobDialog({ open, onOpenChange, onSubmit }: CreateJobDialo
     if (isNaN(highPrice) || highPrice <= 0) newErrors.priceRangeHigh = "Please enter a valid price"
     if (lowPrice >= highPrice) newErrors.priceRangeHigh = "Maximum price must be greater than minimum price"
 
-    if (formData.startDate >= formData.endDate) {
+    const startDate = new Date(formData.startDate)
+    const endDate = new Date(formData.endDate)
+
+    if (isNaN(startDate.getTime())) newErrors.startDate = "Please enter a valid start date"
+    if (isNaN(endDate.getTime())) newErrors.endDate = "Please enter a valid end date"
+
+    if (startDate >= endDate) {
       newErrors.endDate = "End date must be after start date"
     }
 
@@ -107,7 +99,13 @@ export function CreateJobDialog({ open, onOpenChange, onSubmit }: CreateJobDialo
     e.preventDefault()
     if (validateForm()) {
       const { currentTag, ...dataToSubmit } = formData
-      onSubmit(dataToSubmit)
+      onSubmit({
+        ...dataToSubmit,
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: new Date(formData.endDate).toISOString(),
+        priceRangeLow: Number(formData.priceRangeLow),
+        priceRangeHigh: Number(formData.priceRangeHigh)
+      })
     }
   }
 
@@ -221,55 +219,25 @@ export function CreateJobDialog({ open, onOpenChange, onSubmit }: CreateJobDialo
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Start Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.startDate && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.startDate ? format(formData.startDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.startDate}
-                    onSelect={(date) => handleDateChange(date, "startDate")}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                id="startDate"
+                name="startDate"
+                type="date"
+                value={formData.startDate}
+                onChange={handleChange}
+              />
               {errors.startDate && <p className="text-sm text-red-500">{errors.startDate}</p>}
             </div>
             <div className="space-y-2">
-              <Label>End Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.endDate && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.endDate ? format(formData.endDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.endDate}
-                    onSelect={(date) => handleDateChange(date, "endDate")}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                name="endDate"
+                type="date"
+                value={formData.endDate}
+                onChange={handleChange}
+              />
               {errors.endDate && <p className="text-sm text-red-500">{errors.endDate}</p>}
             </div>
           </div>
