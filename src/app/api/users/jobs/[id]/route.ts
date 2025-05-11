@@ -6,32 +6,33 @@ import {
   endJob,
   deleteJobPost,
 } from "@/controllers/job-posts"
-import { createNotification } from "@/controllers/notifications"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const awaitedParamas = await params
   try {
     // Get job post by ID
-    const awaitedParams = await params
-    const jobPost = await getJobPostById(awaitedParams.id)
+
+    const jobPost = await getJobPostById(awaitedParamas.id)
     if (!jobPost) {
       return NextResponse.json({ error: "Job post not found" }, { status: 404 })
     }
 
     return NextResponse.json({ jobPost })
   } catch (error: any) {
-    console.error(`Error in GET /api/users/jobs/${(await params).id}:`, error)
+    console.error(`Error in GET /api/users/jobs/${awaitedParamas.id}:`, error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const awaitedParamas = await params
   try {
     // Get request body
     const data = await request.json()
     const { action, caregiverId, userId } = data
 
     // Get job post to verify ownership
-    const jobPost = await getJobPostById(params.id)
+    const jobPost = await getJobPostById(awaitedParamas.id)
     if (!jobPost) {
       return NextResponse.json({ error: "Job post not found" }, { status: 404 })
     }
@@ -45,23 +46,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     // Perform action based on request
     switch (action) {
       case "select_caregiver":
-        result = await selectCaregiverForJob(params.id, caregiverId)
-        // Notify caregiver
-        await createNotification(caregiverId, "JOB_SELECTED", `You have been selected for the job: ${jobPost.title}`)
+        result = await selectCaregiverForJob(awaitedParamas.id, caregiverId)
+        // Removed notification creation for caregiver
         break
       case "end_job":
-        result = await endJob(params.id)
-        // Notify caregiver
-        if (jobPost.selectedCaregiver) {
-          await createNotification(
-            jobPost.selectedCaregiver.id,
-            "JOB_COMPLETED",
-            `The job "${jobPost.title}" has been marked as completed`,
-          )
-        }
+        result = await endJob(awaitedParamas.id)
+        // Removed notification creation for caregiver
         break
       case "cancel_job":
-        result = await updateJobPostStatus(params.id, "CLOSED")
+        result = await updateJobPostStatus(awaitedParamas.id, "CLOSED")
         break
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 })
@@ -69,17 +62,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json({ success: true, result })
   } catch (error: any) {
-    console.error(`Error in PUT /api/users/jobs/${params.id}:`, error)
+    console.error(`Error in PUT /api/users/jobs/${awaitedParamas.id}:`, error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const awaitedParamas = await params
   try {
     const { userId } = await request.json()
 
     // Get job post to verify ownership
-    const jobPost = await getJobPostById(params.id)
+    const jobPost = await getJobPostById(awaitedParamas.id)
     if (!jobPost) {
       return NextResponse.json({ error: "Job post not found" }, { status: 404 })
     }
@@ -99,11 +93,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Delete job post
-    await deleteJobPost(params.id)
+    await deleteJobPost(awaitedParamas.id)
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error(`Error in DELETE /api/users/jobs/${params.id}:`, error)
+    console.error(`Error in DELETE /api/users/jobs/${awaitedParamas.id}:`, error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

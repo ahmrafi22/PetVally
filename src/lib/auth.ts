@@ -142,3 +142,49 @@ export async function clearCaregiverCookie() {
     expires: new Date(0),
   })
 }
+
+// Function to verify user authentication from request
+export async function verifyUserAuth(request: Request) {
+  try {
+    // Get token from Authorization header
+    const authHeader = request.headers.get("Authorization")
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return null
+    }
+
+    const token = authHeader.split(" ")[1]
+    const payload = await verifyJwtToken(token)
+
+    if (!payload || payload.role !== "user") {
+      return null
+    }
+
+    return payload.id
+  } catch (error) {
+    console.error("Error verifying user auth:", error)
+    return null
+  }
+}
+
+// Function to verify caregiver authentication from request
+export async function verifyCaregiverAuth(request: Request) {
+  try {
+    // Get token from Authorization header
+    const authHeader = request.headers.get("Authorization")
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return null
+    }
+
+    const token = authHeader.split(" ")[1]
+    const payload = await verifyJwtToken(token)
+
+    if (!payload || payload.role !== "caregiver") {
+      return null
+    }
+
+    return payload.id
+  } catch (error) {
+    console.error("Error verifying caregiver auth:", error)
+    return null
+  }
+}

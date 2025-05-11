@@ -194,6 +194,31 @@ export async function updateJobPostStatus(id: string, status: string) {
 // Select caregiver for job
 export async function selectCaregiverForJob(jobId: string, caregiverId: string) {
   try {
+    // First, update the job application status to ACCEPTED
+    await prisma.jobApplication.updateMany({
+      where: {
+        jobPostId: jobId,
+        caregiverId: caregiverId,
+      },
+      data: {
+        status: "ACCEPTED",
+      },
+    })
+
+    // Reject all other applications
+    await prisma.jobApplication.updateMany({
+      where: {
+        jobPostId: jobId,
+        caregiverId: {
+          not: caregiverId,
+        },
+      },
+      data: {
+        status: "REJECTED",
+      },
+    })
+
+    // Then update the job post
     const jobPost = await prisma.jobPost.update({
       where: {
         id: jobId,
@@ -214,7 +239,63 @@ export async function selectCaregiverForJob(jobId: string, caregiverId: string) 
 // End job
 export async function endJob(jobId: string) {
   try {
-    const jobPost = await prisma.jobPost.update({
+    // Get the job post with selected caregiver and application details
+    const jobPost = await prisma.jobPost.findUnique({
+      where: {
+        id: jobId,
+      },
+      include: {
+        selectedCaregiver: true,
+        applications: {
+          where: {
+            caregiverId: {
+              equals: (
+                (await prisma.jobPost.findUnique({
+                  where: { id: jobId },
+                  select: { selectedCaregiverId: true },
+                }))?.selectedCaregiverId ?? undefined
+              ),
+            },
+          },
+        },
+      },
+    })
+
+    if (!jobPost || !jobPost.selectedCaregiverId) {
+      throw new Error("Job post not found or no caregiver selected")
+    }
+
+    // Get the accepted application to find the requested amount
+    const acceptedApplication = jobPost.applications[0]
+
+    if (!acceptedApplication) {
+      throw new Error("No accepted application found for the selected caregiver")
+    }
+
+    // Update the application status to COMPLETED
+    await prisma.jobApplication.update({
+      where: {
+        id: acceptedApplication.id,
+      },
+      data: {
+        status: "COMPLETED",
+      },
+    })
+
+    // Add the requested amount to the caregiver's totalEarnings
+    await prisma.caregiver.update({
+      where: {
+        id: jobPost.selectedCaregiverId,
+      },
+      data: {
+        totalEarnings: {
+          increment: acceptedApplication.requestedAmount,
+        },
+      },
+    })
+
+    // Update the job post status to CLOSED
+    const updatedJobPost = await prisma.jobPost.update({
       where: {
         id: jobId,
       },
@@ -223,7 +304,7 @@ export async function endJob(jobId: string) {
       },
     })
 
-    return jobPost
+    return updatedJobPost
   } catch (error) {
     console.error("Error ending job:", error)
     throw error
@@ -287,6 +368,7 @@ export async function getJobPostsForCaregiver(caregiverId: string) {
           select: {
             id: true,
             name: true,
+            image: true,
           },
         },
         applications: {
@@ -303,9 +385,9 @@ export async function getJobPostsForCaregiver(caregiverId: string) {
         status: "OPEN",
         NOT: {
           AND: [
-            caregiver.city ? { city: caregiver.city } : undefined,
-            caregiver.area ? { area: caregiver.area } : undefined,
-          ].filter(Boolean) as Prisma.JobPostWhereInput[],
+            { city: { equals: caregiver.city || undefined } },
+            { area: { equals: caregiver.area || undefined } },
+          ],
         },
       },
       orderBy: {
@@ -316,6 +398,7 @@ export async function getJobPostsForCaregiver(caregiverId: string) {
           select: {
             id: true,
             name: true,
+            image: true,
           },
         },
         applications: {
@@ -350,12 +433,14 @@ export async function getCaregiverAppliedJobs(caregiverId: string) {
               select: {
                 id: true,
                 name: true,
+                image: true,
               },
             },
             selectedCaregiver: {
               select: {
                 id: true,
                 name: true,
+                image: true,
               },
             },
           },

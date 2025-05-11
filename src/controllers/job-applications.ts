@@ -1,57 +1,70 @@
 import { prisma } from "@/lib/prisma"
-import { Prisma } from "@prisma/client"
 import { createNotification } from "./notifications"
 
 // Create a new job application
 export async function createJobApplication(data: any) {
   try {
-    // Convert string values to appropriate types
-    const requestedAmount = Number.parseFloat(data.requestedAmount)
-
-    // Check if caregiver has already applied for this job
+    // Check if caregiver has already applied to this job
     const existingApplication = await prisma.jobApplication.findFirst({
       where: {
-        caregiverId: data.caregiverId,
         jobPostId: data.jobPostId,
+        caregiverId: data.caregiverId,
       },
     })
 
     if (existingApplication) {
-      throw new Error("You have already applied for this job")
+      throw new Error("You have already applied to this job")
+    }
+
+    // Get job post to check if it's still open
+    const jobPost = await prisma.jobPost.findUnique({
+      where: {
+        id: data.jobPostId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    })
+
+    if (!jobPost) {
+      throw new Error("Job post not found")
+    }
+
+    if (jobPost.status !== "OPEN") {
+      throw new Error("This job is no longer accepting applications")
     }
 
     // Create job application
     const application = await prisma.jobApplication.create({
       data: {
         proposal: data.proposal,
-        requestedAmount: new Prisma.Decimal(requestedAmount),
-        caregiverId: data.caregiverId,
+        requestedAmount: data.requestedAmount,
         jobPostId: data.jobPostId,
+        caregiverId: data.caregiverId,
       },
       include: {
         caregiver: {
           select: {
-            id: true,
             name: true,
           },
         },
         jobPost: {
-          include: {
-            user: {
-              select: {
-                id: true,
-              },
-            },
+          select: {
+            title: true,
           },
         },
       },
     })
 
-    // Notify job poster
+    // Create notification for job poster
     await createNotification(
-      application.jobPost.user.id,
-      "NEW_APPLICATION",
-      `${application.caregiver.name} has applied for your job: ${application.jobPost.title}`,
+      jobPost.user.id,
+      "JOB_APPLICATION",
+      `${application.caregiver.name} has applied to your job: ${application.jobPost.title}`,
     )
 
     return application
@@ -61,12 +74,12 @@ export async function createJobApplication(data: any) {
   }
 }
 
-// Get job applications by job post ID
-export async function getJobApplicationsByJobPostId(jobPostId: string) {
+// Get job application by ID
+export async function getJobApplicationById(id: string) {
   try {
-    const applications = await prisma.jobApplication.findMany({
+    const application = await prisma.jobApplication.findUnique({
       where: {
-        jobPostId,
+        id,
       },
       include: {
         caregiver: {
@@ -74,49 +87,59 @@ export async function getJobApplicationsByJobPostId(jobPostId: string) {
             id: true,
             name: true,
             email: true,
-            image: true,
+          },
+        },
+        jobPost: {
+          select: {
+            id: true,
+            title: true,
+            userId: true,
           },
         },
       },
-      orderBy: {
-        createdAt: "asc",
-      },
     })
 
-    return applications
+    return application
   } catch (error) {
-    console.error("Error getting job applications by job post ID:", error)
+    console.error("Error getting job application by ID:", error)
     throw error
   }
 }
 
-// Get job applications by caregiver ID
-export async function getJobApplicationsByCaregiverId(caregiverId: string) {
+// Update job application status
+export async function updateJobApplicationStatus(id: string, status: string) {
   try {
-    const applications = await prisma.jobApplication.findMany({
+    const application = await prisma.jobApplication.update({
       where: {
-        caregiverId,
+        id,
+      },
+      data: {
+        status,
       },
       include: {
+        caregiver: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         jobPost: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
+          select: {
+            title: true,
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
     })
 
-    return applications
+    // Create notification for caregiver
+    const notificationType = "JOB_APPLICATION_UPDATE"
+    const message = `Your application for "${application.jobPost.title}" has been ${status.toLowerCase()}`
+
+    await createNotification(application.caregiver.id, notificationType, message)
+
+    return application
   } catch (error) {
-    console.error("Error getting job applications by caregiver ID:", error)
+    console.error("Error updating job application status:", error)
     throw error
   }
 }
