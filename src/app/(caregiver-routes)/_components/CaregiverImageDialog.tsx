@@ -28,10 +28,17 @@ export default function CaregiverImageDialog({ isOpen, onClose, caregiver, onUpd
   const [isLoading, setIsLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Reset preview image when dialog opens/closes
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setPreviewImage(null)
+    }
+    onClose()
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
 
     if (file.size > 5 * 1024 * 1024) {
       return
@@ -80,10 +87,18 @@ export default function CaregiverImageDialog({ isOpen, onClose, caregiver, onUpd
       }
 
       const data = await response.json()
-
-
-      onUpdate(data.caregiver)
-
+      
+      // Create an updated caregiver object with the new image
+      const updatedCaregiver = {
+        ...caregiver,
+        image: previewImage // Use the preview image as the new image URL
+      }
+      
+      // Call the onUpdate function with the updated caregiver object
+      onUpdate(updatedCaregiver)
+      
+      // Close the dialog
+      setPreviewImage(null)
       onClose()
     } catch (error: any) {
       console.error("Error updating profile image:", error)
@@ -93,7 +108,7 @@ export default function CaregiverImageDialog({ isOpen, onClose, caregiver, onUpd
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Update Profile Picture</DialogTitle>
@@ -151,4 +166,3 @@ export default function CaregiverImageDialog({ isOpen, onClose, caregiver, onUpd
     </Dialog>
   )
 }
-

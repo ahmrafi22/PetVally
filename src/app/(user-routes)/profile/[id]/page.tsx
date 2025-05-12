@@ -57,7 +57,6 @@ export default function UserProfile() {
   // Removed duplicate handleUserUpdate function
 
   const handleImageUpdate = (updatedUser: User) => {
-    // Don't make a second API call, just update the state
     if (updatedUser.image) {
       // Update the local state directly
       useUserStore.setState((state) => ({

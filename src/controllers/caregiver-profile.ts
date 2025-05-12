@@ -48,14 +48,13 @@ export async function getCaregiverProfileForUsers(caregiverId: string) {
       reviews.length > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0
 
     // Get completed jobs for this caregiver
-    // The bug was here - we need to get both ACCEPTED and COMPLETED applications
     const completedJobs = await prisma.jobApplication.findMany({
       where: {
         caregiverId,
         status: { in: ["ACCEPTED", "COMPLETED"] },
         jobPost: {
           status: "CLOSED",
-          selectedCaregiverId: caregiverId, // Ensure only jobs where this caregiver was selected
+          selectedCaregiverId: caregiverId, 
         },
       },
       select: {

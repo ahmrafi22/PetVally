@@ -402,7 +402,7 @@ export default function FindJobPage() {
                   </CardContent>
                   <CardFooter>
                     <Button asChild className="w-full">
-                      <Link href={`/caregiver/findjob/${application.jobPost.id}`}>View Job</Link>
+                      <Link href={`/caregiver/findjobs/${application.jobPost.id}`}>View Job</Link>
                     </Button>
                   </CardFooter>
                 </Card>
