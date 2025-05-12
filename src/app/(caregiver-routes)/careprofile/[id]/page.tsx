@@ -18,6 +18,8 @@ import {
   Briefcase,
   Award,
   Heart,
+  AtSign,
+  PhoneCall,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import CaregiverProfileDialog from "../../_components/CaregiverProfileDialog";
@@ -51,7 +53,9 @@ export default function CaregiverProfile() {
     }
   }, [id, fetchCaregiverData]);
 
-  const handleCaregiverUpdate = async (updatedCaregiver: Partial<Caregiver>) => {
+  const handleCaregiverUpdate = async (
+    updatedCaregiver: Partial<Caregiver>
+  ) => {
     try {
       await updateCaregiverProfile(updatedCaregiver);
       setProfileDialogOpen(false);
@@ -130,7 +134,7 @@ export default function CaregiverProfile() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           {/* Header Section - Glass Card Design */}
-          <div className="glass-card p-8 mb-8 relative overflow-hidden bg-gradient-to-r from-green-100 to-teal-100 rounded-lg shadow-lg">
+          <div className="glass-card p-8 mb-8 relative overflow-hidden bg-gradient-to-r from-yellow-100 to-teal-100 rounded-lg shadow-lg">
             <div className="absolute top-0 right-0 w-full h-full pet-pattern opacity-50 z-0"></div>
             <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
               <div className="relative">
@@ -176,13 +180,24 @@ export default function CaregiverProfile() {
                     </span>
                   )}
                 </div>
-                <p className="text-gray-600">{caregiverData.email}</p>
-                <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-gray-600">
-                  <MapPin className="w-4 h-4 text-green-500" />
-                  <span>
-                    {caregiverData.city ? caregiverData.city + ", " : ""}
-                    {caregiverData.country || "Location not specified"}
-                  </span>
+                <div className="mt-1 space-y-2">
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center">
+                      <AtSign className="h-5 w-5 mr-2 text-gray-500" />
+                      <p className="text-gray-600">{caregiverData.email}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <PhoneCall className="h-5 w-5 mr-2 text-gray-500" />
+                      <p className="text-gray-600">{caregiverData.phone}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center md:justify-start gap-2 text-gray-600">
+                    <MapPin className="w-5 h-5" />
+                    <span>
+                      {caregiverData.city ? caregiverData.city + ", " : ""}
+                      {caregiverData.country || "Location not specified"}
+                    </span>
+                  </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
                   <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
@@ -209,10 +224,13 @@ export default function CaregiverProfile() {
                 <div className="glass-card p-4 text-center hidden md:block bg-white/70 rounded-lg">
                   <div className="text-sm text-gray-500">Member since</div>
                   <div className="font-medium">
-                    {new Date(caregiverData.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                    })}
+                    {new Date(caregiverData.createdAt).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                      }
+                    )}
                   </div>
                 </div>
               </div>
@@ -294,11 +312,14 @@ export default function CaregiverProfile() {
                       Member Since
                     </div>
                     <div className="font-medium">
-                      {new Date(caregiverData.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric"
-                      })}
+                      {new Date(caregiverData.createdAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
                     </div>
                   </div>
 
@@ -307,11 +328,14 @@ export default function CaregiverProfile() {
                       Last Updated
                     </div>
                     <div className="font-medium">
-                      {new Date(caregiverData.updatedAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric"
-                      })}
+                      {new Date(caregiverData.updatedAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
                     </div>
                   </div>
 
@@ -355,7 +379,9 @@ export default function CaregiverProfile() {
               </div>
 
               {/* Location info */}
-              {(caregiverData.country || caregiverData.city || caregiverData.area) && (
+              {(caregiverData.country ||
+                caregiverData.city ||
+                caregiverData.area) && (
                 <div className="glass-card p-6 bg-white/80 rounded-lg shadow-sm">
                   <h2 className="text-xl font-bold text-green-700 mb-4 flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-green-500" />
@@ -406,28 +432,34 @@ export default function CaregiverProfile() {
                   <div className="bg-green-50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="w-5 h-5 text-green-600" />
-                      <h3 className="font-medium text-green-800">Hourly Rate</h3>
+                      <h3 className="font-medium text-green-800">
+                        Hourly Rate
+                      </h3>
                     </div>
                     <p className="text-2xl font-bold text-green-700">
                       {formatCurrency(caregiverData.hourlyRate)}
                     </p>
-                    <p className="text-sm text-green-600 mt-1">Per hour of pet care</p>
+                    <p className="text-sm text-green-600 mt-1">
+                      Per hour of pet care
+                    </p>
                   </div>
 
                   <div className="bg-teal-50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <Briefcase className="w-5 h-5 text-teal-600" />
-                      <h3 className="font-medium text-teal-800">Total Earnings</h3>
+                      <h3 className="font-medium text-teal-800">
+                        Total Earnings
+                      </h3>
                     </div>
                     <p className="text-2xl font-bold text-teal-700">
                       {formatCurrency(caregiverData.totalEarnings)}
                     </p>
-                    <p className="text-sm text-teal-600 mt-1">Career earnings to date</p>
+                    <p className="text-sm text-teal-600 mt-1">
+                      Career earnings to date
+                    </p>
                   </div>
                 </div>
               </div>
-
-              
             </div>
           </div>
         </div>

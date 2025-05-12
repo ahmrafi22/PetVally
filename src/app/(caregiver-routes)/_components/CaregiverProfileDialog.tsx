@@ -33,6 +33,7 @@ export default function CaregiverProfileDialog({ isOpen, onClose, caregiver, onU
     area: "",
     bio: "",
     hourlyRate: "",
+    phone: " ",
   })
   const [isLoading, setIsLoading] = useState(false)
 
@@ -45,6 +46,7 @@ export default function CaregiverProfileDialog({ isOpen, onClose, caregiver, onU
         area: caregiver.area || "",
         bio: caregiver.bio || "",
         hourlyRate: caregiver.hourlyRate?.toString() || "",
+        phone: caregiver.phone || "",
       })
     }
   }, [caregiver])
@@ -82,6 +84,7 @@ export default function CaregiverProfileDialog({ isOpen, onClose, caregiver, onU
           area: formData.area,
           bio: formData.bio,
           hourlyRate: formData.hourlyRate,
+          phone: formData.phone,
         }),
       })
 
@@ -154,7 +157,7 @@ export default function CaregiverProfileDialog({ isOpen, onClose, caregiver, onU
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="hourlyRate" className="text-right">
+              <Label htmlFor="hourlyRate" >
                 Hourly Rate ($)
               </Label>
               <Input
@@ -166,6 +169,21 @@ export default function CaregiverProfileDialog({ isOpen, onClose, caregiver, onU
                 value={formData.hourlyRate}
                 onChange={handleChange}
                 className="col-span-3"
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phone" className="text-right">
+                Phone
+              </Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                className="col-span-3"
+                placeholder="+1 (234) 567-8900"
               />
             </div>
 

@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest) {
 
     // Get the request body
     const body = await request.json()
-    const { id, name, country, city, area, bio, hourlyRate } = body
+    const { id, name, country, city, area, bio, hourlyRate, phone } = body
 
     if (!id) {
       return NextResponse.json({ message: "Bad Request: Missing caregiver ID" }, { status: 400 })
@@ -43,6 +43,7 @@ export async function PUT(request: NextRequest) {
       area,
       bio,
       hourlyRate: hourlyRate ? Number.parseFloat(hourlyRate) : undefined,
+      phone,
     })
 
     // Return the updated caregiver data

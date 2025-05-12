@@ -12,6 +12,7 @@ interface CaregiverState {
     city: string | null;
     area: string | null;
     bio: string;
+    phone: string;
     verified: boolean;
     hourlyRate: number;
     totalEarnings: number;
@@ -38,6 +39,7 @@ export const useCaregiverStore = create<CaregiverState>()(
         city: null,
         area: null,
         bio: '',
+        phone: '',
         verified: false,
         hourlyRate: 0,
         totalEarnings: 0,
@@ -70,6 +72,7 @@ export const useCaregiverStore = create<CaregiverState>()(
                 id: caregiverId,
                 name: data.caregiver.name || '',
                 email: data.caregiver.email || '',
+                phone: data.caregiver.phone || '',
                 image: data.caregiver.image || null,
                 country: data.caregiver.country || null,
                 city: data.caregiver.city || null,
@@ -109,6 +112,7 @@ export const useCaregiverStore = create<CaregiverState>()(
             city: null,
             area: null,
             bio: '',
+            phone: '',
             verified: false,
             hourlyRate: 0,
             totalEarnings: 0,

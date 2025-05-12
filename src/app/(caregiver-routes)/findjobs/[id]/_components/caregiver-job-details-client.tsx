@@ -1,9 +1,9 @@
-// caregiver/jobs/_components/caregiver-job-details-client.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from "react"; // Import useCallback
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -12,6 +12,7 @@ import {
   Clock,
   DollarSign,
   Tag,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,7 +23,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -32,8 +32,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 
-// Define TypeScript interfaces (keep these as they were)
+// Define TypeScript interfaces
 interface User {
   id: string;
   name: string;
@@ -177,13 +178,12 @@ export default function CaregiverJobDetailsClient({
     } finally {
       setLoading(false);
     }
-  }, [jobId, router]); // Include dependencies for useCallback
+  }, [jobId, router]);
 
   // Call fetchJobDetails inside useEffect
   useEffect(() => {
     fetchJobDetails();
-  }, [fetchJobDetails]); // Depend on fetchJobDetails (useCallback ensures stability)
-
+  }, [fetchJobDetails]);
 
   const handleApply = async () => {
     if (!proposal.trim() || !requestedAmount.trim()) {
@@ -213,11 +213,11 @@ export default function CaregiverJobDetailsClient({
       const token = localStorage.getItem("caregiverToken");
 
       if (!token) {
-         toast.error("Authentication Error", {
-            description: "Please log in to apply"
-         });
-         router.push("/caregiverlogin");
-         return;
+        toast.error("Authentication Error", {
+          description: "Please log in to apply",
+        });
+        router.push("/caregiverlogin");
+        return;
       }
 
       const response = await fetch("/api/caregivers/jobs/apply", {
@@ -244,41 +244,42 @@ export default function CaregiverJobDetailsClient({
 
         // Re-fetch job details to update the UI with the applied status
         fetchJobDetails();
-
-
       } else {
         const error = await response.json();
         if (response.status === 409) {
-             toast.warning("Already Applied", {
-                 description: "You have already applied for this job."
-             });
-             setApplyDialogOpen(false);
-             setHasApplied(true);
-             setApplicationStatus("PENDING");
-             fetchJobDetails();
+          toast.warning("Already Applied", {
+            description: "You have already applied for this job.",
+          });
+          setApplyDialogOpen(false);
+          setHasApplied(true);
+          setApplicationStatus("PENDING");
+          fetchJobDetails();
         } else if (response.status === 401) {
-            toast.error("Authentication Error", {
-                description: "Please log in to apply"
-            });
-            router.push("/caregiverlogin");
+          toast.error("Authentication Error", {
+            description: "Please log in to apply",
+          });
+          router.push("/caregiverlogin");
+        } else {
+          throw new Error(error.error || "Failed to submit application");
         }
-         else {
-            throw new Error(error.error || "Failed to submit application");
-         }
       }
     } catch (error: any) {
       console.error("Error submitting application:", error);
-       if (!["Already Applied", "Authentication Error"].some(msg => error.message.includes(msg))) {
-            toast.error("Error", {
-              description: error.message,
-            });
-       }
+      if (
+        !["Already Applied", "Authentication Error"].some((msg) =>
+          error.message.includes(msg)
+        )
+      ) {
+        toast.error("Error", {
+          description: error.message,
+        });
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Helper functions (keep these as they were)
+  // Helper functions
   const getStatusColor = (status: string): string => {
     switch (status) {
       case "OPEN":
@@ -305,11 +306,10 @@ export default function CaregiverJobDetailsClient({
     }
   };
 
-  // --- Render Logic --- (Keep this section as it was)
-
+  // Loading skeleton
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="container max-w-6xl mx-auto py-8 px-4">
         <div className="flex items-center mb-6">
           <Button variant="ghost" size="sm" className="mr-2">
             <ArrowLeft size={16} className="mr-2" />
@@ -320,12 +320,13 @@ export default function CaregiverJobDetailsClient({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <Card>
+            <Card className="shadow-sm">
               <CardHeader>
                 <Skeleton className="h-8 w-3/4 mb-2" />
                 <Skeleton className="h-4 w-1/3" />
               </CardHeader>
               <CardContent className="space-y-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-3/4" />
@@ -347,7 +348,7 @@ export default function CaregiverJobDetailsClient({
           </div>
 
           <div>
-            <Card>
+            <Card className="shadow-sm">
               <CardHeader>
                 <Skeleton className="h-6 w-40" />
               </CardHeader>
@@ -361,118 +362,149 @@ export default function CaregiverJobDetailsClient({
     );
   }
 
+  // Job not found
   if (!job) {
     return (
-      <div className="container mx-auto py-8 px-4 text-center">
+      <div className="container max-w-6xl mx-auto py-16 px-4 text-center">
         <Alert variant="destructive" className="max-w-md mx-auto">
-          <AlertTitle>Job Not Found</AlertTitle>
+          <AlertTitle className="text-lg font-semibold">Job Not Found</AlertTitle>
           <AlertDescription>
             The job you&apos;re looking for might have been removed or doesn&apos;t exist.
           </AlertDescription>
         </Alert>
-        <div className="mt-4">
+        <div className="mt-6">
           <Button asChild variant="outline">
-            <Link href="/caregiver/findjob">Back to Jobs</Link>
+            <Link href="/findjobs">Back to Jobs</Link>
           </Button>
         </div>
       </div>
     );
   }
 
+  // Main view
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center mb-6">
-        <Button asChild variant="ghost" size="sm" className="mr-2">
-          <Link href="/caregiver/findjob">
-            <ArrowLeft size={16} className="mr-2" />
-            Back to Jobs
-          </Link>
-        </Button>
-        <h1 className="text-2xl font-bold">{job.title}</h1>
-        <Badge className={`ml-4 ${getStatusColor(job.status)}`}>{job.status}</Badge>
+    <div className="container max-w-6xl mx-auto py-8 px-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div className="flex items-center">
+          <Button asChild variant="ghost" size="sm" className="mr-3">
+            <Link href="/caregiver/findjob">
+              <ArrowLeft size={16} className="mr-2" />
+              Back to Jobs
+            </Link>
+          </Button>
+          <Badge className={`${getStatusColor(job.status)} mr-3`}>{job.status}</Badge>
+        </div>
+        <h1 className="text-2xl md:text-3xl font-bold">{job.title}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Job Details</CardTitle>
+        {/* Main content area */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Job details card */}
+          <Card className="shadow-sm overflow-hidden">
+            <CardHeader className="bg-gray-50 border-b pb-4">
+              <CardTitle className="flex items-center justify-between">
+                <span>Job Details</span>
+                <span className="text-sm font-normal text-gray-500">
+                  Posted {format(new Date(job.createdAt), "MMM d, yyyy")}
+                </span>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-start gap-4">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage
-                    src={job.user.image || "/placeholder.svg"}
-                    alt={job.user.name || "User"}
-                    sizes="40px"
-                  />
-                  <AvatarFallback>{job.user.name?.charAt(0) || "U"}</AvatarFallback>
-                </Avatar>
+            
+            <CardContent className="pt-6 space-y-6">
+              {/* Job poster */}
+              <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg">
+                <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                  {job.user.image ? (
+                    <Image
+                      src={job.user.image}
+                      alt={job.user.name || "User"}
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                      priority
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <User size={24} className="text-gray-500" />
+                    </div>
+                  )}
+                </div>
                 <div>
-                  <div className="font-medium">{job.user.name}</div>
-                  <div className="text-sm text-gray-500">Job Poster</div>
+                  <div className="font-medium text-lg">{job.user.name}</div>
+                  <div className="text-sm text-gray-600">Job Poster</div>
                 </div>
               </div>
 
+              {/* Description */}
               <div>
-                <h3 className="font-medium mb-2">Description</h3>
-                <p className="text-gray-700 whitespace-pre-line">{job.description}</p>
+                <h3 className="text-lg font-semibold mb-3">Description</h3>
+                <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+                  {job.description}
+                </p>
               </div>
 
+              <Separator />
+
+              {/* Services Needed */}
               <div>
-                <h3 className="font-medium mb-2">Services Needed</h3>
+                <h3 className="text-lg font-semibold mb-3">Services Needed</h3>
                 <div className="flex flex-wrap gap-2">
                   {job.tags.map((tag: string, index: number) => (
-                    <Badge key={index} variant="outline" className="bg-blue-50">
-                      <Tag size={12} className="mr-1" />
+                    <Badge
+                      key={index}
+                      variant="outline"
+                      className="bg-blue-50 py-1 px-3 text-sm"
+                    >
+                      <Tag size={12} className="mr-2" />
                       {tag}
                     </Badge>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center">
-                  <MapPin className="h-5 w-5 text-gray-500 mr-2" />
+              <Separator />
+
+              {/* Job Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-start">
+                  <MapPin className="h-5 w-5 text-blue-500 mr-3 mt-1" />
                   <div>
-                    <div className="text-sm text-gray-500">Location</div>
-                    <div>
+                    <div className="text-sm text-gray-500 mb-1">Location</div>
+                    <div className="font-medium">
                       {job.city}, {job.area}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <DollarSign className="h-5 w-5 text-gray-500 mr-2" />
+                <div className="flex items-start">
+                  <DollarSign className="h-5 w-5 text-green-500 mr-3 mt-1" />
                   <div>
-                    <div className="text-sm text-gray-500">Budget Range</div>
-                    <div>
-                      ${job.priceRangeLow} - ${job.priceRangeHigh}
+                    <div className="text-sm text-gray-500 mb-1">Budget Range</div>
+                    <div className="font-medium">
+                      ${Number(job.priceRangeLow).toFixed(2)} - ${Number(job.priceRangeHigh).toFixed(2)}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <Calendar className="h-5 w-5 text-gray-500 mr-2" />
+                <div className="flex items-start">
+                  <Calendar className="h-5 w-5 text-orange-500 mr-3 mt-1" />
                   <div>
-                    <div className="text-sm text-gray-500">Start Date</div>
-                    <div>{format(new Date(job.startDate), "MMM d, yyyy")}</div>
+                    <div className="text-sm text-gray-500 mb-1">Start Date</div>
+                    <div className="font-medium">
+                      {format(new Date(job.startDate), "MMMM d, yyyy")}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <Calendar className="h-5 w-5 text-gray-500 mr-2" />
+                <div className="flex items-start">
+                  <Calendar className="h-5 w-5 text-red-500 mr-3 mt-1" />
                   <div>
-                    <div className="text-sm text-gray-500">End Date</div>
-                    <div>{format(new Date(job.endDate), "MMM d, yyyy")}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <Clock className="h-5 w-5 text-gray-500 mr-2" />
-                  <div>
-                    <div className="text-sm text-gray-500">Posted</div>
-                    <div>{format(new Date(job.createdAt), "MMM d, yyyy")}</div>
+                    <div className="text-sm text-gray-500 mb-1">End Date</div>
+                    <div className="font-medium">
+                      {format(new Date(job.endDate), "MMMM d, yyyy")}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -480,37 +512,60 @@ export default function CaregiverJobDetailsClient({
           </Card>
         </div>
 
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Application Status</CardTitle>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Application Status Card */}
+          <Card className="shadow-sm">
+            <CardHeader className="bg-gray-50 border-b">
+              <CardTitle className="text-xl">Application Status</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {hasApplied ? (
                 <div className="space-y-4">
                   <Alert>
-                    {applicationStatus && (
-                       <Badge className={getApplicationStatusColor(applicationStatus)}>{applicationStatus}</Badge>
-                    )}
-                    <AlertTitle className="mt-2">You have applied to this job</AlertTitle>
-                    <AlertDescription>Your requested amount: ${requestedAmount}</AlertDescription>
+                    <div className="flex flex-col space-y-3">
+                      {applicationStatus && (
+                        <Badge className={`${getApplicationStatusColor(applicationStatus)} w-fit`}>
+                          {applicationStatus}
+                        </Badge>
+                      )}
+                      <div className="space-y-1">
+                        <AlertTitle className="text-lg font-semibold">
+                          You have applied to this job
+                        </AlertTitle>
+                        <AlertDescription className="text-base">
+                          Your requested amount:{" "}
+                          <span className="font-semibold">${requestedAmount}</span>
+                        </AlertDescription>
+                      </div>
+                    </div>
                   </Alert>
 
-                  <div>
-                    <h4 className="text-sm font-medium mb-1">Your Proposal</h4>
-                    <p className="text-sm text-gray-700 whitespace-pre-line">{proposal}</p>
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h4 className="font-semibold mb-2">Your Proposal</h4>
+                    <p className="text-gray-700 whitespace-pre-line text-sm">
+                      {proposal}
+                    </p>
                   </div>
                 </div>
               ) : job.status === "OPEN" ? (
-                <div>
-                  <p className="mb-4">Interested in this job? Submit your proposal and requested payment.</p>
-                  <Button onClick={() => setApplyDialogOpen(true)} className="w-full">
+                <div className="text-center">
+                  <p className="mb-6 text-gray-600">
+                    Interested in this job? Submit your proposal and requested payment.
+                  </p>
+                  <Button
+                    onClick={() => setApplyDialogOpen(true)}
+                    className="w-full py-6"
+                    size="lg"
+                  >
                     Apply for this Job
                   </Button>
                 </div>
               ) : (
-                <Alert>
-                  <AlertTitle>This job is no longer accepting applications</AlertTitle>
+                <Alert variant="destructive" className="bg-red-50">
+                  <AlertTitle className="font-semibold">
+                    This job is no longer accepting applications
+                  </AlertTitle>
                   <AlertDescription>
                     The job poster has already selected a caregiver or closed this job.
                   </AlertDescription>
@@ -519,62 +574,80 @@ export default function CaregiverJobDetailsClient({
             </CardContent>
           </Card>
 
+          {/* Selected Caregiver Card */}
           {job.selectedCaregiver && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Selected Caregiver</CardTitle>
+            <Card className="shadow-sm">
+              <CardHeader className="bg-gray-50 border-b">
+                <CardTitle className="text-xl">Selected Caregiver</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4">
-                  <Avatar>
-                    <AvatarImage
-                      src={job.selectedCaregiver.image || "/placeholder.svg"}
-                      alt={job.selectedCaregiver.name || "Caregiver"}
-                      sizes="40px"
-                    />
-                    <AvatarFallback>{job.selectedCaregiver.name?.charAt(0) || "C"}</AvatarFallback>
-                  </Avatar>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
+                  <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                    {job.selectedCaregiver.image ? (
+                      <Image
+                        src={job.selectedCaregiver.image}
+                        alt={job.selectedCaregiver.name || "Caregiver"}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <User size={24} className="text-gray-500" />
+                      </div>
+                    )}
+                  </div>
                   <div>
-                    <div className="font-medium">{job.selectedCaregiver.name}</div>
-                    {job.selectedCaregiver.id === localStorage.getItem("caregiverId") && (
+                    <div className="font-medium text-lg">
+                      {job.selectedCaregiver.name}
+                    </div>
+                    {job.selectedCaregiver.id ===
+                      localStorage.getItem("caregiverId") && (
                       <Badge className="bg-green-100 text-green-800 mt-1">You</Badge>
                     )}
                   </div>
                 </div>
-                 {job.selectedCaregiver.id === localStorage.getItem("caregiverId") && (
-                    <div className="mt-4 text-sm text-gray-700 flex items-center">
-                        <DollarSign className="h-4 w-4 mr-1" />
-                        Your accepted amount: ${requestedAmount}
-                    </div>
-                 )}
+                {job.selectedCaregiver.id === localStorage.getItem("caregiverId") && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm font-medium text-blue-800 flex items-center">
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Your accepted amount: ${requestedAmount}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
         </div>
       </div>
 
+      {/* Application Dialog */}
       <Dialog open={applyDialogOpen} onOpenChange={setApplyDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
-            <DialogTitle>Apply for Job: {job.title}</DialogTitle>
-            <DialogDescription>Submit your proposal and requested payment amount.</DialogDescription>
+            <DialogTitle className="text-xl">Apply for Job: {job.title}</DialogTitle>
+            <DialogDescription>
+              Submit your proposal and requested payment amount.
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="space-y-5 py-4">
             <div className="space-y-2">
-              <Label htmlFor="proposal">Your Proposal</Label>
+              <Label htmlFor="proposal" className="text-base">
+                Your Proposal
+              </Label>
               <Textarea
                 id="proposal"
                 placeholder="Explain why you're a good fit for this job..."
                 value={proposal}
                 onChange={(e) => setProposal(e.target.value)}
-                className="min-h-[120px]"
-                 disabled={submitting}
+                className="min-h-[150px]"
+                disabled={submitting}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="amount">Requested Amount ($)</Label>
+              <Label htmlFor="amount" className="text-base">
+                Requested Amount ($)
+              </Label>
               <div className="relative">
                 <DollarSign
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
@@ -590,20 +663,24 @@ export default function CaregiverJobDetailsClient({
                   min={job.priceRangeLow}
                   max={job.priceRangeHigh}
                   step="0.01"
-                   disabled={submitting}
+                  disabled={submitting}
                 />
               </div>
-              <p className="text-xs text-gray-500">
-                Budget range: ${job.priceRangeLow} - ${job.priceRangeHigh}
+              <p className="text-sm text-gray-500">
+                Budget range: ${Number(job.priceRangeLow).toFixed(2)} - ${Number(job.priceRangeHigh).toFixed(2)}
               </p>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setApplyDialogOpen(false)} disabled={submitting}>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setApplyDialogOpen(false)}
+              disabled={submitting}
+            >
               Cancel
             </Button>
-            <Button onClick={handleApply} disabled={submitting}>
+            <Button onClick={handleApply} disabled={submitting} className="px-6">
               {submitting ? "Submitting..." : "Submit Application"}
             </Button>
           </DialogFooter>

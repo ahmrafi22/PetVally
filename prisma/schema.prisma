@@ -61,6 +61,7 @@ model Caregiver {
   city          String? 
   area          String? 
   bio           String
+  phone         String?
   verified      Boolean  @default(false)
   hourlyRate    Decimal  @default(0) @db.Decimal(10, 2)
   totalEarnings Decimal  @default(0) @db.Decimal(10, 2)

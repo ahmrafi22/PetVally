@@ -40,6 +40,7 @@ export type Caregiver = {
   city?: string | null
   area?: string | null
   bio: string
+  phone: string
   verified: boolean
   hourlyRate: number
   totalEarnings: number
@@ -49,7 +50,7 @@ export type Caregiver = {
 
 export type CaregiverProfile = Pick<
   Caregiver,
-  "id" | "name" | "image" | "country" | "city" | "area" | "bio" | "hourlyRate"
+  "id" | "name" | "image" | "country" | "city" | "area" | "bio" | "hourlyRate" | "phone"
 >
 
 export type CaregiverImage = Pick<Caregiver, "id" | "image">

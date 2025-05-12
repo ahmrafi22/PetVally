@@ -135,6 +135,7 @@ export async function getJobPostById(id: string) {
             id: true,
             name: true,
             email: true,
+            image: true,
           },
         },
         applications: {
@@ -160,6 +161,7 @@ export async function getJobPostById(id: string) {
             name: true,
             email: true,
             image: true,
+            phone: true,
           },
         },
       },

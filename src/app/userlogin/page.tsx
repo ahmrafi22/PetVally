@@ -16,7 +16,6 @@ export default function UserLogin() {
   const router = useRouter();
 
   useEffect(() => {
-    // Function to verify token validity
     const checkTokenValidity = async () => {
       const userToken = localStorage.getItem("userToken");
       
@@ -26,8 +25,7 @@ export default function UserLogin() {
       }
       
       try {
-        // Option 1: Make a request to validate the token
-        const response = await fetch("/api/users/verify-token", {
+        const response = await fetch("/api/verify-token", {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${userToken}`
@@ -35,7 +33,6 @@ export default function UserLogin() {
         });
         
         if (response.ok) {
-          // Token is valid, redirect to petshop
           router.push("/petshop");
         } else {
           localStorage.removeItem("userToken");
@@ -43,7 +40,6 @@ export default function UserLogin() {
           setCheckingAuth(false);
         }
       } catch (error) {
-        // Error checking token, clear localStorage and show login
         localStorage.removeItem("userToken");
         localStorage.removeItem("userId");
         setCheckingAuth(false);

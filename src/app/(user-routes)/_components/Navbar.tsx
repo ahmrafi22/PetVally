@@ -17,6 +17,7 @@ import {
   OctagonAlert,
   BotMessageSquare,
   BriefcaseMedicalIcon,
+  BriefcaseBusiness,
 } from "lucide-react";
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react";
@@ -245,6 +246,7 @@ export default function UserNavigation() {
     { name: "Missing Pets", icon: <OctagonAlert size={25} />, href: "/missingposts" },
     { name: "Vetchat bot", icon: <BotMessageSquare size={25} />, href: "/vetchat" },
     { name: "Vetdoctors", icon: <BriefcaseMedicalIcon size={25} />, href: "/vetinfo" },
+    { name: "Post a job", icon: <BriefcaseBusiness size={25} />, href: "/jobs" },
     {
       name: "Notifications",
       icon: <Bell size={25} />,

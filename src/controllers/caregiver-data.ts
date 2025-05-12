@@ -18,6 +18,7 @@ export async function getCaregiverById(id: string) {
         city: true,
         area: true,
         bio: true,
+        phone: true,
         verified: true,
         hourlyRate: true,
         totalEarnings: true,
@@ -54,6 +55,7 @@ export async function updateCaregiverProfile(id: string, data: Partial<Caregiver
         area: data.area,
         bio: data.bio,
         hourlyRate: data.hourlyRate ? Number.parseFloat(data.hourlyRate.toString()) : undefined,
+        phone: data.phone,
       },
       select: {
         id: true,
@@ -66,6 +68,7 @@ export async function updateCaregiverProfile(id: string, data: Partial<Caregiver
         bio: true,
         verified: true,
         hourlyRate: true,
+        phone:true,
         totalEarnings: true,
         createdAt: true,
         updatedAt: true,
