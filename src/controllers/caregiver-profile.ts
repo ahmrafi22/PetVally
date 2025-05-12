@@ -95,13 +95,13 @@ export async function getCaregiverProfileForUsers(caregiverId: string) {
   }
 }
 
-// Get caregiver schedule (all jobs - ongoing and upcoming)
+// Get caregiver schedule 
 export async function getCaregiverSchedule(caregiverId: string) {
   try {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    // Get all accepted applications for ongoing and upcoming jobs
+    // Get all accepted applications 
     const applications = await prisma.jobApplication.findMany({
       where: {
         caregiverId,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
-import { LayoutDashboard, PawPrint,  LogOut, Menu, X, ShoppingCartIcon, Package, ShoppingCart } from "lucide-react"
+import { LayoutDashboard, PawPrint,  LogOut, Menu, X, ShoppingCartIcon, Package, ShoppingCart, HeartHandshake } from "lucide-react"
 
 export default function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -46,7 +46,8 @@ export default function AdminSidebar() {
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, href: "/admin/dashboard" },
     { name: "Pet Management", icon: <PawPrint size={20} />, href: "/admin/petadd" },
     { name: "Product Management", icon: <Package size={20} />, href: "/admin/productadd" },
-    { name: "Order Management", icon: <ShoppingCart size={20} />, href: "/admin/orderconfirm" }
+    { name: "Order Management", icon: <ShoppingCart size={20} />, href: "/admin/orderconfirm" },
+    { name: "Caregivers Management", icon: <HeartHandshake size={20} />, href: "/admin/caregivers" }
 
   ]
 

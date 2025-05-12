@@ -189,14 +189,12 @@ export async function createPet(data: any) {
 
     // Create notifications for all users
     try {
-      // Import the function here to avoid circular dependencies
       await createNotificationForAllUsers(
         "NEW_PET",
         `A new pet named ${pet.name} (${pet.breed}) is now available for adoption!`,
       )
     } catch (notificationError) {
-      console.error("Error creating notifications:", notificationError)
-      // Don't throw the error, as we still want to return the pet
+      console.error("Error creating notifications:", notificationError) 
     }
 
     // Convert Decimal to number for JSON serialization
@@ -484,7 +482,6 @@ export async function updateOrderStatus(id: string, status: "COMPLETED" | "CANCE
       )
     } catch (notificationError) {
       console.error("Error creating notification:", notificationError)
-      // Don't throw the error, as we still want to return the order
     }
 
     // Convert Decimal to number for JSON serialization
@@ -502,6 +499,62 @@ export async function updateOrderStatus(id: string, status: "COMPLETED" | "CANCE
     }
   } catch (error) {
     console.error("Error updating order status:", error)
+    throw error
+  }
+}
+
+// Update caregiver verification status
+export async function updateCaregiverVerificationStatus(id: string, isVerified: boolean) {
+  try {
+    const updatedCaregiver = await prisma.caregiver.update({
+      where: { id },
+      data: { verified: isVerified },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        verified: true,
+      },
+    })
+
+    return updatedCaregiver
+  } catch (error) {
+    console.error("Error updating caregiver verification status:", error)
+    throw error
+  }
+}
+
+// Get all caregivers with basic info
+export async function getAllCaregivers() {
+  try {
+    const caregivers = await prisma.caregiver.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        country: true,
+        city: true,
+        area: true,
+        bio: true,
+        verified: true,
+        hourlyRate: true,
+        totalEarnings: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    // Convert Decimal to number for JSON serialization
+    return caregivers.map((caregiver) => ({
+      ...caregiver,
+      hourlyRate: Number(caregiver.hourlyRate),
+      totalEarnings: Number(caregiver.totalEarnings),
+    }))
+  } catch (error) {
+    console.error("Error getting all caregivers:", error)
     throw error
   }
 }

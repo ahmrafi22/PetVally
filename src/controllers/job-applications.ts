@@ -131,12 +131,6 @@ export async function updateJobApplicationStatus(id: string, status: string) {
       },
     })
 
-    // Create notification for caregiver
-    const notificationType = "JOB_APPLICATION_UPDATE"
-    const message = `Your application for "${application.jobPost.title}" has been ${status.toLowerCase()}`
-
-    await createNotification(application.caregiver.id, notificationType, message)
-
     return application
   } catch (error) {
     console.error("Error updating job application status:", error)
