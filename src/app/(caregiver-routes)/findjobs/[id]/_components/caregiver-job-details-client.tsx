@@ -34,7 +34,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
-// Define TypeScript interfaces
 interface User {
   id: string;
   name: string;
@@ -92,7 +91,6 @@ export default function CaregiverJobDetailsClient({
   const [submitting, setSubmitting] = useState<boolean>(false);
   const router = useRouter();
 
-  // Define fetchJobDetails outside useEffect
   const fetchJobDetails = useCallback(async () => {
     try {
       setLoading(true);
@@ -131,14 +129,7 @@ export default function CaregiverJobDetailsClient({
           } else {
             setHasApplied(false);
             setApplicationStatus("");
-            if (fetchedJob) {
-              const minPrice = fetchedJob.priceRangeLow;
-              const maxPrice = fetchedJob.priceRangeHigh;
-              const defaultAmount = ((minPrice + maxPrice) / 2).toFixed(2);
-              setRequestedAmount(defaultAmount);
-            } else {
-              setRequestedAmount("0");
-            }
+            setRequestedAmount("0");
             setProposal("");
           }
         } else {
@@ -180,7 +171,7 @@ export default function CaregiverJobDetailsClient({
     }
   }, [jobId, router]);
 
-  // Call fetchJobDetails inside useEffect
+
   useEffect(() => {
     fetchJobDetails();
   }, [fetchJobDetails]);
@@ -279,7 +270,7 @@ export default function CaregiverJobDetailsClient({
     }
   };
 
-  // Helper functions
+
   const getStatusColor = (status: string): string => {
     switch (status) {
       case "OPEN":
@@ -367,9 +358,12 @@ export default function CaregiverJobDetailsClient({
     return (
       <div className="container max-w-6xl mx-auto py-16 px-4 text-center">
         <Alert variant="destructive" className="max-w-md mx-auto">
-          <AlertTitle className="text-lg font-semibold">Job Not Found</AlertTitle>
+          <AlertTitle className="text-lg font-semibold">
+            Job Not Found
+          </AlertTitle>
           <AlertDescription>
-            The job you&apos;re looking for might have been removed or doesn&apos;t exist.
+            The job you&apos;re looking for might have been removed or
+            doesn&apos;t exist.
           </AlertDescription>
         </Alert>
         <div className="mt-6">
@@ -393,7 +387,9 @@ export default function CaregiverJobDetailsClient({
               Back to Jobs
             </Link>
           </Button>
-          <Badge className={`${getStatusColor(job.status)} mr-3`}>{job.status}</Badge>
+          <Badge className={`${getStatusColor(job.status)} mr-3`}>
+            {job.status}
+          </Badge>
         </div>
         <h1 className="text-2xl md:text-3xl font-bold">{job.title}</h1>
       </div>
@@ -411,7 +407,7 @@ export default function CaregiverJobDetailsClient({
                 </span>
               </CardTitle>
             </CardHeader>
-            
+
             <CardContent className="pt-6 space-y-6">
               {/* Job poster */}
               <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg">
@@ -481,9 +477,12 @@ export default function CaregiverJobDetailsClient({
                 <div className="flex items-start">
                   <DollarSign className="h-5 w-5 text-green-500 mr-3 mt-1" />
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">Budget Range</div>
+                    <div className="text-sm text-gray-500 mb-1">
+                      Budget Range
+                    </div>
                     <div className="font-medium">
-                      ${Number(job.priceRangeLow).toFixed(2)} - ${Number(job.priceRangeHigh).toFixed(2)}
+                      ${Number(job.priceRangeLow).toFixed(2)} - $
+                      {Number(job.priceRangeHigh).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -520,22 +519,42 @@ export default function CaregiverJobDetailsClient({
               <CardTitle className="text-xl">Application Status</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
+              {/* Application Count */}
+              {job.applications && job.applications.length > 0 && (
+                <div className="mb-4 flex items-center bg-gray-100 p-3 rounded-md -mt-5">
+                  <span className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse mr-2"></span>
+                  <span className="text-sm font-medium">
+                    {job.applications.length}{" "}
+                    {job.applications.length === 1
+                      ? "person has"
+                      : "people have"}{" "}
+                    applied
+                  </span>
+                </div>
+              )}
+
               {hasApplied ? (
                 <div className="space-y-4">
                   <Alert>
                     <div className="flex flex-col space-y-3">
                       {applicationStatus && (
-                        <Badge className={`${getApplicationStatusColor(applicationStatus)} w-fit`}>
+                        <Badge
+                          className={`${getApplicationStatusColor(
+                            applicationStatus
+                          )} w-fit`}
+                        >
                           {applicationStatus}
                         </Badge>
                       )}
-                      <div className="space-y-1">
+                      <div className="space-y-1 -mt-6">
                         <AlertTitle className="text-lg font-semibold">
                           You have applied to this job
                         </AlertTitle>
-                        <AlertDescription className="text-base">
+                        <AlertDescription className="text-base flex-nowrap w-full">
                           Your requested amount:{" "}
-                          <span className="font-semibold">${requestedAmount}</span>
+                          <span className="font-semibold">
+                            ${requestedAmount}
+                          </span>
                         </AlertDescription>
                       </div>
                     </div>
@@ -551,7 +570,8 @@ export default function CaregiverJobDetailsClient({
               ) : job.status === "OPEN" ? (
                 <div className="text-center">
                   <p className="mb-6 text-gray-600">
-                    Interested in this job? Submit your proposal and requested payment.
+                    Interested in this job? Submit your proposal and requested
+                    payment.
                   </p>
                   <Button
                     onClick={() => setApplyDialogOpen(true)}
@@ -567,7 +587,8 @@ export default function CaregiverJobDetailsClient({
                     This job is no longer accepting applications
                   </AlertTitle>
                   <AlertDescription>
-                    The job poster has already selected a caregiver or closed this job.
+                    The job poster has already selected a caregiver or closed
+                    this job.
                   </AlertDescription>
                 </Alert>
               )}
@@ -603,11 +624,14 @@ export default function CaregiverJobDetailsClient({
                     </div>
                     {job.selectedCaregiver.id ===
                       localStorage.getItem("caregiverId") && (
-                      <Badge className="bg-green-100 text-green-800 mt-1">You</Badge>
+                      <Badge className="bg-green-100 text-green-800 mt-1">
+                        You
+                      </Badge>
                     )}
                   </div>
                 </div>
-                {job.selectedCaregiver.id === localStorage.getItem("caregiverId") && (
+                {job.selectedCaregiver.id ===
+                  localStorage.getItem("caregiverId") && (
                   <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm font-medium text-blue-800 flex items-center">
                     <DollarSign className="h-4 w-4 mr-2" />
                     Your accepted amount: ${requestedAmount}
@@ -623,7 +647,9 @@ export default function CaregiverJobDetailsClient({
       <Dialog open={applyDialogOpen} onOpenChange={setApplyDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
-            <DialogTitle className="text-xl">Apply for Job: {job.title}</DialogTitle>
+            <DialogTitle className="text-xl">
+              Apply for Job: {job.title}
+            </DialogTitle>
             <DialogDescription>
               Submit your proposal and requested payment amount.
             </DialogDescription>
@@ -667,7 +693,8 @@ export default function CaregiverJobDetailsClient({
                 />
               </div>
               <p className="text-sm text-gray-500">
-                Budget range: ${Number(job.priceRangeLow).toFixed(2)} - ${Number(job.priceRangeHigh).toFixed(2)}
+                Budget range: ${Number(job.priceRangeLow).toFixed(2)} - $
+                {Number(job.priceRangeHigh).toFixed(2)}
               </p>
             </div>
           </div>
@@ -680,7 +707,11 @@ export default function CaregiverJobDetailsClient({
             >
               Cancel
             </Button>
-            <Button onClick={handleApply} disabled={submitting} className="px-6">
+            <Button
+              onClick={handleApply}
+              disabled={submitting}
+              className="px-6"
+            >
               {submitting ? "Submitting..." : "Submit Application"}
             </Button>
           </DialogFooter>
