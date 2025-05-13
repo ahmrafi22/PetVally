@@ -170,7 +170,7 @@ export default function CaregiverSchedulePage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-5xl mx-auto">
         {/* Header Section - Glass Card Design */}
-        <div className="glass-card p-8 mb-8 relative overflow-hidden bg-gradient-to-r from-green-100 to-teal-100 rounded-lg shadow-lg">
+        <div className="glass-card p-8 mb-8 relative overflow-hidden bg-gradient-to-r from-yellow-100 to-teal-100 rounded-lg shadow-lg">
           <div className="absolute top-0 right-0 w-full h-full pet-pattern opacity-50 z-0"></div>
           <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
             {loading ? (

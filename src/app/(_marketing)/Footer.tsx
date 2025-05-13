@@ -76,7 +76,9 @@ const Footer = () => {
 
     const handleClick = (e: React.MouseEvent) => {
       e.preventDefault();
-      if (url.startsWith("http")) {
+      if (url === "/") {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (url.startsWith("http")) {
         window.open(url, "_blank");
       } else {
         router.push(url);
@@ -85,7 +87,7 @@ const Footer = () => {
 
     return (
       <li
-        className="relative cursor-pointer sm:h-8 w-fit h-5 overflow-hidden"
+        className="relative cursor-pointer sm:h-8 w-fit hover:w-fit h-5 overflow-hidden"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleClick}
@@ -126,7 +128,7 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Animated Pet Vally Title */}
+        {/*Pet Vally Title */}
         <h2
           ref={headingRef}
           className={cn(

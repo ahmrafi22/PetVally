@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Bell,  Calendar, Info, Cat, PackageCheck, PackageX, MapPinPlus, MessageSquare, HeartPulse, HeartHandshake, MapPinnedIcon } from "lucide-react"
+import { Bell,  Calendar, Info, Cat, PackageCheck, PackageX, MapPinPlus, MessageSquare, HeartPulse, HeartHandshake, MapPinnedIcon, PersonStanding, Laugh } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import type { Notification } from "@/types"
@@ -56,13 +56,13 @@ export default function NotificationsPage() {
       case "NEW_PET":
         return <Cat className="h-8 w-8 text-blue-500" />
       case "APPOINTMENT":
-        return <Calendar className="h-5 w-5 text-purple-500" />
+        return <Calendar className="h-5 w-5 text-purple-800" />
       case "ORDER_COMPLETED":
         return <PackageCheck className="h-8 w-8 text-purple-500" />
       case "ORDER_CANCELLED":
-        return <PackageX className="h-8 w-8 text-purple-500" />
+        return <PackageX className="h-8 w-8 text-red-400" />
       case "NEW_DONATION_POST":
-        return <MapPinPlus className="h-8 w-8 text-green-500" />
+        return <MapPinPlus className="h-8 w-8 text-sky-500" />
       case "NEW_MISSING_POST":
           return <MapPinnedIcon className="h-8 w-8 text-green-500" />
       case "NEW_COMMENT":
@@ -70,9 +70,13 @@ export default function NotificationsPage() {
       case "NEW_ADOPTION_APPLICATION":
         return <HeartPulse className="h-8 w-8 text-red-500" />
       case "ADOPTION_ACCEPTED":
-        return <HeartHandshake className="h-8 w-8 text-pink-500" />
+        return <HeartHandshake className="h-8 w-8 text-yellow-500" />
+      case "JOB_APPLICATION":
+        return <PersonStanding className="h-8 w-8 text-blue-500" />
+      case "PET_FOUND":
+        return <Laugh className="h-8 w-8 text-fuchsia-500" />
       default:
-        return <Info className="h-5 w-5 text-gray-500" />
+        return <Info className="h-8 w-8 text-gray-500" />
         
     }
   }
