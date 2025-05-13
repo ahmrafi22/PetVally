@@ -6,15 +6,10 @@ import Image from "next/image";
 import {
   Calendar,
   Star,
-  Clock,
   MapPin,
   BadgeCheck,
   BadgeX,
-  DollarSign,
   Briefcase,
-  Award,
-  Heart,
-  MessageSquare,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

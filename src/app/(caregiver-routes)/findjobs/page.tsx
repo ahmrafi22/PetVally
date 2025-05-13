@@ -11,7 +11,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function FindJobPage() {
@@ -20,6 +19,7 @@ export default function FindJobPage() {
   const [appliedJobs, setAppliedJobs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
+  const [activeTab, setActiveTab] = useState("local")
   const router = useRouter()
 
   useEffect(() => {
@@ -78,6 +78,10 @@ export default function FindJobPage() {
     fetchJobs()
   }, [router])
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab)
+  }
+
   const filteredLocalJobs = localJobs.filter(
     (job) =>
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -117,7 +121,7 @@ export default function FindJobPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold">Find Pet Care Jobs</h1>
-          <p className="text-gray-600 mt-2">Browse and apply for pet care jobs in your area</p>
+          <p className="text-gray-600 mt-2">Browse and apply for pet care jobs </p>
         </div>
 
         <div className="relative">
@@ -131,14 +135,67 @@ export default function FindJobPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="local">
-        <TabsList className="mb-6">
-          <TabsTrigger value="local">Local Jobs</TabsTrigger>
-          <TabsTrigger value="all">All Jobs</TabsTrigger>
-          <TabsTrigger value="applied">Applied Jobs</TabsTrigger>
-        </TabsList>
+      {/* Custom Animated Tabs */}
+      <div className="mb-8">
+        <div className="relative flex rounded-lg bg-gray-100 p-1">
+          <div
+            className="absolute h-10 bg-blue-500 rounded-md transition-all duration-300 ease-in-out shadow-md"
+            style={{
+              width: `${100 / 3}%`,
+              left:
+                activeTab === "local"
+                  ? "0%"
+                  : activeTab === "all"
+                  ? "33.333%"
+                  : "66.666%",
+            }}
+          ></div>
 
-        <TabsContent value="local">
+          <button
+            onClick={() => handleTabChange("local")}
+            className={`flex-1 relative z-10 flex items-center justify-center gap-2 py-2 rounded-md transition-colors duration-200 
+              ${
+                activeTab === "local"
+                  ? "text-white font-medium"
+                  : "text-gray-700 hover:text-blue-600"
+              }`}
+          >
+            <Home size={16} />
+            <span>Local Jobs</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange("all")}
+            className={`flex-1 relative z-10 flex items-center justify-center gap-2 py-2 rounded-md transition-colors duration-200 
+              ${
+                activeTab === "all"
+                  ? "text-white font-medium"
+                  : "text-gray-700 hover:text-blue-600"
+              }`}
+          >
+            <Briefcase size={16} />
+            <span>All Jobs</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange("applied")}
+            className={`flex-1 relative z-10 flex items-center justify-center gap-2 py-2 rounded-md transition-colors duration-200 
+              ${
+                activeTab === "applied"
+                  ? "text-white font-medium"
+                  : "text-gray-700 hover:text-blue-600"
+              }`}
+          >
+            <Clock size={16} />
+            <span>Applied Jobs</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Contents */}
+      <div>
+        {/* Local Jobs Tab Content */}
+        <div className={activeTab === "local" ? "block" : "hidden"}>
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -229,17 +286,18 @@ export default function FindJobPage() {
                 {searchTerm ? "Try a different search term" : "There are no jobs in your area right now"}
               </p>
               <div className="mt-6">
-                <Button asChild variant="outline">
-                  <Link href="#all" onClick={() => (document.querySelector('[data-value="all"]') as HTMLElement)?.click()}>
+                <Button asChild variant="outline" onClick={() => handleTabChange("all")}>
+                  <Link href="#all">
                     Browse All Jobs
                   </Link>
                 </Button>
               </div>
             </div>
           )}
-        </TabsContent>
+        </div>
 
-        <TabsContent value="all">
+        {/* All Jobs Tab Content */}
+        <div className={activeTab === "all" ? "block" : "hidden"}>
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -331,9 +389,10 @@ export default function FindJobPage() {
               </p>
             </div>
           )}
-        </TabsContent>
+        </div>
 
-        <TabsContent value="applied">
+        {/* Applied Jobs Tab Content */}
+        <div className={activeTab === "applied" ? "block" : "hidden"}>
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
@@ -402,7 +461,7 @@ export default function FindJobPage() {
                   </CardContent>
                   <CardFooter>
                     <Button asChild className="w-full">
-                      <Link href={`/caregiver/findjobs/${application.jobPost.id}`}>View Job</Link>
+                      <Link href={`/findjobs/${application.jobPost.id}`}>View Job</Link>
                     </Button>
                   </CardFooter>
                 </Card>
@@ -416,21 +475,16 @@ export default function FindJobPage() {
                 {searchTerm ? "Try a different search term" : "You haven't applied to any jobs yet"}
               </p>
               <div className="mt-6">
-                <Button asChild variant="outline">
-                  <Link href="#local" onClick={() => {
-                    const element = document.querySelector('[data-value="local"]');
-                    if (element instanceof HTMLElement) {
-                      element.click();
-                    }
-                  }}>
+                <Button asChild variant="outline" onClick={() => handleTabChange("local")}>
+                  <Link href="#local">
                     Browse Local Jobs
                   </Link>
                 </Button>
               </div>
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   )
 }

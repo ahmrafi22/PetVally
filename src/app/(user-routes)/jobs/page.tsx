@@ -6,8 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CalendarIcon, MapPinIcon, TagIcon, DollarSignIcon, PlusIcon } from "lucide-react"
+import { CalendarIcon, MapPinIcon, TagIcon, DollarSignIcon, PlusIcon, BriefcaseIcon } from "lucide-react"
 import { CreateJobDialog } from "./_components/create-job-dialog"
 import { format } from "date-fns"
 
@@ -45,6 +44,7 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<JobPost[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  const [activeTab, setActiveTab] = useState<string>("all")
   const router = useRouter()
 
   useEffect(() => {
@@ -109,6 +109,23 @@ export default function JobsPage() {
     return jobs.filter((job) => job.status === status)
   }
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab)
+  }
+
+  const getActiveJobs = () => {
+    switch (activeTab) {
+      case "open":
+        return filterJobsByStatus("OPEN")
+      case "ongoing":
+        return filterJobsByStatus("ONGOING")
+      case "closed":
+        return filterJobsByStatus("CLOSED")
+      default:
+        return jobs
+    }
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto p-4">
@@ -134,74 +151,84 @@ export default function JobsPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All Jobs ({jobs.length})</TabsTrigger>
-          <TabsTrigger value="open">Open ({filterJobsByStatus("OPEN").length})</TabsTrigger>
-          <TabsTrigger value="ongoing">Ongoing ({filterJobsByStatus("ONGOING").length})</TabsTrigger>
-          <TabsTrigger value="closed">Closed ({filterJobsByStatus("CLOSED").length})</TabsTrigger>
-        </TabsList>
+      {/* Custom Animated Tabs */}
+      <div className="mb-6">
+        <div className="relative flex rounded-lg bg-gray-100 p-1">
+          <div
+            className="absolute h-8 bg-blue-500 rounded-md transition-all duration-300 ease-in-out shadow-md"
+            style={{
+              width: `${100 / 4}%`,
+              left: activeTab === "all" 
+                ? "0%" 
+                : activeTab === "open" 
+                ? "25%" 
+                : activeTab === "ongoing" 
+                ? "50%" 
+                : "75%",
+            }}
+          ></div>
 
-        <TabsContent value="all">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {jobs.length === 0 ? (
-              <div className="col-span-full text-center py-10">
-                <p className="text-gray-500">You haven&apos;t posted any jobs yet.</p>
+          <button
+            onClick={() => handleTabChange("all")}
+            className={`flex-1 relative z-10 flex items-center justify-center gap-1 py-1 rounded-md transition-colors duration-200 text-sm
+              ${activeTab === "all" ? "text-white font-medium" : "text-gray-700 hover:text-blue-600"}`}
+          >
+            <BriefcaseIcon size={14} />
+            <span>All Jobs ({jobs.length})</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange("open")}
+            className={`flex-1 relative z-10 flex items-center justify-center gap-1 py-1 rounded-md transition-colors duration-200 text-sm
+              ${activeTab === "open" ? "text-white font-medium" : "text-gray-700 hover:text-blue-600"}`}
+          >
+            <BriefcaseIcon size={14} />
+            <span>Open ({filterJobsByStatus("OPEN").length})</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange("ongoing")}
+            className={`flex-1 relative z-10 flex items-center justify-center gap-1 py-1 rounded-md transition-colors duration-200 text-sm
+              ${activeTab === "ongoing" ? "text-white font-medium" : "text-gray-700 hover:text-blue-600"}`}
+          >
+            <BriefcaseIcon size={14} />
+            <span>Ongoing ({filterJobsByStatus("ONGOING").length})</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange("closed")}
+            className={`flex-1 relative z-10 flex items-center justify-center gap-1 py-1 rounded-md transition-colors duration-200 text-sm
+              ${activeTab === "closed" ? "text-white font-medium" : "text-gray-700 hover:text-blue-600"}`}
+          >
+            <BriefcaseIcon size={14} />
+            <span>Closed ({filterJobsByStatus("CLOSED").length})</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {getActiveJobs().length === 0 ? (
+            <div className="col-span-full text-center py-10">
+              <p className="text-gray-500">
+                {activeTab === "all" 
+                  ? "You haven't posted any jobs yet."
+                  : `You don't have any ${activeTab.toLowerCase()} jobs.`}
+              </p>
+              {activeTab === "all" || activeTab === "open" ? (
                 <Button onClick={() => setIsDialogOpen(true)} className="mt-4">
-                  Post Your First Job
+                  {activeTab === "all" ? "Post Your First Job" : "Post a New Job"}
                 </Button>
-              </div>
-            ) : (
-              jobs.map((job) => <JobCard key={job.id} job={job} onClick={() => router.push(`/jobs/${job.id}`)} />)
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="open">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filterJobsByStatus("OPEN").length === 0 ? (
-              <div className="col-span-full text-center py-10">
-                <p className="text-gray-500">You don&apos;t have any open jobs.</p>
-                <Button onClick={() => setIsDialogOpen(true)} className="mt-4">
-                  Post a New Job
-                </Button>
-              </div>
-            ) : (
-              filterJobsByStatus("OPEN").map((job) => (
-                <JobCard key={job.id} job={job} onClick={() => router.push(`/jobs/${job.id}`)} />
-              ))
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="ongoing">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filterJobsByStatus("ONGOING").length === 0 ? (
-              <div className="col-span-full text-center py-10">
-                <p className="text-gray-500">You don&apos;t have any ongoing jobs.</p>
-              </div>
-            ) : (
-              filterJobsByStatus("ONGOING").map((job) => (
-                <JobCard key={job.id} job={job} onClick={() => router.push(`/jobs/${job.id}`)} />
-              ))
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="closed">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filterJobsByStatus("CLOSED").length === 0 ? (
-              <div className="col-span-full text-center py-10">
-                <p className="text-gray-500">You don&apos;t have any closed jobs.</p>
-              </div>
-            ) : (
-              filterJobsByStatus("CLOSED").map((job) => (
-                <JobCard key={job.id} job={job} onClick={() => router.push(`/jobs/${job.id}`)} />
-              ))
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+              ) : null}
+            </div>
+          ) : (
+            getActiveJobs().map((job) => (
+              <JobCard key={job.id} job={job} onClick={() => router.push(`/jobs/${job.id}`)} />
+            ))
+          )}
+        </div>
+      </div>
 
       <CreateJobDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onSubmit={handleCreateJob} />
     </div>

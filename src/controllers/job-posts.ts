@@ -337,6 +337,7 @@ export async function deleteJobPost(id: string) {
   }
 }
 
+
 // Get job posts for caregiver (matching city and area)
 export async function getJobPostsForCaregiver(caregiverId: string) {
   try {
@@ -355,11 +356,12 @@ export async function getJobPostsForCaregiver(caregiverId: string) {
       throw new Error("Caregiver not found")
     }
 
-    // Get matching job posts
-    const matchingJobs = await prisma.jobPost.findMany({
+    const normalizedCaregiverCity = caregiver.city?.trim().toLowerCase() || "";
+    const normalizedCaregiverArea = caregiver.area?.trim().toLowerCase() || "";
+
+    // Get all open jobs
+    const allJobs = await prisma.jobPost.findMany({
       where: {
-        city: caregiver.city || "",
-        area: caregiver.area || "",
         status: "OPEN",
       },
       orderBy: {
@@ -381,38 +383,23 @@ export async function getJobPostsForCaregiver(caregiverId: string) {
       },
     })
 
-    // Get all other open jobs
-    const otherJobs = await prisma.jobPost.findMany({
-      where: {
-        status: "OPEN",
-        NOT: {
-          AND: [
-            { city: { equals: caregiver.city || undefined } },
-            { area: { equals: caregiver.area || undefined } },
-          ],
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-        applications: {
-          where: {
-            caregiverId,
-          },
-        },
-      },
-    })
+    // Split jobs into local and other based on normalized strings
+    const localJobs = allJobs.filter(job => {
+      const jobCity = job.city?.trim().toLowerCase() || "";
+      const jobArea = job.area?.trim().toLowerCase() || "";
+      
+      return jobCity === normalizedCaregiverCity && jobArea === normalizedCaregiverArea;
+    });
+
+    const otherJobs = allJobs.filter(job => {
+      const jobCity = job.city?.trim().toLowerCase() || "";
+      const jobArea = job.area?.trim().toLowerCase() || "";
+      
+      return jobCity !== normalizedCaregiverCity || jobArea !== normalizedCaregiverArea;
+    });
 
     return {
-      matchingJobs,
+      localJobs,
       otherJobs,
     }
   } catch (error) {

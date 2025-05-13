@@ -388,7 +388,7 @@ export default function CaregiverJobDetailsClient({
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div className="flex items-center">
           <Button asChild variant="ghost" size="sm" className="mr-3">
-            <Link href="/caregiver/findjob">
+            <Link href="/findjobs">
               <ArrowLeft size={16} className="mr-2" />
               Back to Jobs
             </Link>
