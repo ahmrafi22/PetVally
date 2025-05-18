@@ -62,8 +62,8 @@ const Footer = () => {
   ];
 
   const rightLinks = [
-    { name: "Github     ", url: "https://github.com" },
-    { name: "Facebook", url: "https://facebook.com" },
+    { name: "Github     ", url: "https://github.com/ahmrafi22/PetVally"},
+    { name: "Admin", url: "/admin" },
   ];
 
   interface LinkProps {
