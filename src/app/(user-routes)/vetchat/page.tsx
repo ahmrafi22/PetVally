@@ -10,6 +10,7 @@ import {
   PawPrint as Paw,
 } from "lucide-react";
 import gsap from "gsap";
+import { useUserStore } from "@/stores/user-store"; 
 
 interface Message {
   id: number;
@@ -27,6 +28,7 @@ export default function VetChatPage() {
   const [showGreeting, setShowGreeting] = useState(true);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const { userData } = useUserStore(); // Get userData from your store
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const latestAiMessageRef = useRef<HTMLDivElement>(null);
@@ -94,9 +96,9 @@ export default function VetChatPage() {
 
         gsap.to(textElement.querySelectorAll("span"), {
           opacity: 1,
-          stagger: 0.015, // Slightly increased for smoother animation
+          stagger: 0.015, 
           duration: 0.3,
-          ease: "power2.out", // Changed to power2 for smoother animation
+          ease: "power2.out", 
         });
       }
     }
@@ -442,8 +444,16 @@ export default function VetChatPage() {
             </div>
             {message.sender === "user" && (
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-md">
-                  <User size={20} color="#fff" />
+                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-md overflow-hidden">
+                  {userData.image ? (
+                    <img 
+                      src={userData.image} 
+                      alt="User profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User size={20} color="#fff" />
+                  )}
                 </div>
               </div>
             )}

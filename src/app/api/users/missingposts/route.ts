@@ -39,14 +39,14 @@ export async function GET(request: NextRequest) {
     const area = searchParams.get("area");
     let posts;
     if (city && area && city.trim() !== "" && area.trim() !== "") {
-      // Get posts in user's area
+      // Geting posts based on user's area from controller function
       posts = await getMissingPostsInArea(city.trim(), area.trim());
     } else {
-      // Get all posts
+      // fallback
       posts = await getAllMissingPosts();
     }
 
-    // Return the posts
+    // Returning to view 
     return NextResponse.json(
       {
         message: "Missing posts retrieved successfully",
@@ -63,13 +63,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Create a new missing post
 export async function POST(request: NextRequest) {
   try {
-    // Get the authorization header
     const authHeader = request.headers.get("Authorization");
 
-    // Check if the authorization header exists and is in the correct format
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
         { message: "Unauthorized: Missing or invalid token" },
@@ -77,10 +74,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extract the token
     const token = authHeader.split(" ")[1];
 
-    // Verify the token
     const payload = await verifyJwtToken(token);
 
     if (!payload || payload.role !== "user") {
@@ -90,13 +85,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the user ID from the payload
     const userId = payload.id as string;
 
-    // Get the request body
     const body = await request.json();
 
-    // Validate required fields
     const requiredFields = [
       "title",
       "description",
@@ -118,7 +110,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create the missing post
     const post = await createMissingPost(userId, {
       title: body.title,
       description: body.description,
@@ -131,7 +122,6 @@ export async function POST(request: NextRequest) {
       age: Number.parseInt(body.age),
     });
 
-    // Return the post
     return NextResponse.json(
       {
         message: "Missing post created successfully",

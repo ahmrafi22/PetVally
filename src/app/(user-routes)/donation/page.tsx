@@ -192,7 +192,6 @@ export default function DonationPage() {
               )}
             </div>
             
-            {/* Content area */}
             <div className="flex-1 p-4">
               <div className="flex flex-wrap justify-between items-start gap-2">
                 <h2 className="text-xl font-semibold text-black">
@@ -247,7 +246,6 @@ export default function DonationPage() {
                   <span className="text-xs text-gray-500 ml-2 ">• {getRelativeTime(post.createdAt)}</span>
                 </div>
                 
-                {/* Stats indicators in a horizontal row */}
                 <div className="flex flex-wrap gap-2 mt-4 ">
                   <StatBadge 
                     value={post.upvotesCount} 

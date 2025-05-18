@@ -33,13 +33,10 @@ export async function getAllMissingPosts() {
   }
 }
 
-// Get missing posts in user's area
 export async function getMissingPostsInArea(city: string, area: string) {
   try {
-    // Normalize city and area for case-insensitive comparison
     const normalizedCity = city.trim().toLowerCase()
     const normalizedArea = area.trim().toLowerCase()
-
     const posts = await prisma.missingPost.findMany({
       where: {
         city: {
@@ -147,7 +144,7 @@ export async function getUserMissingPosts(userId: string) {
   }
 }
 
-// Create missing post
+
 export async function createMissingPost(
   userId: string,
   data: {
@@ -163,10 +160,8 @@ export async function createMissingPost(
   },
 ) {
   try {
-    // Upload image to Cloudinary
     const uploadResponse = await uploadImage(data.imageBase64, "missing_posts")
 
-    // Create post in database
     const post = await prisma.missingPost.create({
       data: {
         title: data.title,
@@ -192,7 +187,6 @@ export async function createMissingPost(
       },
     })
 
-    // Find users in the same area to notify
     const normalizedCity = data.city.trim().toLowerCase()
     const normalizedArea = data.area.trim().toLowerCase()
     
@@ -217,14 +211,12 @@ export async function createMissingPost(
       },
     })
     
-    // Filter users with matching city and area after trimming and lowercase conversion
     const matchingUsers = usersInArea.filter(user => {
       const userCity = user.city?.trim().toLowerCase() || ""
       const userArea = user.area?.trim().toLowerCase() || ""
       return userCity === normalizedCity && userArea === normalizedArea
     })
     
-    // Create notifications for matching users
     if (matchingUsers.length > 0) {
       const userIds = matchingUsers.map((user) => user.id)
       await createNotificationForUsers(

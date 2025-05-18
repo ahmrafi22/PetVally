@@ -152,7 +152,6 @@ export default function JobCalendar({ jobs }: JobCalendarProps) {
           const isCurrentDay = isToday(day)
           const inCurrentMonth = isSameMonth(day, currentMonth)
           
-          // Determine the color for the date cell background if it has jobs
           let cellColor = ""
           if (hasJobs) {
             const firstJobColor = dayJobs[0].color || "teal"

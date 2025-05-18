@@ -13,7 +13,6 @@ import {
   PlusCircle,
   MinusCircle,
   Tag,
-  Heart,
   Share2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -21,7 +20,6 @@ import { format } from "date-fns";
 import { useCartStore } from "@/stores/cart-store";
 import { Badge } from "@/components/ui/badge";
 
-import type { ProductRating } from "@/types";
 
 import type { Product } from "@/types";
 import Image from "next/image";
@@ -70,10 +68,6 @@ export default function ProductDetail() {
 
         const data = await response.json();
         setProduct(data.product);
-
-        // If the product is already in cart, set initial quantity to 1
-        // We don't want to default to existing cart quantity as that could be confusing
-        // when adding more of the same product
       } catch (err: any) {
         console.error("Error fetching product details:", err);
         setError(
@@ -417,8 +411,10 @@ export default function ProductDetail() {
                             <Image
                               src={rating.user.image}
                               alt={rating.user.name}
-                              fill
-                              className="object-cover"
+                              width={40}
+                              height={40}
+                              className="object-cover rounded-full"
+                              style={{ objectFit: "cover" }}
                             />
                           ) : (
                             <User className="h-6 w-6 text-gray-400" />

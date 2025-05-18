@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerativeModel, Part, Content } from '@google/generative-ai'; // Import Content type
+import { GoogleGenerativeAI, GenerativeModel, Part, Content } from '@google/generative-ai';
 
 const apiKey = process.env.GEMINI_API_KEY as string;
 
@@ -7,9 +7,8 @@ if (!apiKey) {
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
-// It's generally recommended to use the latest stable model unless you specifically need 2.0-flash features
-// Consider 'gemini-1.5-flash-latest' or 'gemini-1.5-pro-latest' if available and suitable
-const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-1.5-pro-latest' }); 
+// use 'gemini-1.5-flash-latest' or 'gemini-1.5-pro-latest' or 'gemini-2.0-flash' models 
+const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' }); 
 
 // Interface for conversation message
 interface ConversationMessage {
