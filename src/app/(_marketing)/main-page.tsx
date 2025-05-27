@@ -70,14 +70,13 @@ export default function MainPage() {
       {/* Shadow gradient overlay */}
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent via-[rgba(255,255,255,0.2)] via-[65%] to-white"></div>
 
-      {/* Header with logo */}
+      {/* Header , logo */}
       <header className="w-full z-10 relative py-4">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 flex justify-center">
           <PetVallyLogo />
         </div>
       </header>
 
-      {/* Main content container with flex spacing */}
       <div className="flex flex-col items-center justify-between w-full flex-grow z-10 px-4">
         {/* Mobile and Tablet layout */}
         <div className="max-w-7xl mt-8 lg:hidden z-10 flex-grow flex flex-col justify-center items-center">
@@ -105,7 +104,7 @@ export default function MainPage() {
             </div>
           </div>
 
-          {/* Button for mobile - positioned with margin to ensure visibility */}
+          {/* Button for mobile */}
           <div className="mt-12 mb-16 hover:scale-110 transition-transform duration-300 z-10">
             <JoinButton href="/userlogin" text=" JOIN NOW " />
           </div>

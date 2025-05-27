@@ -42,7 +42,6 @@ export default function ThirdPage() {
       {/* Shadow gradient overlay */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none -z-10 bg-gradient-to-b from-transparent via-[rgba(255,255,255,0.2)] via-[65%] to-white"></div>
 
-      {/* Content positioned above the gradient */}
       <div className="relative z-10">
         <header className="max-w-7xl mx-auto text-center mb-4">
           <TxtEffct animateOnScroll={true} delay={0.2}>

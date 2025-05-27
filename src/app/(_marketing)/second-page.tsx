@@ -35,7 +35,7 @@ export default function SecondPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const trailRef = useRef<TrailImage[]>([]);
 
-  // Memoize static configuration to prevent unnecessary re-renders
+  // static configuration to prevent unnecessary re-renders
   const config = useMemo<TrailConfig>(
     () => ({
       imageCount: 22,
@@ -115,7 +115,6 @@ export default function SecondPage() {
 
     containerRef.current.appendChild(img);
 
-    // Use setTimeout to match original implementation
     setTimeout(() => {
       img.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(1)`;
     }, 10);

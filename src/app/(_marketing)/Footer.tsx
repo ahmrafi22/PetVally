@@ -128,7 +128,6 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/*Pet Vally Title */}
         <h2
           ref={headingRef}
           className={cn(

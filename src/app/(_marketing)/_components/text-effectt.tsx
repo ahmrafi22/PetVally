@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, ReactNode, forwardRef } from "react";
+import React, { useRef, ReactNode, forwardRef, RefObject } from "react";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -38,15 +38,15 @@ const TxtEffct = forwardRef<HTMLDivElement, TxtEffctProps>(
     const splitRef = useRef<SplitText[]>([]);
     const lines = useRef<HTMLElement[]>([]);
 
-    // Merge refs if an external ref is provided
     React.useEffect(() => {
       if (!ref) return;
 
       if (typeof ref === "function") {
         ref(containerRef.current);
       } else {
-        (ref as React.MutableRefObject<HTMLDivElement | null>).current =
-          containerRef.current;
+        if (containerRef.current) {
+          (ref as RefObject<HTMLDivElement>).current = containerRef.current;
+        }
       }
     }, [ref]);
 
@@ -54,7 +54,6 @@ const TxtEffct = forwardRef<HTMLDivElement, TxtEffctProps>(
       () => {
         if (!containerRef.current) return;
 
-        // Clear previous refs
         splitRef.current = [];
         elementRef.current = [];
         lines.current = [];
@@ -95,7 +94,7 @@ const TxtEffct = forwardRef<HTMLDivElement, TxtEffctProps>(
         // Set initial state
         gsap.set(lines.current, { y: "100%", opacity: 0 });
 
-        // Create animation configuration
+        // animation configuration
         const animationProps = {
           y: "0%",
           opacity: 1,
@@ -106,7 +105,7 @@ const TxtEffct = forwardRef<HTMLDivElement, TxtEffctProps>(
           onComplete,
         };
 
-        // Apply animation
+        //animation
         if (animateOnScroll) {
           gsap.to(lines.current, {
             ...animationProps,
@@ -142,7 +141,7 @@ const TxtEffct = forwardRef<HTMLDivElement, TxtEffctProps>(
       }
     );
 
-    // Handle single child case
+    // single child case
     if (React.Children.count(children) === 1) {
       const child = React.Children.only(children);
 
@@ -155,7 +154,7 @@ const TxtEffct = forwardRef<HTMLDivElement, TxtEffctProps>(
             ((childType as any).prototype?.isReactComponent || // Class component
               (child as any).type.$typeof === Symbol.for("react.forward_ref"))) // forwardRef component
         ) {
-          // Clone with ref and possibly updated className
+
           return React.cloneElement(child, {
             ref: containerRef,
           } as React.Attributes & { ref: React.Ref<any>; className?: string });
@@ -164,7 +163,7 @@ const TxtEffct = forwardRef<HTMLDivElement, TxtEffctProps>(
       return child;
     }
 
-    // Handle multiple children case
+    // multiple children case
     return (
       <div ref={containerRef} data-txteffct-wrapper="true">
         {children}
@@ -173,7 +172,6 @@ const TxtEffct = forwardRef<HTMLDivElement, TxtEffctProps>(
   }
 );
 
-// Add display name for better debugging
 TxtEffct.displayName = "TxtEffct";
 
 export default TxtEffct;

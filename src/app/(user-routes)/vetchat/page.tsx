@@ -28,7 +28,7 @@ export default function VetChatPage() {
   const [showGreeting, setShowGreeting] = useState(true);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const { userData } = useUserStore(); // Get userData from your store
+  const { userData } = useUserStore(); 
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const latestAiMessageRef = useRef<HTMLDivElement>(null);
@@ -41,7 +41,7 @@ export default function VetChatPage() {
   };
 
   useEffect(() => {
-    // Try to get session ID from local storage on component mount
+    //  get session ID from local storage on component mount
     const storedSessionId = localStorage.getItem("vetchat_session_id");
     if (storedSessionId) {
       setSessionId(storedSessionId);
@@ -241,7 +241,6 @@ export default function VetChatPage() {
 
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
-    // Add a placeholder loading message
     const loadingMessageId = Date.now() + 1;
     setMessages((prevMessages) => [
       ...prevMessages,
@@ -292,13 +291,13 @@ export default function VetChatPage() {
       const data = await response.json();
       const aiResponseText = data.response;
 
-      // Store session ID if returned from the API
+      // session ID if returned from the API
       if (data.sessionId && !sessionId) {
         setSessionId(data.sessionId);
         localStorage.setItem("vetchat_session_id", data.sessionId);
       }
 
-      // Replace the loading message with the actual response
+      // Replace  loading message with ai response
       setMessages((prevMessages) =>
         prevMessages.map((msg) =>
           msg.id === loadingMessageId ? { ...msg, text: aiResponseText } : msg
@@ -347,7 +346,7 @@ export default function VetChatPage() {
     }
   };
 
-  // Custom loading dots component
+  // loading dots component
   const LoadingDots = () => (
     <div
       ref={loadingDotsRef}
@@ -466,7 +465,7 @@ export default function VetChatPage() {
         <form
           onSubmit={(e) => {
             handleSendMessage(e);
-            setIsInputFocused(false); // Reset focus state after sending
+            setIsInputFocused(false); 
           }}
           className={`input-container flex items-center space-x-2 p-3 rounded-full transition-all duration-300 mb-4 w-[30%]`}
           style={{
@@ -519,7 +518,7 @@ export default function VetChatPage() {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleSendMessage();
-                setIsInputFocused(false); // Reset focus state after sending
+                setIsInputFocused(false); 
               }
             }}
             placeholder={
@@ -537,8 +536,6 @@ export default function VetChatPage() {
             className="p-2 bg-pink-400 bg-opacity-70 text-white rounded-full hover:bg-pink-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             disabled={isLoading || (!inputMessage.trim() && !selectedImage)}
             onClick={() => {
-              // No need for additional logic here as form submit will trigger handleSendMessage
-              // and we're already setting isInputFocused to false there
             }}
           >
             {isLoading ? (
