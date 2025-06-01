@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getAllProducts, getProductsByCategory, getFeaturedProducts } from "@/controllers/store-data"
-import { verifyJwtToken } from "@/lib/auth"
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,16 +10,6 @@ export async function GET(request: NextRequest) {
     // Check if the authorization header exists and is in the correct format
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json({ message: "Unauthorized: Missing or invalid token" }, { status: 401 })
-    }
-
-    // Extract the token
-    const token = authHeader.split(" ")[1]
-
-    // Verify the token
-    const payload = await verifyJwtToken(token)
-
-    if (!payload || payload.role !== "user") {
-      return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 })
     }
 
     // Get query parameters

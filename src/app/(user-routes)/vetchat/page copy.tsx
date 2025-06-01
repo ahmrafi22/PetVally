@@ -12,6 +12,8 @@ import {
 import gsap from "gsap";
 import { useUserStore } from "@/stores/user-store"; 
 
+import { useIsMobile } from "@/hooks/use-mobile";
+
 interface Message {
   id: number;
   sender: "user" | "ai";
@@ -28,8 +30,8 @@ export default function VetChatPage() {
   const [showGreeting, setShowGreeting] = useState(true);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [isDesktop, setIsDesktop] = useState(false);
   const { userData } = useUserStore(); 
+  const isMobile = useIsMobile();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const latestAiMessageRef = useRef<HTMLDivElement>(null);
@@ -41,20 +43,8 @@ export default function VetChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Check if screen is desktop size
   useEffect(() => {
-    const checkScreenSize = () => {
-      setIsDesktop(window.innerWidth >= 1024); 
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  useEffect(() => {
-
+    //  get session ID from local storage on component mount
     const storedSessionId = localStorage.getItem("vetchat_session_id");
     if (storedSessionId) {
       setSessionId(storedSessionId);
@@ -74,10 +64,10 @@ export default function VetChatPage() {
       }
     };
 
-
+    // Add event listener
     document.addEventListener("click", handleDocumentClick);
 
-
+    // Clean up
     return () => {
       document.removeEventListener("click", handleDocumentClick);
     };
@@ -141,16 +131,16 @@ export default function VetChatPage() {
     }
   }, [showGreeting]);
 
-
   useEffect(() => {
-    if (inputRef.current && isDesktop) {
+    if (inputRef.current) {
       inputRef.current.style.height = "auto";
       inputRef.current.style.height = inputRef.current.scrollHeight + "px";
     }
-  }, [inputMessage, isDesktop]);
+  }, [inputMessage]);
 
+  // Focus animation effect - only for desktop
   useEffect(() => {
-    if (isDesktop) {
+    if (!isMobile) {
       if (isInputFocused) {
         gsap.to(".input-container", {
           width: "45%",
@@ -165,7 +155,7 @@ export default function VetChatPage() {
         });
       }
     }
-  }, [isInputFocused, isDesktop]);
+  }, [isInputFocused, isMobile]);
 
   // Animation for loading dots
   useEffect(() => {
@@ -380,7 +370,11 @@ export default function VetChatPage() {
         {showGreeting && (
           <div
             ref={greetingRef}
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-25 p-8 rounded-xl shadow-xl text-center max-w-lg w-full backdrop-blur-md border border-white border-opacity-20"
+            className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-25 rounded-xl shadow-xl text-center backdrop-blur-md border border-white border-opacity-20 ${
+              isMobile 
+                ? 'p-4 max-w-xs w-[85%]' 
+                : 'p-8 max-w-lg w-full'
+            }`}
             style={{
               background: "rgba(255, 255, 255, 0.25)",
               boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
@@ -391,23 +385,23 @@ export default function VetChatPage() {
             }}
           >
             <div className="flex justify-center mb-4">
-              <Paw size={28} className="text-pink-500 paw-icon" />
-              <Paw size={28} className="text-blue-500 paw-icon ml-3" />
-              <Paw size={28} className="text-pink-500 paw-icon ml-3" />
+              <Paw size={isMobile ? 20 : 28} className="text-pink-500 paw-icon" />
+              <Paw size={isMobile ? 20 : 28} className="text-blue-500 paw-icon ml-3" />
+              <Paw size={isMobile ? 20 : 28} className="text-pink-500 paw-icon ml-3" />
             </div>
-            <h1 className="text-3xl font-bold mb-2 text-pink-600">
+            <h1 className={`font-bold mb-2 text-pink-600 ${isMobile ? 'text-xl' : 'text-3xl'}`}>
               Dr. Whisker&apos;s Pet Clinic
             </h1>
-            <p className="text-lg mb-4 text-blue-600">
+            <p className={`mb-4 text-blue-600 ${isMobile ? 'text-sm' : 'text-lg'}`}>
               Hello! I&apos;m Dr. Whisker, your friendly virtual vet.
             </p>
-            <p className="text-gray-700">
+            <p className={`text-gray-700 ${isMobile ? 'text-xs' : 'text-base'}`}>
               Share your concerns about your furry friend, and I&apos;ll help
               with advice and suggestions. Feel free to upload a photo if
               needed!
             </p>
             <div className="mt-4 flex justify-center">
-              <Heart size={24} className="text-pink-500" />
+              <Heart size={isMobile ? 16 : 24} className="text-pink-500" />
             </div>
           </div>
         )}
@@ -483,8 +477,10 @@ export default function VetChatPage() {
             handleSendMessage(e);
             setIsInputFocused(false); 
           }}
-          className={`input-container flex items-center space-x-2 p-3 rounded-full transition-all duration-300 mb-4 ${
-            isDesktop ? 'w-[30%]' : 'w-[90%] max-w-md'
+          className={`input-container flex items-center space-x-2 rounded-full transition-all duration-300 mb-4 ${
+            isMobile 
+              ? 'w-[90%] p-2 min-h-[48px]' 
+              : 'w-[30%] p-3'
           }`}
           style={{
             background: "rgba(255, 255, 255, 0.25)",
@@ -544,9 +540,7 @@ export default function VetChatPage() {
                 ? "Add a message about your pet's photo..."
                 : "Ask Dr. Whisker about your pet..."
             }
-            className={`flex-1 p-2 rounded-full outline-none resize-none bg-transparent text-gray-700 ${
-              isDesktop ? 'min-h-10 max-h-24' : 'h-10'
-            }`}
+            className="flex-1 p-2 rounded-full outline-none resize-none bg-transparent min-h-10 max-h-24 text-gray-700"
             rows={1}
             disabled={isLoading}
           />

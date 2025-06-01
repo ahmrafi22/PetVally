@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     // Get query parameters
     const searchParams = request.nextUrl.searchParams
     const userOnly = searchParams.get("userOnly") === "true"
-    const userId = searchParams.get("userId") as stringto
+    const userId = searchParams.get("userId") as string
 
     // Get job posts
     let jobPosts
