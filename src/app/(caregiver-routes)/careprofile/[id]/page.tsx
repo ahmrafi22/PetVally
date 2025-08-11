@@ -32,7 +32,7 @@ export default function CaregiverProfile() {
   const params = useParams();
   const id = params.id as string;
 
-  // Use the Zustand store instead of local state
+
   const {
     caregiverData,
     isLoading,
@@ -42,12 +42,10 @@ export default function CaregiverProfile() {
     updateCaregiverImage,
   } = useCaregiverStore();
 
-  // Dialog states
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Only fetch caregiver data when the component mounts or when id changes
     if (id) {
       fetchCaregiverData();
     }

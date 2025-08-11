@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Camera, Upload } from "lucide-react"
-import { toast } from "sonner" // Import from sonner instead
+import { toast } from "sonner" 
 import type { User } from "@/types"
 
 type ImageUploadDialogProps = {
@@ -93,16 +93,16 @@ export default function ImageUploadDialog({ isOpen, onClose, user, onUpdate }: I
         image: data.imageUrl || data.user?.image || previewImage
       }
 
-      // Call the onUpdate callback with the updated user data
+    
       onUpdate(updatedUser)
       
-      // Show success toast with Sonner
+  
       toast.success("Profile image updated successfully", {
         description: "Your new profile picture has been saved.",
         duration: 3000,
       })
 
-      // Reset state and close dialog
+  
       setPreviewImage(null)
       onClose()
     } catch (error: any) {

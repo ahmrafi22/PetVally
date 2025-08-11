@@ -54,12 +54,12 @@ export async function deleteImage(imageUrl: string) {
  */
 function extractPublicIdFromUrl(url: string): string | null {
   try {
-    // Example URL: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/image.jpg
+   
     const urlParts = url.split("/")
     const filename = urlParts[urlParts.length - 1]
     const folderPath = urlParts[urlParts.length - 2]
 
-    // Remove file extension
+
     const filenameWithoutExt = filename.split(".")[0]
 
     return `${folderPath}/${filenameWithoutExt}`

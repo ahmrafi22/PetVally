@@ -5,18 +5,12 @@
 
 ![Petvally banner](./public/petvally.png)
 
-We are Building a comunity of petowners and caregivers. More info will be added later......... :)
+A comunity of petowners and caregivers.
 
 ### 💾 Tech Stack :
 ![Typescript](    https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![Next JS](https://img.shields.io/badge/next%20js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white) ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![Css3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)  ![Prisma](    https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white) ![Postgres](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white) ![NeonDB](https://img.shields.io/badge/NeonDB-00E599?style=for-the-badge&logo=neon&logoColor=white) ![ShandCN](https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white) ![PostMan](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=Postman&logoColor=white) ![🐻 Zustand](https://img.shields.io/badge/🐻%20Zustand-000000?style=for-the-badge&logoColor=white)
  ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=Cloudinary&logoColor=white) ![Gsap](https://img.shields.io/badge/GSAP-93CF2B?style=for-the-badge&logo=greensock&logoColor=white) ![LottieFiles](https://img.shields.io/badge/LottieFiles-0ABFBC?style=for-the-badge&logo=lottiefiles&logoColor=white) 
 
-### 👨‍💻 Team Members
-
-- [@Rafi](https://github.com/ahmrafi22) 
-- [@Wasi](https://github.com/KOOKIEKAT123)
-- [@Montasir](https://github.com/)
-- [@Mahi](https://github.com/)
 
 <!-- So Far time spent on this <br>
  [![wakatime](https://wakatime.com/badge/user/d7d5cf63-4ec9-422f-a677-8823091fc3db/project/990c11bf-1cc3-4dda-a67d-17cfaf30e6d1.svg)](https://wakatime.com/badge/user/d7d5cf63-4ec9-422f-a677-8823091fc3db/project/990c11bf-1cc3-4dda-a67d-17cfaf30e6d1)  -->

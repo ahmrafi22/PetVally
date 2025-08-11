@@ -20,13 +20,10 @@ export async function GET(request: NextRequest) {
     let products
 
     if (featured === "true") {
-      // Get featured products
       products = await getFeaturedProducts(10) 
     } else if (category) {
-      // Get products by category
       products = await getProductsByCategory(category)
     } else {
-      // Get all products
       products = await getAllProducts()
     }
 

@@ -39,7 +39,6 @@ export async function GET(request: NextRequest) {
     const area = searchParams.get("area");
     let posts;
     if (city && area && city.trim() !== "" && area.trim() !== "") {
-      // Geting posts based on user's area from controller function
       posts = await getMissingPostsInArea(city.trim(), area.trim());
     } else {
       // fallback

@@ -58,7 +58,7 @@ export default function SecondPage() {
     []
   );
 
-  // Consolidate refs into a single mutable object for better performance
+  // Consolidate refs -> a single mutable object
   const stateRef = useRef({
     mousePos: {
       x: 0,
@@ -77,7 +77,7 @@ export default function SecondPage() {
     },
   });
 
-  // Optimize event handlers with useCallback to maintain referential stability
+
   const isInContainer = useCallback((x: number, y: number): boolean => {
     if (!containerRef.current) return false;
     const rect = containerRef.current.getBoundingClientRect();

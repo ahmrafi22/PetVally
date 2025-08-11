@@ -31,7 +31,7 @@ export default function UserProfile() {
   const params = useParams();
   const id = params.id as string;
 
-  // Use the Zustand store instead of local state
+
   const {
     userData,
     isLoading,
@@ -42,23 +42,23 @@ export default function UserProfile() {
     updateUserImage,
   } = useUserStore();
 
-  // Dialog states
+
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [preferencesDialogOpen, setPreferencesDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Only fetch user data when the component mounts or when id changes
+
     if (id) {
       fetchUserData();
     }
   }, [id, fetchUserData]);
 
-  // Removed duplicate handleUserUpdate function
+
 
   const handleImageUpdate = (updatedUser: User) => {
     if (updatedUser.image) {
-      // Update the local state directly
+
       useUserStore.setState((state) => ({
         userData: {
           ...state.userData,
@@ -138,7 +138,7 @@ export default function UserProfile() {
     );
   }
 
-  // Helper function to get experience level text
+
   const getExperienceLevel = (level: number) => {
     switch (level) {
       case 1:
@@ -160,7 +160,7 @@ export default function UserProfile() {
     <>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
-          {/* Header Section - Glass Card Design */}
+          {/* Header Section  */}
           <div className="glass-card p-8 mb-8 relative overflow-hidden bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg shadow-lg">
             <div className="absolute top-0 right-0 w-full h-full pet-pattern opacity-50 z-0"></div>
             <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start">

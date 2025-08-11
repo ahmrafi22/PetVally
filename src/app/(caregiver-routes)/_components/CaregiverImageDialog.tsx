@@ -28,7 +28,7 @@ export default function CaregiverImageDialog({ isOpen, onClose, caregiver, onUpd
   const [isLoading, setIsLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Reset preview image when dialog opens/closes
+ 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setPreviewImage(null)
@@ -88,16 +88,16 @@ export default function CaregiverImageDialog({ isOpen, onClose, caregiver, onUpd
 
       const data = await response.json()
       
-      // Create an updated caregiver object with the new image
+     
       const updatedCaregiver = {
         ...caregiver,
-        image: previewImage // Use the preview image as the new image URL
+        image: previewImage 
       }
       
-      // Call the onUpdate function with the updated caregiver object
+
       onUpdate(updatedCaregiver)
       
-      // Close the dialog
+     
       setPreviewImage(null)
       onClose()
     } catch (error: any) {

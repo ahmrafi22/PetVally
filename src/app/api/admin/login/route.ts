@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       {
         message: "Login successful",
         admin,
-        token, // Return token for client-side storage
+        token, 
       },
       { status: 200 },
     )

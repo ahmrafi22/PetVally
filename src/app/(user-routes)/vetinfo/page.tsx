@@ -157,7 +157,6 @@ export default function VetInfoPage() {
     setSelectedVetId(vet.id);
     setSelectedVet(vet);
     setDialogOpen(true);
-    // Reset form data when opening the dialog
     setAppointmentData({ date: undefined, time: "", reason: "" });
     setFormErrors({});
   };
@@ -203,7 +202,7 @@ export default function VetInfoPage() {
 
       if (response.ok) {
         toast.success("Appointment booked successfully!");
-        setDialogOpen(false); // Close the dialog on success
+        setDialogOpen(false); 
         resetForm();
       } else {
         const errorData = await response.json();

@@ -19,7 +19,7 @@ export async function getAllProducts() {
 
       return {
         ...product,
-        price: Number(product.price), // Convert Decimal to number for JSON serialization
+        price: Number(product.price), 
         avgRating: Number.parseFloat(avgRating.toFixed(1)),
         ratingCount: ratings.length,
       }

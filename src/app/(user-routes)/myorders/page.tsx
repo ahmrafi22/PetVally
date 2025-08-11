@@ -119,7 +119,7 @@ export default function MyOrdersPage() {
     }
   }
 
-  // Add this function to handle opening the rating dialog
+  // function to handle opening the rating dialog
   const openRatingDialog = async (product: OrderItem["product"]) => {
     setSelectedProduct(product)
     setRatingValue(0)
@@ -150,7 +150,7 @@ export default function MyOrdersPage() {
     setRatingDialogOpen(true)
   }
 
-  // Add this function to handle submitting the rating
+  //  function to handle submitting the rating
   const submitRating = async () => {
     if (!selectedProduct) return
 
@@ -187,7 +187,7 @@ export default function MyOrdersPage() {
     }
   }
 
-  // Add this function to render the star rating component
+  //  function to render the star rating component
   const StarRating = ({ value, onChange }: { value: number; onChange: (value: number) => void }) => {
     return (
       <div className="flex items-center space-x-1">

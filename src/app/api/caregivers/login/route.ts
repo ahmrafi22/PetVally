@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       {
         message: "Login successful",
         caregiver,
-        token, // Return token for Postman testing
+        token, 
       },
       { status: 200 },
     )

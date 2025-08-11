@@ -40,7 +40,7 @@ export default function ProductAddPage() {
     category: "food", // Default category
   })
 
-  // Add this state for the update dialog
+  //  state for the update dialog
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
   const [productToUpdate, setProductToUpdate] = useState<Product | null>(null)
   const [updateFormData, setUpdateFormData] = useState({
@@ -183,7 +183,7 @@ export default function ProductAddPage() {
     setDeleteDialogOpen(true)
   }
 
-  // Add this function to open the update dialog
+  //  function to open the update dialog
   const openUpdateDialog = (product: Product) => {
     setProductToUpdate(product)
     setUpdateFormData({
@@ -232,18 +232,18 @@ export default function ProductAddPage() {
     }
   }
 
-  // Add this function to handle update form input changes
+  //  function to handle update form input changes
   const handleUpdateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setUpdateFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Add this function to handle update form select changes
+  //  function to handle update form select changes
   const handleUpdateSelectChange = (name: string) => (value: string) => {
     setUpdateFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Add this function to handle update form file changes
+  //  function to handle update form file changes
   const handleUpdateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -268,7 +268,7 @@ export default function ProductAddPage() {
     reader.readAsDataURL(file)
   }
 
-  // Add this function to handle update form submission
+  // function to handle update form submission
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -311,9 +311,9 @@ export default function ProductAddPage() {
     }
   }
 
-  // Add this function to handle update image upload click
+  // function to handle update image upload click
   const handleUpdateUploadClick = (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent event bubbling
+    e.stopPropagation() 
     updateFileInputRef.current?.click()
   }
 

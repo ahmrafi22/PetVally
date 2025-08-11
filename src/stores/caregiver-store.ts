@@ -143,7 +143,7 @@ export const useCaregiverStore = create<CaregiverState>()(
           
           if (response.ok) {
             const data = await response.json();
-            // Update the store with the complete caregiver data from response
+
             set(state => ({
               caregiverData: {
                 ...state.caregiverData,
@@ -172,8 +172,6 @@ export const useCaregiverStore = create<CaregiverState>()(
         try {
           set({ isLoading: true, error: null });
           
-          // Instead of making another API call, directly update the store
-          // The API call already happened in the CaregiverImageDialog component
           set(state => ({
             caregiverData: {
               ...state.caregiverData,

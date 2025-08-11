@@ -29,7 +29,7 @@ export default function CaregiverNavigation() {
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
 
-  // Get caregiver data from store
+ 
   const { caregiverData, fetchCaregiverData } = useCaregiverStore();
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
@@ -45,19 +45,18 @@ export default function CaregiverNavigation() {
       }
     };
 
-    // Check on mount
+
     checkIfMobile();
 
-    // Add event listener for resize
+
     window.addEventListener("resize", checkIfMobile);
 
-    // Cleanup
+
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // Fetch caregiver data on mount
+
   useEffect(() => {
-    // Check if we already have caregiver data in the store
     const caregiverId = localStorage.getItem("caregiverId");
 
     if (caregiverId) {
@@ -67,7 +66,7 @@ export default function CaregiverNavigation() {
     }
   }, [fetchCaregiverData, caregiverData.id]);
 
-  // GSAP animations for sidebar expand/collapse
+  // animations for sidebar expand/collapse
   useEffect(() => {
     if (!isMobile && sidebarRef.current) {
       gsap.to(sidebarRef.current, {
@@ -112,7 +111,7 @@ export default function CaregiverNavigation() {
     }
   }, [mobileOpen, isMobile]);
 
-  // Reset position when switching between mobile and desktop
+
   useEffect(() => {
     if (sidebarRef.current) {
       if (isMobile) {
@@ -129,7 +128,7 @@ export default function CaregiverNavigation() {
     }
   }, [isMobile, mobileOpen, expanded]);
 
-  // Add reference to text elements for animation
+
   const addToRefs = (el: any) => {
     if (el && !textElementsRef.current.includes(el)) {
       textElementsRef.current.push(el);
@@ -140,7 +139,6 @@ export default function CaregiverNavigation() {
     await fetch("/api/caregivers/logout", { method: "POST" });
     localStorage.removeItem("caregiverToken");
     localStorage.removeItem("caregiverId");
-    // Clear caregiver data from store
     useCaregiverStore.getState().clearCaregiverData();
     router.push("/");
   }
@@ -153,7 +151,7 @@ export default function CaregiverNavigation() {
     }
   };
 
-  // Handle closing navigation
+
   const handleNavClose = () => {
     if (isMobile) {
       setMobileOpen(false);
@@ -162,7 +160,7 @@ export default function CaregiverNavigation() {
     }
   };
 
-  // Clicking outside handle
+
   useEffect(() => {
     if (!isMobile && expanded) {
       const handleClickOutside = (event: MouseEvent) => {
@@ -269,7 +267,7 @@ export default function CaregiverNavigation() {
                 </li>
               ))}
 
-              {/* Profile link with caregiver name */}
+              {/* Profile */}
               <li>
                 <Link
                   href={`/careprofile/${caregiverId}`}

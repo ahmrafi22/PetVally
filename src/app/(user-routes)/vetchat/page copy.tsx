@@ -64,7 +64,7 @@ export default function VetChatPage() {
       }
     };
 
-    // Add event listener
+    // event listener
     document.addEventListener("click", handleDocumentClick);
 
     // Clean up

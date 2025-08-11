@@ -453,7 +453,6 @@ export async function upvoteMissingPost(userId: string, postId: string) {
 // Remove upvote from a post
 export async function removeUpvoteFromMissingPost(userId: string, postId: string) {
   try {
-    // Check if upvote exists
     const upvote = await prisma.upvote.findUnique({
       where: {
         userId_missingPostId: {
