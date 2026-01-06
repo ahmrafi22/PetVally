@@ -40,7 +40,7 @@ export default function LoadingScreen() {
 
 
       <div
-        className={`fixed inset-0 z-1000 flex flex-col items-center justify-center bg-gradient-to-bl  from-red-200 to-blue-200 transition-transform duration-500 ease-in-out  ${
+        className={`fixed inset-0 z-1000 flex flex-col items-center justify-center bg-gradient-to-bl  from-gray-200 to-blue-200 transition-transform duration-500 ease-in-out  ${
           loadingComplete ? "translate-y-[-100%]" : "translate-y-0"
         }`}
       >

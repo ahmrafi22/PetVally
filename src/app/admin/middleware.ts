@@ -6,7 +6,7 @@ export async function middleware(request: Request) {
   const url = new URL(request.url)
   const path = url.pathname
 
-  // Skip middleware for login page
+
   if (path === "/admin") {
     return NextResponse.next()
   }
